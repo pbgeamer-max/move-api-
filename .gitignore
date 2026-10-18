@@ -65,3 +65,7 @@ project-source.zip
 public/project-source.zip
 upload/
 download/
+
+# Large raw scraped catalog (gz is tracked)
+data/3isk_catalog.json
+!data/3isk_catalog.json.gz

@@ -1,8 +1,52 @@
 // TVORA Firestore Database Adapter
 // Provides a Prisma-compatible API backed by Google Cloud Firestore (Firebase Admin)
 import { getFirestoreDb } from "./firebase-admin";
+import * as fsModule from "fs";
+import * as pathModule from "path";
+
+import * as zlibModule from "zlib";
 
 type Dict = Record<string, any>;
+
+let _catalogCache: Dict[] | null = null;
+function getLocalCatalog(): Dict[] {
+  if (_catalogCache) return _catalogCache;
+  try {
+    const rawPath = pathModule.join(process.cwd(), "data", "3isk_catalog.json");
+    const gzPath = pathModule.join(process.cwd(), "data", "3isk_catalog.json.gz");
+    let jsonStr = "";
+    if (fsModule.existsSync(rawPath)) {
+      jsonStr = fsModule.readFileSync(rawPath, "utf-8");
+    } else if (fsModule.existsSync(gzPath)) {
+      const buffer = fsModule.readFileSync(gzPath);
+      jsonStr = zlibModule.gunzipSync(buffer).toString("utf-8");
+    }
+
+    if (jsonStr) {
+      const raw = JSON.parse(jsonStr);
+      const list: Dict[] = [];
+      for (const m of Object.values(raw.movies || {})) {
+        const movie = m as Dict;
+        list.push({
+          ...movie,
+          genres: typeof movie.genres === "string" ? movie.genres : JSON.stringify(movie.genres || ["أفلام تركية"]),
+        });
+      }
+      for (const s of Object.values(raw.series || {})) {
+        const ser = s as Dict;
+        list.push({
+          ...ser,
+          genres: typeof ser.genres === "string" ? ser.genres : JSON.stringify(ser.genres || ["مسلسلات تركية"]),
+        });
+      }
+      _catalogCache = list;
+      return list;
+    }
+  } catch (err) {
+    console.error("[TVORA Catalog] Error loading local catalog fallback:", err);
+  }
+  return [];
+}
 
 function matchWhere(docData: Dict, where?: Dict): boolean {
   if (!where) return true;
@@ -94,10 +138,19 @@ function cleanDates(data: Dict): Dict {
 export const firestoreDb = {
   title: {
     async findMany(args: { where?: Dict; orderBy?: any; skip?: number; take?: number; include?: Dict } = {}) {
+      let rows: Dict[] = [];
       const fs = getFirestoreDb();
-      if (!fs) return [];
-      const snap = await fs.collection("titles").get();
-      let rows: Dict[] = snap.docs.map((d) => ({ id: d.id, ...cleanDates(d.data()) }));
+      if (fs) {
+        try {
+          const snap = await fs.collection("titles").get();
+          rows = snap.docs.map((d) => ({ id: d.id, ...cleanDates(d.data()) }));
+        } catch (err) {
+          // If Firestore is throttled or offline, use local catalog fallback
+        }
+      }
+      if (rows.length === 0) {
+        rows = getLocalCatalog();
+      }
 
       if (args.where) {
         rows = rows.filter((r) => matchWhere(r, args.where));
@@ -109,33 +162,37 @@ export const firestoreDb = {
       const take = args.take ?? rows.length;
       const paged = rows.slice(skip, skip + take);
 
-      if (args.include?.seasons) {
-        const seasonsSnap = await fs.collection("seasons").get();
-        const allSeasons = seasonsSnap.docs.map((d) => ({ id: d.id, ...cleanDates(d.data()) }));
-        const epSnap = args.include.seasons?.include?.episodes ? await fs.collection("episodes").get() : null;
-        const allEps = epSnap ? epSnap.docs.map((d) => ({ id: d.id, ...cleanDates(d.data()) })) : [];
-
+      if (args.include?.seasons || args.include?._count?.select?.seasons) {
         for (const title of paged) {
-          title.seasons = allSeasons
-            .filter((s) => s.titleId === title.id)
-            .sort((a, b) => a.number - b.number)
-            .map((s) => {
-              if (args.include?.seasons?.include?.episodes) {
-                s.episodes = allEps
-                  .filter((e) => e.seasonId === s.id)
-                  .sort((a, b) => a.number - b.number);
-              }
-              return s;
-            });
-          if (args.include._count?.select?.seasons) {
-            title._count = { seasons: title.seasons.length };
+          if (title.seasons && Array.isArray(title.seasons)) {
+            if (args.include?._count?.select?.seasons) {
+              title._count = { seasons: title.seasons.length };
+            }
           }
         }
-      } else if (args.include?._count?.select?.seasons) {
-        const seasonsSnap = await fs.collection("seasons").get();
-        const allSeasons = seasonsSnap.docs.map((d) => ({ id: d.id, ...cleanDates(d.data()) }));
-        for (const title of paged) {
-          title._count = { seasons: allSeasons.filter((s) => s.titleId === title.id).length };
+        const needsSeasons = paged.filter((t) => !t.seasons);
+        if (needsSeasons.length > 0) {
+          const seasonsSnap = await fs.collection("seasons").get();
+          const allSeasons = seasonsSnap.docs.map((d) => ({ id: d.id, ...cleanDates(d.data()) }));
+          const epSnap = args.include?.seasons?.include?.episodes ? await fs.collection("episodes").get() : null;
+          const allEps = epSnap ? epSnap.docs.map((d) => ({ id: d.id, ...cleanDates(d.data()) })) : [];
+
+          for (const title of needsSeasons) {
+            title.seasons = allSeasons
+              .filter((s) => s.titleId === title.id)
+              .sort((a, b) => a.number - b.number)
+              .map((s) => {
+                if (args.include?.seasons?.include?.episodes) {
+                  s.episodes = allEps
+                    .filter((e) => e.seasonId === s.id)
+                    .sort((a, b) => a.number - b.number);
+                }
+                return s;
+              });
+            if (args.include?._count?.select?.seasons) {
+              title._count = { seasons: title.seasons.length };
+            }
+          }
         }
       }
 
@@ -149,22 +206,43 @@ export const firestoreDb = {
 
     async findUnique(args: { where: { id?: string; slug?: string }; include?: Dict }) {
       const fs = getFirestoreDb();
-      if (!fs) return null;
       if (args.where.id) {
-        const doc = await fs.collection("titles").doc(args.where.id).get();
-        if (!doc.exists) return null;
-        const title: Dict = { id: doc.id, ...cleanDates(doc.data()!) };
-        if (args.include?.seasons) {
-          const seasonsSnap = await fs.collection("seasons").where("titleId", "==", doc.id).get();
-          title.seasons = seasonsSnap.docs
-            .map((d) => ({ id: d.id, ...cleanDates(d.data()) }))
-            .sort((a, b) => a.number - b.number);
-          if (args.include.seasons?.include?.episodes) {
-            const epSnap = await fs.collection("episodes").where("titleId", "==", doc.id).get();
-            const allEps = epSnap.docs.map((d) => ({ id: d.id, ...cleanDates(d.data()) }));
-            for (const s of title.seasons) {
-              s.episodes = allEps.filter((e) => e.seasonId === s.id).sort((a, b) => a.number - b.number);
+        let title: Dict | null = null;
+        if (fs) {
+          try {
+            const doc = await fs.collection("titles").doc(args.where.id).get();
+            if (doc.exists) {
+              title = { id: doc.id, ...cleanDates(doc.data()!) };
             }
+          } catch {}
+        }
+        if (!title) {
+          const cat = getLocalCatalog();
+          const found = cat.find((c) => c.id === args.where.id || c.slug === args.where.id);
+          if (found) title = { ...found };
+        }
+        if (!title) return null;
+        if (args.include?.seasons) {
+          if (title.seasons && Array.isArray(title.seasons) && title.seasons.length > 0) {
+            if (args.include._count?.select?.seasons) {
+              title._count = { seasons: title.seasons.length };
+            }
+            return title;
+          }
+          if (fs) {
+            try {
+              const seasonsSnap = await fs.collection("seasons").where("titleId", "==", title.id).get();
+              title.seasons = seasonsSnap.docs
+                .map((d) => ({ id: d.id, ...cleanDates(d.data()) }))
+                .sort((a, b) => a.number - b.number);
+              if (args.include.seasons?.include?.episodes) {
+                const epSnap = await fs.collection("episodes").where("titleId", "==", title.id).get();
+                const allEps = epSnap.docs.map((d) => ({ id: d.id, ...cleanDates(d.data()) }));
+                for (const s of title.seasons) {
+                  s.episodes = allEps.filter((e) => e.seasonId === s.id).sort((a, b) => a.number - b.number);
+                }
+              }
+            } catch {}
           }
         }
         return title;
