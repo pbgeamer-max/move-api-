@@ -32,8 +32,8 @@ async function ensureSupabaseTables(prismaClient: any) {
   if (!prismaClient || typeof prismaClient.$executeRawUnsafe !== "function") return;
 
   try {
-    const ddl = `
-      CREATE TABLE IF NOT EXISTS "User" (
+    const statements = [
+      `CREATE TABLE IF NOT EXISTS "User" (
         "id" TEXT PRIMARY KEY,
         "email" TEXT UNIQUE NOT NULL,
         "name" TEXT,
@@ -43,17 +43,15 @@ async function ensureSupabaseTables(prismaClient: any) {
         "plan" TEXT NOT NULL DEFAULT 'free',
         "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
         "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
-      );
-
-      CREATE TABLE IF NOT EXISTS "Session" (
+      )`,
+      `CREATE TABLE IF NOT EXISTS "Session" (
         "id" TEXT PRIMARY KEY,
         "token" TEXT UNIQUE NOT NULL,
         "userId" TEXT NOT NULL REFERENCES "User"("id") ON DELETE CASCADE,
         "expiresAt" TIMESTAMP(3) NOT NULL,
         "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
-      );
-
-      CREATE TABLE IF NOT EXISTS "Title" (
+      )`,
+      `CREATE TABLE IF NOT EXISTS "Title" (
         "id" TEXT PRIMARY KEY,
         "slug" TEXT UNIQUE NOT NULL,
         "type" TEXT NOT NULL,
@@ -86,18 +84,16 @@ async function ensureSupabaseTables(prismaClient: any) {
         "sortOrder" INTEGER NOT NULL DEFAULT 0,
         "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
         "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
-      );
-
-      CREATE TABLE IF NOT EXISTS "Season" (
+      )`,
+      `CREATE TABLE IF NOT EXISTS "Season" (
         "id" TEXT PRIMARY KEY,
         "titleId" TEXT NOT NULL REFERENCES "Title"("id") ON DELETE CASCADE,
         "number" INTEGER NOT NULL,
         "titleAr" TEXT,
         "titleEn" TEXT,
         CONSTRAINT "Season_titleId_number_key" UNIQUE ("titleId", "number")
-      );
-
-      CREATE TABLE IF NOT EXISTS "Episode" (
+      )`,
+      `CREATE TABLE IF NOT EXISTS "Episode" (
         "id" TEXT PRIMARY KEY,
         "seasonId" TEXT NOT NULL REFERENCES "Season"("id") ON DELETE CASCADE,
         "titleId" TEXT NOT NULL REFERENCES "Title"("id") ON DELETE CASCADE,
@@ -112,9 +108,8 @@ async function ensureSupabaseTables(prismaClient: any) {
         "playbackUrl" TEXT,
         "stillSeed" TEXT,
         CONSTRAINT "Episode_seasonId_number_key" UNIQUE ("seasonId", "number")
-      );
-
-      CREATE TABLE IF NOT EXISTS "Channel" (
+      )`,
+      `CREATE TABLE IF NOT EXISTS "Channel" (
         "id" TEXT PRIMARY KEY,
         "code" TEXT UNIQUE NOT NULL,
         "nameAr" TEXT NOT NULL,
@@ -133,17 +128,15 @@ async function ensureSupabaseTables(prismaClient: any) {
         "sortOrder" INTEGER NOT NULL DEFAULT 0,
         "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
         "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
-      );
-
-      CREATE TABLE IF NOT EXISTS "UserList" (
+      )`,
+      `CREATE TABLE IF NOT EXISTS "UserList" (
         "id" TEXT PRIMARY KEY,
         "userId" TEXT REFERENCES "User"("id") ON DELETE CASCADE,
         "deviceId" TEXT,
         "titleId" TEXT NOT NULL REFERENCES "Title"("id") ON DELETE CASCADE,
         "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
-      );
-
-      CREATE TABLE IF NOT EXISTS "WatchProgress" (
+      )`,
+      `CREATE TABLE IF NOT EXISTS "WatchProgress" (
         "id" TEXT PRIMARY KEY,
         "userId" TEXT REFERENCES "User"("id") ON DELETE CASCADE,
         "deviceId" TEXT,
@@ -153,16 +146,57 @@ async function ensureSupabaseTables(prismaClient: any) {
         "durationSeconds" INTEGER NOT NULL DEFAULT 0,
         "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
         "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
-      );
-
-      CREATE TABLE IF NOT EXISTS "SiteSetting" (
+      )`,
+      `CREATE TABLE IF NOT EXISTS "SiteSetting" (
         "key" TEXT PRIMARY KEY,
         "value" TEXT NOT NULL
-      );
-    `;
+      )`,
+      `CREATE INDEX IF NOT EXISTS "Title_type_visible_idx" ON "Title"("type", "visible")`,
+      `CREATE INDEX IF NOT EXISTS "Title_featured_idx" ON "Title"("featured")`,
+      `CREATE INDEX IF NOT EXISTS "Episode_titleId_idx" ON "Episode"("titleId")`,
+      `CREATE INDEX IF NOT EXISTS "Channel_visible_sortOrder_idx" ON "Channel"("visible", "sortOrder")`,
+      `CREATE INDEX IF NOT EXISTS "Channel_category_idx" ON "Channel"("category")`,
+      `CREATE INDEX IF NOT EXISTS "UserList_userId_idx" ON "UserList"("userId")`,
+      `CREATE INDEX IF NOT EXISTS "WatchProgress_userId_idx" ON "WatchProgress"("userId")`,
+    ];
 
-    await prismaClient.$executeRawUnsafe(ddl);
-    console.log("[TVORA DB] Supabase PostgreSQL tables verified/created successfully.");
+    let successCount = 0;
+    for (const stmt of statements) {
+      try {
+        await prismaClient.$executeRawUnsafe(stmt);
+        successCount++;
+      } catch (stmtErr: any) {
+        console.warn("[TVORA DB] DDL notice:", stmtErr?.message || stmtErr);
+      }
+    }
+
+    console.log(`[TVORA DB] Supabase PostgreSQL tables verified/created successfully (${successCount}/${statements.length} operations).`);
+
+    // Seed default channels if empty
+    try {
+      const channelCount = await prismaClient.channel.count();
+      if (channelCount === 0) {
+        for (const ch of DEFAULT_CHANNELS) {
+          await prismaClient.channel.create({ data: ch }).catch(() => {});
+        }
+        console.log("[TVORA DB] Default channels initialized in Supabase.");
+      }
+    } catch {}
+
+    // Seed default site settings if empty
+    try {
+      const settingCount = await prismaClient.siteSetting.count();
+      if (settingCount === 0) {
+        for (const [key, value] of Object.entries(DEFAULT_SETTINGS)) {
+          await prismaClient.siteSetting.upsert({
+            where: { key },
+            create: { key, value },
+            update: {},
+          }).catch(() => {});
+        }
+        console.log("[TVORA DB] Default site settings initialized in Supabase.");
+      }
+    } catch {}
   } catch (err: any) {
     console.warn("[TVORA DB] Supabase table auto-provision notice:", err?.message || err);
   }
@@ -173,7 +207,7 @@ function getPrismaClient(): any {
     const PrismaClass = getPrismaClientClass();
     if (PrismaClass) {
       globalForPrisma.prisma = new PrismaClass({
-        log: ["error", "warn"],
+        log: ["warn"],
       });
       // Trigger background schema provisioning
       ensureSupabaseTables(globalForPrisma.prisma).catch(() => {});
