@@ -19,10 +19,16 @@ interface CacheEntry {
 }
 const resolverCache = new Map<string, CacheEntry>();
 
-function getCached(key: string): ResolvedStream | null {
+function getCached(key: string, bypass = false): ResolvedStream | null {
+  if (bypass) return null;
   const entry = resolverCache.get(key);
   if (!entry) return null;
   if (Date.now() > entry.expiresAt) {
+    resolverCache.delete(key);
+    return null;
+  }
+  // NEVER return cached embed fallback — always attempt fresh direct stream extraction!
+  if (entry.data.type === "embed" || !entry.data.streamUrl) {
     resolverCache.delete(key);
     return null;
   }
@@ -30,7 +36,8 @@ function getCached(key: string): ResolvedStream | null {
 }
 
 function setCached(key: string, data: ResolvedStream, ttlMs = 2 * 60 * 60 * 1000) {
-  if (!data.success) return;
+  // ONLY cache successful HLS or MP4 streams; NEVER cache fallback embeds
+  if (!data.success || data.type === "embed" || !data.streamUrl) return;
   resolverCache.set(key, {
     data,
     expiresAt: Date.now() + ttlMs,
@@ -66,7 +73,7 @@ function unpackDeanEdwards(packedCode: string): string | null {
 /**
  * Resolves any video or 3isk page URL to a playable .m3u8 or embed URL
  */
-export async function resolveStream(targetUrl: string): Promise<ResolvedStream> {
+export async function resolveStream(targetUrl: string, bypassCache = false): Promise<ResolvedStream> {
   if (!targetUrl || typeof targetUrl !== "string") {
     return { success: false, type: "embed", error: "رابط التشغيل غير متوفر" };
   }
@@ -82,7 +89,7 @@ export async function resolveStream(targetUrl: string): Promise<ResolvedStream> 
   }
 
   // 2. Check cache
-  const cached = getCached(trimmed);
+  const cached = getCached(trimmed, bypassCache);
   if (cached) {
     return cached;
   }
@@ -273,7 +280,7 @@ async function resolve3iskPage(pageUrl: string): Promise<ResolvedStream> {
   return {
     success: true,
     type: "embed",
-    embedUrl: cdnUrl,
+    embedUrl: embed3iskUrl || cdnUrl,
     fallbackEmbed: embed3iskUrl,
     title,
   };

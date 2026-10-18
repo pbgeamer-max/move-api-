@@ -377,22 +377,21 @@ export function TvoraPlayer({
   const [skipFeedback, setSkipFeedback] = useState<"forward" | "rewind" | null>(null);
 
   // ── Stream Resolver State (Auto-resolves 3isk, external streams, and embeds) ──
+  const isDirectMedia = Boolean(
+    src && (src.includes(".m3u8") || src.includes(".mp4") || src.includes(".webm"))
+  );
   const [resolvedStream, setResolvedStream] = useState<{
     type: "hls" | "mp4" | "embed";
     streamUrl?: string;
     embedUrl?: string;
-  } | null>(null);
-  const [resolving, setResolving] = useState<boolean>(false);
+  } | null>(isDirectMedia ? { type: src.includes(".m3u8") ? "hls" : "mp4", streamUrl: src } : null);
+  const [resolving, setResolving] = useState<boolean>(!isDirectMedia);
 
   useEffect(() => {
     if (!src) return;
-    const clean = src.split("?")[0].toLowerCase();
-    if (clean.endsWith(".m3u8")) {
-      setResolvedStream({ type: "hls", streamUrl: src });
-      return;
-    }
-    if (clean.endsWith(".mp4") || clean.endsWith(".webm")) {
-      setResolvedStream({ type: "mp4", streamUrl: src });
+    if (isDirectMedia) {
+      setResolvedStream({ type: src.includes(".m3u8") ? "hls" : "mp4", streamUrl: src });
+      setResolving(false);
       return;
     }
 
@@ -410,11 +409,16 @@ export function TvoraPlayer({
       .then((data) => {
         if (!active) return;
         setResolving(false);
-        if (data && data.success) {
+        if (data && data.success && data.streamUrl) {
           setResolvedStream({
             type: data.type || "hls",
             streamUrl: data.streamUrl,
-            embedUrl: data.embedUrl || data.fallbackEmbed,
+            embedUrl: data.fallbackEmbed || data.embedUrl,
+          });
+        } else if (data && data.success && (data.fallbackEmbed || data.embedUrl)) {
+          setResolvedStream({
+            type: "embed",
+            embedUrl: data.fallbackEmbed || data.embedUrl,
           });
         } else {
           setResolvedStream({ type: "embed", embedUrl: src });
@@ -430,16 +434,16 @@ export function TvoraPlayer({
     return () => {
       active = false;
     };
-  }, [src, episodeId, titleId]);
+  }, [src, episodeId, titleId, isDirectMedia]);
 
-  const activePlaybackUrl = resolvedStream?.streamUrl || (resolvedStream?.type !== "embed" ? src : null);
+  const activePlaybackUrl = resolvedStream?.streamUrl || (isDirectMedia ? src : null);
   const isEmbedMode = resolvedStream?.type === "embed" && Boolean(resolvedStream.embedUrl);
 
   // ── 1. Engine Initialization (hls.js with ABR + Native Fallback) ───────────
   useEffect(() => {
-    if (isEmbedMode || resolving) return;
+    if (isEmbedMode || resolving || !activePlaybackUrl) return;
     const video = videoRef.current;
-    if (!video || !activePlaybackUrl) return;
+    if (!video) return;
     let disposed = false;
 
     setReady(false);
@@ -986,11 +990,7 @@ export function TvoraPlayer({
       {isEmbedMode ? (
         <div className="absolute inset-0 h-full w-full bg-[#080808]">
           <iframe
-            src={
-              resolvedStream.embedUrl?.startsWith("http")
-                ? `/api/stream/embed-proxy?url=${encodeURIComponent(resolvedStream.embedUrl)}`
-                : resolvedStream.embedUrl
-            }
+            src={resolvedStream.embedUrl}
             title={title || "TVORA Cinema Stream"}
             className="h-full w-full border-0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"

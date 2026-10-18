@@ -40,7 +40,8 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const result = await resolveStream(targetUrl);
+    const bypassCache = searchParams.get("nocache") === "1" || searchParams.get("force") === "1";
+    const result = await resolveStream(targetUrl, bypassCache);
     return NextResponse.json(result);
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Internal resolver error";

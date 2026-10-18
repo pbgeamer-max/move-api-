@@ -92,6 +92,7 @@ async function testUrl(pageUrl) {
 async function run() {
   await testUrl('https://3iskk.xyz/watch/movies/movie-tam-bir-centilmen-2023-mudblij/');
   await testUrl('https://3iskk.xyz/watch/episodes/serie-karagul-season-1-episode-1/');
+  await testUrl('https://3iskk.xyz/watch/episodes/serie-kasaba-doktoru-mudblij-season-1-episode-1-k508w/');
 }
 
 run();
