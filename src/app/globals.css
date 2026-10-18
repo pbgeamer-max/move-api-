@@ -1,0 +1,413 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-tvora-sans);
+  --font-display: var(--font-tvora-display);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  /* TVORA brand tokens */
+  --color-ink: var(--tv-ink);
+  --color-surface: var(--tv-surface);
+  --color-elevated: var(--tv-elevated);
+  --color-ice: var(--tv-ice);
+  --color-ice-strong: var(--tv-ice-strong);
+  --color-live: var(--tv-live);
+  --color-champagne: var(--tv-champagne);
+  --color-hairline: var(--tv-hairline);
+}
+
+:root {
+  --radius: 0.375rem;
+
+  /* TVORA — dark cinema palette */
+  --tv-ink: #070708;
+  --tv-surface: #101012;
+  --tv-elevated: #171719;
+  --tv-ice: #9fb7cb;
+  --tv-ice-strong: #cfe0ee;
+  --tv-live: #e5484d;
+  --tv-champagne: #d8c9a3;
+  --tv-hairline: rgba(255, 255, 255, 0.09);
+
+  --background: #070708;
+  --foreground: #ffffff;
+  --card: #101012;
+  --card-foreground: #ffffff;
+  --popover: #131316;
+  --popover-foreground: #ffffff;
+  --primary: #ffffff;
+  --primary-foreground: #0b0b0d;
+  --secondary: #171719;
+  --secondary-foreground: #ffffff;
+  --muted: #141416;
+  --muted-foreground: #a4a4aa;
+  --accent: #1b1b1f;
+  --accent-foreground: #ffffff;
+  --destructive: #e5484d;
+  --border: rgba(255, 255, 255, 0.09);
+  --input: rgba(255, 255, 255, 0.12);
+  --ring: rgba(207, 224, 238, 0.5);
+  --chart-1: #9fb7cb;
+  --chart-2: #d8c9a3;
+  --chart-3: #e5484d;
+  --chart-4: #7fb09e;
+  --chart-5: #9a8fc2;
+  --sidebar: #101012;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #ffffff;
+  --sidebar-primary-foreground: #0b0b0d;
+  --sidebar-accent: #1b1b1f;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: rgba(255, 255, 255, 0.09);
+  --sidebar-ring: rgba(207, 224, 238, 0.5);
+}
+
+.dark {
+  --background: #070708;
+  --foreground: #ffffff;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    color-scheme: dark;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "ss01" on;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+  }
+  ::selection {
+    background: rgba(207, 224, 238, 0.25);
+    color: #fff;
+  }
+  /* Elegant scrollbars */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #0a0a0c;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #26262b;
+    border-radius: 8px;
+    border: 2px solid #0a0a0c;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #333338;
+  }
+}
+
+@layer utilities {
+  /* Cinematic helpers */
+  .tv-grain::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.05;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E");
+    mix-blend-mode: overlay;
+  }
+  .tv-vignette::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(120% 90% at 50% 40%, transparent 55%, rgba(0, 0, 0, 0.55) 100%);
+  }
+  .tv-hairline {
+    border-color: var(--tv-hairline);
+  }
+  .tv-title-glow {
+    text-shadow: 0 2px 24px rgba(0, 0, 0, 0.8), 0 1px 2px rgba(0, 0, 0, 0.9);
+  }
+  .tv-metal-text {
+    background: linear-gradient(180deg, #f4f7fa 0%, #c9d6e2 38%, #8fa3b5 52%, #e8eef4 65%, #aebfcc 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  /* gate wordmark — full playful spin when a letter is clicked */
+  @keyframes tv-letter-spin-kf {
+    0% {
+      transform: rotate(0deg) scale(1);
+    }
+    45% {
+      transform: rotate(200deg) scale(1.25);
+    }
+    100% {
+      transform: rotate(360deg) scale(1);
+    }
+  }
+  .tv-letter-spin {
+    animation: tv-letter-spin-kf 0.7s cubic-bezier(0.34, 1.4, 0.5, 1);
+  }
+  .tv-no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .tv-no-scrollbar {
+    scrollbar-width: none;
+  }
+  .tv-focusable:focus-visible {
+    outline: 2px solid rgba(207, 224, 238, 0.7);
+    outline-offset: 2px;
+  }
+  .tv-shimmer {
+    background: linear-gradient(100deg, #101012 40%, #1c1c20 50%, #101012 60%);
+    background-size: 200% 100%;
+    animation: tv-shimmer 1.6s linear infinite;
+  }
+  @keyframes tv-shimmer {
+    to {
+      background-position-x: -200%;
+    }
+  }
+  .tv-fade-bottom {
+    mask-image: linear-gradient(180deg, black 82%, transparent 100%);
+  }
+
+  /* ── TVORA Motion FX system ──────────────────────────────────────────── */
+
+  /* Aurora ambience — drifting blurred blobs (GPU transform/opacity only) */
+  .tv-aurora-blob {
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(90px);
+    will-change: transform, opacity;
+    animation: tv-aurora 26s ease-in-out infinite alternate;
+  }
+  @keyframes tv-aurora {
+    0% { transform: translate3d(0, 0, 0) scale(1); opacity: var(--blob-o, 0.5); }
+    50% { transform: translate3d(6vw, -4vh, 0) scale(1.15); opacity: calc(var(--blob-o, 0.5) * 0.72); }
+    100% { transform: translate3d(-5vw, 5vh, 0) scale(0.92); opacity: var(--blob-o, 0.5); }
+  }
+
+  /* Infinite marquee track (duplicate children once → -50% loop) */
+  .tv-marquee-track {
+    display: flex;
+    width: max-content;
+    animation: tv-marquee var(--marquee-dur, 32s) linear infinite;
+  }
+  .tv-marquee-reverse { animation-direction: reverse; }
+  .tv-marquee-paused:hover .tv-marquee-track { animation-play-state: paused; }
+  @keyframes tv-marquee {
+    to { transform: translateX(-50%); }
+  }
+
+  /* Animated shimmering metal text */
+  .tv-shimmer-text {
+    background: linear-gradient(100deg, #cfe0ee 18%, #ffffff 38%, #d8c9a3 52%, #cfe0ee 72%, #ffffff 90%);
+    background-size: 220% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: tv-shine 6s linear infinite;
+  }
+  @keyframes tv-shine {
+    to { background-position-x: -220%; }
+  }
+
+  /* Expanding pulse rings (live indicators) */
+  .tv-pulse-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 9999px;
+    border: 1.5px solid currentColor;
+    animation: tv-pulse-ring 2.2s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+    pointer-events: none;
+  }
+  @keyframes tv-pulse-ring {
+    0% { transform: scale(1); opacity: 0.55; }
+    70%, 100% { transform: scale(2.4); opacity: 0; }
+  }
+
+  /* One-shot diagonal light sweep on view mount (attach to relative parent) */
+  .tv-sweep::after {
+    content: "";
+    position: absolute;
+    inset: -20%;
+    pointer-events: none;
+    z-index: 40;
+    background: linear-gradient(105deg, transparent 42%, rgba(207, 224, 238, 0.06) 48%, rgba(255, 255, 255, 0.1) 50%, rgba(207, 224, 238, 0.06) 52%, transparent 58%);
+    transform: translateX(-120%);
+    animation: tv-sweep 1.05s cubic-bezier(0.33, 0, 0.15, 1) 0.05s both;
+  }
+  @keyframes tv-sweep {
+    to { transform: translateX(120%); }
+  }
+
+  /* Button sheen on hover */
+  .tv-btn-sheen { position: relative; overflow: hidden; }
+  .tv-btn-sheen::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, 0.32) 50%, transparent 60%);
+    transform: translateX(-130%);
+    transition: transform 0.7s cubic-bezier(0.33, 0, 0.15, 1);
+  }
+  .tv-btn-sheen:hover::after { transform: translateX(130%); }
+
+  /* Card sheen band on group hover (attach to a gradient overlay div) */
+  .tv-card-sheen {
+    background: linear-gradient(105deg, transparent 35%, rgba(255, 255, 255, 0.14) 50%, transparent 65%);
+    transform: translateX(-140%) skewX(-8deg);
+    transition: transform 0.9s cubic-bezier(0.33, 0, 0.15, 1);
+  }
+  .group\/card:hover .tv-card-sheen,
+  [class*="group/ch"]:hover .tv-card-sheen { transform: translateX(140%) skewX(-8deg); }
+
+  /* CRT scanlines overlay for TV channel logo stages */
+  .tv-scanlines {
+    background-image: repeating-linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.05) 0px,
+      rgba(255, 255, 255, 0.05) 1px,
+      transparent 1px,
+      transparent 4px
+    );
+  }
+
+  /* Mouse spotlight card (uses --mx/--my set from JS) */
+  .tv-spotlight { position: relative; }
+  .tv-spotlight::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    opacity: 0;
+    transition: opacity 0.45s ease;
+    background: radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%), rgba(207, 224, 238, 0.09), transparent 65%);
+    pointer-events: none;
+    z-index: 1;
+  }
+  .tv-spotlight:hover::before { opacity: 1; }
+
+  /* Gentle float / breathe */
+  .tv-float { animation: tv-float 7s ease-in-out infinite; }
+  @keyframes tv-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  .tv-glow-breathe { animation: tv-breathe 4.5s ease-in-out infinite; }
+  @keyframes tv-breathe {
+    0%, 100% { opacity: 0.55; }
+    50% { opacity: 1; }
+  }
+
+  /* Panning gradient (borders / text) */
+  .tv-gradient-pan {
+    background-size: 200% 200%;
+    animation: tv-pan 9s ease-in-out infinite;
+  }
+  @keyframes tv-pan {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  /* 3D tilt helper */
+  .tv-tilt { transform-style: preserve-3d; }
+
+  /* Vertical drifting light beam */
+  .tv-beam {
+    position: absolute;
+    top: 0;
+    pointer-events: none;
+    background: linear-gradient(180deg, transparent, rgba(207, 224, 238, 0.4), transparent);
+    animation: tv-beam var(--beam-dur, 11s) ease-in-out var(--beam-delay, 0s) infinite;
+  }
+  @keyframes tv-beam {
+    0%, 100% { transform: translateY(-60vh); opacity: 0; }
+    12% { opacity: 1; }
+    50% { opacity: 0.8; }
+    88% { opacity: 1; }
+  }
+
+  /* ── 5-a ──────────────────────────────────────────────────────────────── */
+
+  /* Hero secondary CTA — subtle border-glow hover */
+  .tv-ghost-glow {
+    transition:
+      border-color 0.4s ease,
+      box-shadow 0.4s ease,
+      background-color 0.4s ease;
+  }
+  .tv-ghost-glow:hover,
+  .tv-ghost-glow:focus-visible {
+    border-color: rgba(159, 183, 203, 0.55);
+    background-color: rgba(255, 255, 255, 0.05);
+    box-shadow:
+      0 0 0 1px rgba(159, 183, 203, 0.14),
+      0 0 30px rgba(159, 183, 203, 0.16),
+      inset 0 0 14px rgba(159, 183, 203, 0.05);
+  }
+
+  /* Home scroll-cue — bobbing wheel dot inside the mouse glyph */
+  .tv-scroll-dot {
+    animation: tv-scroll-dot 2.2s cubic-bezier(0.33, 0, 0.15, 1) infinite;
+  }
+  @keyframes tv-scroll-dot {
+    0% { transform: translateY(0); opacity: 0; }
+    30% { opacity: 1; }
+    75% { transform: translateY(11px); opacity: 0; }
+    100% { transform: translateY(0); opacity: 0; }
+  }
+
+  /* ── 5-b ──────────────────────────────────────────────────────────────── */
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

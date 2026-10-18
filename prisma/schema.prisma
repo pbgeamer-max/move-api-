@@ -1,0 +1,189 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Auth ────────────────────────────────────────────────────────────────────
+
+model User {
+  id                String   @id @default(cuid())
+  email             String   @unique
+  name              String?
+  passwordHash      String
+  role              String   @default("user") // "user" | "admin"
+  preferredLanguage String   @default("ar") // "ar" | "en"
+  plan              String   @default("free") // "free" | "premium" | "family"
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  sessions Session[]
+  lists    UserList[]
+  progress WatchProgress[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// ─── Catalog (movies + series unified as Title) ──────────────────────────────
+
+model Title {
+  id            String   @id @default(cuid())
+  slug          String   @unique
+  type          String // "movie" | "series"
+  titleAr       String
+  titleEn       String
+  originalTitle String?
+  synopsisAr    String   @default("")
+  synopsisEn    String   @default("")
+  posterUrl     String? // null → procedural artwork
+  backdropUrl   String?
+  releaseYear   Int
+  releaseDate   String? // ISO
+  genres        String   @default("[]") // JSON string[]
+  runtime       Int? // minutes (movies)
+  rating        Float? // 0-10 editorial rating
+  ratingSource  String   @default("TVORA Editorial")
+  ageRating     String? // "+13" etc
+  featured      Boolean  @default(false)
+  trending      Boolean  @default(false)
+  isNew         Boolean  @default(false)
+  premium       Boolean  @default(false)
+  visible       Boolean  @default(true)
+  director      String?
+  cast          String   @default("[]") // JSON string[]
+  country       String?
+  contentLang   String? // "ar" | "en" | "ko" | "tr"
+  trailerUrl    String?
+  playbackType  String   @default("demo") // "demo" | "none"
+  playbackUrl   String?
+  sortOrder     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  seasons  Season[]
+  episodes Episode[]
+  listItems UserList[]
+  progress WatchProgress[]
+
+  @@index([type, visible])
+  @@index([featured])
+}
+
+model Season {
+  id      String @id @default(cuid())
+  titleId String
+  number  Int
+  titleAr String?
+  titleEn String?
+
+  title    Title   @relation(fields: [titleId], references: [id], onDelete: Cascade)
+  episodes Episode[]
+
+  @@unique([titleId, number])
+}
+
+model Episode {
+  id            String  @id @default(cuid())
+  seasonId      String
+  titleId       String
+  number        Int
+  titleAr       String
+  titleEn       String
+  synopsisAr    String  @default("")
+  synopsisEn    String  @default("")
+  runtime       Int?
+  thumbnailUrl  String?
+  playbackType  String  @default("demo") // "demo" | "none"
+  playbackUrl   String?
+  stillSeed     String? // procedural artwork seed
+
+  season Season @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  title  Title  @relation(fields: [titleId], references: [id], onDelete: Cascade)
+
+  progress WatchProgress[]
+
+  @@unique([seasonId, number])
+  @@index([titleId])
+}
+
+// ─── Live TV channels ────────────────────────────────────────────────────────
+
+model Channel {
+  id            String   @id @default(cuid())
+  code          String   @unique // "TVORA-SPORTS-1"
+  nameAr        String
+  nameEn        String
+  category      String   @default("general") // "sports" | "movies" | "series" | "kids" | "documentary" | "news" | "music" | "general"
+  descriptionAr String   @default("")
+  descriptionEn String   @default("")
+  nowPlayingAr  String   @default("") // demo EPG — what's on air right now
+  nowPlayingEn  String   @default("")
+  colorA        String   @default("#9fb7cb") // logo gradient start
+  colorB        String   @default("#171719") // logo gradient end
+  quality       String   @default("HD") // "HD" | "4K" | "SD"
+  streamType    String   @default("demo") // "demo" | "none"
+  streamUrl     String?
+  visible       Boolean  @default(true)
+  sortOrder     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([visible, sortOrder])
+  @@index([category])
+}
+
+// ─── User data ───────────────────────────────────────────────────────────────
+
+model UserList {
+  id        String   @id @default(cuid())
+  userId    String?
+  deviceId  String? // guest users
+  titleId   String
+  createdAt DateTime @default(now())
+
+  user  User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title Title @relation(fields: [titleId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([deviceId])
+}
+
+model WatchProgress {
+  id              String   @id @default(cuid())
+  userId          String?
+  deviceId        String?
+  titleId         String
+  episodeId       String?
+  positionSeconds Int      @default(0)
+  durationSeconds Int      @default(0)
+  updatedAt       DateTime @updatedAt
+  createdAt       DateTime @default(now())
+
+  user    User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title   Title    @relation(fields: [titleId], references: [id], onDelete: Cascade)
+  episode Episode? @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([deviceId])
+  @@index([updatedAt])
+}
+
+// ─── Settings ────────────────────────────────────────────────────────────────
+
+model SiteSetting {
+  key   String @id
+  value String // JSON
+}
