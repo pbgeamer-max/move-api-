@@ -1,6 +1,16 @@
-import * as admin from "firebase-admin";
 import * as fs from "fs";
 import * as path from "path";
+
+let _adminModule: any = null;
+function getAdmin(): any {
+  if (_adminModule) return _adminModule;
+  try {
+    _adminModule = require("firebase-admin");
+    return _adminModule;
+  } catch {
+    return null;
+  }
+}
 
 function findLocalServiceAccount(): any | null {
   try {
@@ -14,6 +24,9 @@ function findLocalServiceAccount(): any | null {
 
 export function isFirebaseConfigured(): boolean {
   if (process.env.DATABASE_PROVIDER === "sqlite") return false;
+  const admin = getAdmin();
+  if (!admin) return false;
+
   return Boolean(
     findLocalServiceAccount() ||
     process.env.FIREBASE_SERVICE_ACCOUNT_KEY ||
@@ -24,11 +37,14 @@ export function isFirebaseConfigured(): boolean {
   );
 }
 
-let _db: admin.firestore.Firestore | null = null;
+let _db: any = null;
 
-export function getFirestoreDb(): admin.firestore.Firestore | null {
+export function getFirestoreDb(): any | null {
   if (!isFirebaseConfigured()) return null;
   if (_db) return _db;
+
+  const admin = getAdmin();
+  if (!admin) return null;
 
   try {
     if (admin.apps.length === 0) {
