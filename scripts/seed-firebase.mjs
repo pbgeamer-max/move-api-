@@ -8,6 +8,8 @@
  */
 import admin from "firebase-admin";
 import crypto from "crypto";
+import fs from "fs";
+import path from "path";
 
 function hashPassword(password) {
   const salt = crypto.randomBytes(16).toString("hex");
@@ -17,7 +19,19 @@ function hashPassword(password) {
 
 // 1. Initialize Firebase Admin
 if (admin.apps.length === 0) {
-  if (process.env.FIREBASE_SERVICE_ACCOUNT_KEY) {
+  const localKeyPath = path.join(process.cwd(), "serviceAccountKey.json");
+  if (fs.existsSync(localKeyPath)) {
+    try {
+      const sa = JSON.parse(fs.readFileSync(localKeyPath, "utf-8"));
+      admin.initializeApp({
+        credential: admin.credential.cert(sa),
+        projectId: sa.project_id,
+      });
+      console.log(`Loaded serviceAccountKey.json for project: ${sa.project_id}`);
+    } catch (e) {
+      console.error("Error reading serviceAccountKey.json:", e);
+    }
+  } else if (process.env.FIREBASE_SERVICE_ACCOUNT_KEY) {
     try {
       const sa = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
       admin.initializeApp({
