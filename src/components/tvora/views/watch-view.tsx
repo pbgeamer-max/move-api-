@@ -231,7 +231,25 @@ export function WatchView({ id, episodeId }: { id: string; episodeId?: string })
             src={source.src}
             titleId={source.title.id}
             episodeId={source.kind === "episode" && currentEpisode ? currentEpisode.id : undefined}
+            title={heading}
             poster={poster}
+            subtitles={[
+              { label: "العربية", srclang: "ar", src: "/media/subtitles-ar.vtt", default: lang === "ar" },
+              { label: "English", srclang: "en", src: "/media/subtitles-en.vtt", default: lang === "en" },
+            ]}
+            introStart={15}
+            introEnd={85}
+            nextEpisode={
+              source.kind === "episode" && nextEpisode
+                ? {
+                    id: nextEpisode.id,
+                    number: nextEpisode.number,
+                    seasonNumber: nextEpisode.seasonNumber,
+                    title: lang === "ar" ? nextEpisode.titleAr : nextEpisode.titleEn,
+                    onClick: () => goEpisode(nextEpisode),
+                  }
+                : undefined
+            }
             onVideoEl={onVideoEl}
             onEnded={
               source.kind === "episode" && nextEpisode

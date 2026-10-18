@@ -10,6 +10,7 @@ import { api } from "@/lib/api";
 import { CHANNEL_CATEGORIES, type ChannelCategory, type ChannelDTO } from "@/lib/types";
 import { channelLogo } from "@/lib/artwork";
 import { useT, EmptyState, DemoTag, LiveDot, ErrorState } from "../shared";
+import { TvoraPlayer } from "../player";
 import { Beam, PulseRing, RevealScale, SplitWords } from "../motion-fx";
 import { useMotionAllowed } from "../motion-fx";
 import { EASE_OUT_EXPO, viewportOnce } from "@/lib/motion";
@@ -227,10 +228,7 @@ function ChannelCard({
 // ─── Player dialog — live player with EPG strip & unmute affordance ───────────
 function ChannelPlayer({ channel, onClose }: { channel: ChannelDTO; onClose: () => void }) {
   const { t, lang } = useT();
-  const videoRef = useRef<HTMLVideoElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
-  const [muted, setMuted] = useState(true);
-  const [failed, setFailed] = useState(false);
   const name = lang === "ar" ? channel.nameAr : channel.nameEn;
   const nowPlaying = lang === "ar" ? channel.nowPlayingAr : channel.nowPlayingEn;
 
@@ -253,14 +251,6 @@ function ChannelPlayer({ channel, onClose }: { channel: ChannelDTO; onClose: () 
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
-
-  const toggleMute = useCallback(() => {
-    const el = videoRef.current;
-    if (!el) return;
-    el.muted = !el.muted;
-    setMuted(el.muted);
-    if (!el.muted) void el.play().catch(() => {});
-  }, []);
 
   return (
     <motion.div
@@ -325,46 +315,25 @@ function ChannelPlayer({ channel, onClose }: { channel: ChannelDTO; onClose: () 
           </button>
         </div>
 
-        {/* Video */}
-        <div className="relative aspect-video w-full bg-black">
+        {/* Video Area */}
+        <div className="relative aspect-video w-full bg-[#080808]">
           {channel.streamUrl ? (
-            <video
-              ref={videoRef}
+            <TvoraPlayer
               src={channel.streamUrl}
-              className="h-full w-full"
-              autoPlay
-              muted={muted}
-              loop
-              controls
-              playsInline
-              onError={() => setFailed(true)}
-              aria-label={name}
+              titleId={channel.id}
+              title={name}
+              live={true}
+              liveInfo={{
+                channelCode: channel.code,
+                channelName: name,
+                nowPlaying: nowPlaying || undefined,
+                category: channel.category,
+              }}
             />
           ) : (
             <div className="flex h-full flex-col items-center justify-center gap-3 text-center" data-testid="channel-no-stream">
               <Radio className="h-7 w-7 text-white/30" aria-hidden />
               <p className="max-w-sm px-6 text-sm text-white/55">{t("channels.noStream")}</p>
-            </div>
-          )}
-          {channel.streamUrl && !failed && (
-            <button
-              type="button"
-              onClick={toggleMute}
-              className={cn(
-                "tv-focusable absolute start-4 top-4 z-10 inline-flex items-center gap-2 rounded-full border px-3.5 py-2 text-xs font-bold backdrop-blur-md transition",
-                muted
-                  ? "border-[#d8c9a3]/40 bg-black/60 text-[#d8c9a3] hover:border-[#d8c9a3]/70"
-                  : "border-white/20 bg-black/45 text-white/80 hover:border-white/50"
-              )}
-              aria-pressed={!muted}
-            >
-              {muted ? "🔇" : "🔊"} {muted ? "تشغيل الصوت" : "كتم الصوت"}
-            </button>
-          )}
-          {failed && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/80 text-center">
-              <Radio className="h-7 w-7 text-white/30" aria-hidden />
-              <p className="max-w-sm px-6 text-sm text-white/55">{t("player.streamError")}</p>
             </div>
           )}
         </div>
