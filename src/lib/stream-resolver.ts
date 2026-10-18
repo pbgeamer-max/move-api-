@@ -117,13 +117,21 @@ export async function resolveStream(targetUrl: string, bypassCache = false): Pro
     // 3. Resolve 3isk web page URL (e.g. https://3iskk.xyz/watch/episodes/... or /movies/...)
     if (trimmed.includes("3iskk.xyz") || trimmed.includes("3isk")) {
       const resolved = await resolve3iskPage(trimmed);
-      if (resolved.success) {
+      if (resolved.success && resolved.streamUrl) {
         setCached(trimmed, resolved);
       }
       return resolved;
     }
 
-    // 4. Default fallback: treat as external embed player
+    // 4. Default fallback: only treat as embed if not a raw 3isk page
+    if (trimmed.includes("3iskk.xyz") || trimmed.includes("3isk")) {
+      return {
+        success: false,
+        type: "embed",
+        error: "رابط الصفحة غير صالح للتشغيل المباشر",
+      };
+    }
+
     return {
       success: true,
       type: "embed",
@@ -132,11 +140,9 @@ export async function resolveStream(targetUrl: string, bypassCache = false): Pro
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
     console.error("[TVORA Stream Resolver] Error resolving:", trimmed, msg);
-    // Return clean fallback embed so video player does not crash
     return {
-      success: true,
+      success: false,
       type: "embed",
-      embedUrl: trimmed,
       error: msg,
     };
   }
@@ -144,144 +150,135 @@ export async function resolveStream(targetUrl: string, bypassCache = false): Pro
 
 /**
  * 3isk Multi-stage Form & Player Resolver
+ * Follows the dynamic redirect chain (Hops 1 to N) until reaching the video host iframe,
+ * then extracts the direct CORS-enabled .m3u8 HLS master stream.
  */
 async function resolve3iskPage(pageUrl: string): Promise<ResolvedStream> {
-  // Step 1: Fetch 3isk page
-  const r1 = await fetch(pageUrl, {
-    headers: { ...BROWSER_HEADERS, Referer: "https://3iskk.xyz/" },
-    signal: AbortSignal.timeout(10000),
-  });
+  let currentUrl = pageUrl;
+  let currentHtml = "";
+  let referer = "https://3iskk.xyz/";
+  let title: string | undefined;
 
-  if (!r1.ok) {
-    return { success: false, type: "embed", error: `HTTP ${r1.status} from 3isk` };
-  }
-
-  const html1 = await r1.text();
-
-  // Extract page title
-  const titleMatch = html1.match(/<h1[^>]*class=["']title["'][^>]*>([\s\S]*?)<\/h1>/i) ||
-    html1.match(/<title>([\s\S]*?)<\/title>/i);
-  const title = titleMatch ? titleMatch[1].replace(/<[^>]+>/g, "").trim() : undefined;
-
-  // Check for post token
-  const formMatch = html1.match(/<form[^>]+action=["'](https:\/\/[^"']+\.php)["'][^>]*>([\s\S]*?)<\/form>/i);
-  const tokenMatch = html1.match(/name=["']news["']\s+value=["']([^"']+)["']/i);
-
-  if (!formMatch || !tokenMatch) {
-    // Check for embedURL meta tag fallback
-    const metaEmbed = html1.match(/<meta[^>]+itemprop=["']embedURL["'][^>]+content=["']([^"']+)["']/i);
-    if (metaEmbed) {
-      return { success: true, type: "embed", embedUrl: metaEmbed[1], title };
+  // Step 1: Initial GET of the watch page
+  try {
+    const r = await fetch(pageUrl, {
+      headers: { ...BROWSER_HEADERS, Referer: referer },
+      signal: AbortSignal.timeout(10000),
+    });
+    if (!r.ok) {
+      return { success: false, type: "embed", error: `HTTP ${r.status} from 3isk` };
     }
-    return { success: true, type: "embed", embedUrl: pageUrl, title };
+    currentHtml = await r.text();
+
+    const titleMatch = currentHtml.match(/<h1[^>]*class=["']title["'][^>]*>([\s\S]*?)<\/h1>/i) ||
+      currentHtml.match(/<title>([\s\S]*?)<\/title>/i);
+    title = titleMatch ? titleMatch[1].replace(/<[^>]+>/g, "").trim() : undefined;
+  } catch (err: any) {
+    return { success: false, type: "embed", error: err?.message || String(err), title };
   }
 
-  const postUrl1 = formMatch[1];
-  const token1 = tokenMatch[1];
+  // Step 2: Follow form hops (2-4 hops through aa.3isk.icu)
+  for (let hop = 0; hop < 6; hop++) {
+    // Check if current HTML already contains the 3isk embed player or video CDN iframe
+    const embed3iskMatch = currentHtml.match(/<iframe[^>]+src=["'](https:\/\/3iskk\.xyz\/embed\/[^"']+)["']/i);
+    const directCdnMatch = currentHtml.match(/<iframe[^>]+src=["'](https:\/\/[^"']*(?:miravd|ukrcdn|grzcdn|upstream)[^"']*)["']/i);
 
-  // Step 2: POST Stage 1 form (aa.3isk.icu/3isk301111.php)
-  const body1 = new URLSearchParams();
-  body1.append("news", token1);
-  body1.append("u", "");
-  body1.append("submit", "submit");
-
-  const r2 = await fetch(postUrl1, {
-    method: "POST",
-    headers: {
-      ...BROWSER_HEADERS,
-      "Content-Type": "application/x-www-form-urlencoded",
-      Referer: pageUrl,
-    },
-    body: body1.toString(),
-    signal: AbortSignal.timeout(10000),
-  });
-
-  if (!r2.ok) {
-    return { success: true, type: "embed", embedUrl: pageUrl, title };
-  }
-
-  const html2 = await r2.text();
-
-  // Step 3: Extract stage 2 action and token
-  const stage2ActionMatch = html2.match(/myForm\.action\s*=\s*["']([^"']+)["']/i) ||
-    html2.match(/var\s+myUrl\s*=\s*["']([^"']+)["']/i);
-  const stage2TokenMatch = html2.match(/myInput\.value\s*=\s*["']([^"']+)["']/i);
-
-  if (!stage2ActionMatch || !stage2TokenMatch) {
-    return { success: true, type: "embed", embedUrl: pageUrl, title };
-  }
-
-  const postUrl2 = stage2ActionMatch[1];
-  const token2 = stage2TokenMatch[1];
-
-  // Step 4: POST Stage 2 form (aa.3isk.icu/3isk490929.php)
-  const body2 = new URLSearchParams();
-  body2.append("news", token2);
-  body2.append("u", "");
-  body2.append("submit", "submit");
-
-  const r3 = await fetch(postUrl2, {
-    method: "POST",
-    headers: {
-      ...BROWSER_HEADERS,
-      "Content-Type": "application/x-www-form-urlencoded",
-      Referer: postUrl1,
-    },
-    body: body2.toString(),
-    signal: AbortSignal.timeout(10000),
-  });
-
-  if (!r3.ok) {
-    return { success: true, type: "embed", embedUrl: pageUrl, title };
-  }
-
-  const html3 = await r3.text();
-
-  // Step 5: Extract 3isk embed player URL (e.g. https://3iskk.xyz/embed/1/267361/2/)
-  const embed3iskMatch = html3.match(/<iframe[^>]+src=["'](https:\/\/3iskk\.xyz\/embed\/[^"']+)["']/i) ||
-    html3.match(/<iframe[^>]+src=["']([^"']+)["']/i);
-
-  if (!embed3iskMatch) {
-    return { success: true, type: "embed", embedUrl: pageUrl, title };
-  }
-
-  const embed3iskUrl = embed3iskMatch[1];
-
-  // Step 6: Fetch 3isk embed iframe
-  const r4 = await fetch(embed3iskUrl, {
-    headers: { ...BROWSER_HEADERS, Referer: postUrl2 },
-    signal: AbortSignal.timeout(10000),
-  });
-  const html4 = await r4.text();
-
-  // Step 7: Extract video host iframe (ukrcdn, miravd, etc.)
-  const cdnIframeMatch = html4.match(/<iframe[^>]+src=["'](https:\/\/[^"']+\/(?:e|embed)[^"']*)["']/i) ||
-    html4.match(/<iframe[^>]+src=["']([^"']+)["']/i);
-
-  if (!cdnIframeMatch) {
-    return { success: true, type: "embed", embedUrl: embed3iskUrl, title };
-  }
-
-  const cdnUrl = cdnIframeMatch[1];
-
-  // Step 8: Resolve specific video host (ukrcdn or miravd or generic)
-  if (cdnUrl.includes("ukrcdn.")) {
-    const ukrResult = await resolveUkrcdn(cdnUrl);
-    if (ukrResult.success) {
-      return { ...ukrResult, fallbackEmbed: embed3iskUrl, title };
+    if (embed3iskMatch) {
+      const embed3iskUrl = embed3iskMatch[1];
+      try {
+        const rEmbed = await fetch(embed3iskUrl, {
+          headers: { ...BROWSER_HEADERS, Referer: currentUrl },
+          signal: AbortSignal.timeout(10000),
+        });
+        const embedHtml = await rEmbed.text();
+        const hostMatch = embedHtml.match(/<iframe[^>]+src=["'](https:\/\/[^"']+)["']/i);
+        if (hostMatch) {
+          const hostUrl = hostMatch[1];
+          if (hostUrl.includes("miravd.")) {
+            const res = await resolveMiravd(hostUrl);
+            if (res.success && res.streamUrl) return { ...res, title };
+          }
+          if (hostUrl.includes("ukrcdn.")) {
+            const res = await resolveUkrcdn(hostUrl);
+            if (res.success && res.streamUrl) return { ...res, title };
+          }
+          return { success: true, type: "embed", embedUrl: hostUrl, title };
+        }
+      } catch {}
     }
-  } else if (cdnUrl.includes("miravd.")) {
-    const miraResult = await resolveMiravd(cdnUrl);
-    if (miraResult.success) {
-      return { ...miraResult, fallbackEmbed: embed3iskUrl, title };
+
+    if (directCdnMatch) {
+      const cdnUrl = directCdnMatch[1];
+      if (cdnUrl.includes("miravd.")) {
+        const res = await resolveMiravd(cdnUrl);
+        if (res.success && res.streamUrl) return { ...res, title };
+      }
+      if (cdnUrl.includes("ukrcdn.")) {
+        const res = await resolveUkrcdn(cdnUrl);
+        if (res.success && res.streamUrl) return { ...res, title };
+      }
+      return { success: true, type: "embed", embedUrl: cdnUrl, title };
+    }
+
+    // Look for form or JavaScript action + token for the next hop
+    let nextPostUrl: string | null = null;
+    let nextToken: string | null = null;
+
+    const formActionMatch = currentHtml.match(/<form[^>]+action=["'](https:\/\/[^"']+\.php)["'][^>]*>/i);
+    const formTokenMatch = currentHtml.match(/name=["']news["']\s+value=["']([^"']+)["']/i);
+
+    if (formActionMatch && formTokenMatch) {
+      nextPostUrl = formActionMatch[1];
+      nextToken = formTokenMatch[1];
+    } else {
+      const jsActionMatch = currentHtml.match(/myForm\.action\s*=\s*["']([^"']+)["']/i) ||
+        currentHtml.match(/var\s+myUrl\s*=\s*["']([^"']+)["']/i);
+      const jsTokenMatch = currentHtml.match(/myInput\.value\s*=\s*["']([^"']+)["']/i) ||
+        currentHtml.match(/value\s*=\s*["'](UHRINkt[^"']+)["']/i);
+
+      if (jsActionMatch && jsTokenMatch) {
+        nextPostUrl = jsActionMatch[1];
+        nextToken = jsTokenMatch[1];
+      }
+    }
+
+    if (!nextPostUrl || !nextToken) {
+      break;
+    }
+
+    try {
+      const body = new URLSearchParams();
+      body.append("news", nextToken);
+      body.append("u", "");
+      body.append("submit", "submit");
+
+      const rPost = await fetch(nextPostUrl, {
+        method: "POST",
+        headers: {
+          ...BROWSER_HEADERS,
+          "Content-Type": "application/x-www-form-urlencoded",
+          Referer: currentUrl,
+          Origin: new URL(currentUrl).origin,
+        },
+        body: body.toString(),
+        signal: AbortSignal.timeout(10000),
+      });
+
+      if (!rPost.ok) break;
+
+      referer = currentUrl;
+      currentUrl = nextPostUrl;
+      currentHtml = await rPost.text();
+    } catch {
+      break;
     }
   }
 
+  // Never return raw 3isk landing page as embedUrl
   return {
-    success: true,
+    success: false,
     type: "embed",
-    embedUrl: embed3iskUrl || cdnUrl,
-    fallbackEmbed: embed3iskUrl,
+    error: "تعذر استخراج رابط البث المباشر للفيديو من المصدر.",
     title,
   };
 }

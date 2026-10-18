@@ -416,19 +416,29 @@ export function TvoraPlayer({
             embedUrl: data.fallbackEmbed || data.embedUrl,
           });
         } else if (data && data.success && (data.fallbackEmbed || data.embedUrl)) {
-          setResolvedStream({
-            type: "embed",
-            embedUrl: data.fallbackEmbed || data.embedUrl,
-          });
+          const candidateEmbed = data.fallbackEmbed || data.embedUrl;
+          if (
+            candidateEmbed &&
+            !candidateEmbed.includes("/watch/") &&
+            !candidateEmbed.includes("3iskk.xyz") &&
+            !candidateEmbed.includes("3isk.icu")
+          ) {
+            setResolvedStream({
+              type: "embed",
+              embedUrl: candidateEmbed,
+            });
+          } else {
+            setError(true);
+          }
         } else {
-          setResolvedStream({ type: "embed", embedUrl: src });
+          setError(true);
         }
       })
       .catch((err) => {
         if (!active) return;
         setResolving(false);
         console.warn("[TvoraPlayer] Stream resolve fallback:", err);
-        setResolvedStream({ type: "embed", embedUrl: src });
+        setError(true);
       });
 
     return () => {
