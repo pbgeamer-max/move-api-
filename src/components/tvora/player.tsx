@@ -29,6 +29,7 @@ import {
   Radio,
   RotateCcw,
   RotateCw,
+  Server,
   Settings,
   Sliders,
   Subtitles,
@@ -36,12 +37,14 @@ import {
   Volume1,
   Volume2,
   VolumeX,
+  Wifi,
   X,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useT } from "./shared";
 import { PulseRing } from "./motion-fx";
 import { cn } from "@/lib/utils";
+import type { ChannelServer } from "@/lib/types";
 
 const MAX_AUTO_RETRIES = 3;
 
@@ -97,6 +100,10 @@ export interface TvoraPlayerProps {
   introStart?: number;
   introEnd?: number;
   nextEpisode?: NextEpisodeInfo;
+  servers?: ChannelServer[];
+  activeServerId?: string;
+  onServerChange?: (server: ChannelServer) => void;
+  onErrorState?: (hasError: boolean) => void;
   onEnded?: () => void;
   onVideoEl?: (el: HTMLVideoElement | null) => void;
 }
@@ -320,6 +327,10 @@ export function TvoraPlayer({
   introStart,
   introEnd,
   nextEpisode,
+  servers,
+  activeServerId,
+  onServerChange,
+  onErrorState,
   onEnded,
   onVideoEl,
 }: TvoraPlayerProps) {
@@ -355,6 +366,16 @@ export function TvoraPlayer({
   const [resumingNotice, setResumingNotice] = useState<string | null>(null);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [nonce, setNonce] = useState(0);
+
+  // Servers menu state
+  const [serverMenuOpen, setServerMenuOpen] = useState(false);
+  const [selectedServerId, setSelectedServerId] = useState<string>(
+    activeServerId || (servers && servers[0]?.id) || ""
+  );
+
+  useEffect(() => {
+    if (activeServerId) setSelectedServerId(activeServerId);
+  }, [activeServerId]);
 
   // Popover menus state
   const [speedMenuOpen, setSpeedMenuOpen] = useState(false);
@@ -472,6 +493,23 @@ export function TvoraPlayer({
 
     const handleFatalError = () => {
       if (disposed) return;
+      onErrorState?.(true);
+
+      // Auto-failover to backup server if available
+      if (servers && servers.length > 1) {
+        const currentIdx = servers.findIndex((s) => s.id === selectedServerId || s.url === activePlaybackUrl);
+        const nextIdx = (currentIdx + 1) % servers.length;
+        const nextSrv = servers[nextIdx];
+        if (nextSrv && nextSrv.url !== activePlaybackUrl && retriesRef.current >= 1) {
+          console.warn("[TvoraPlayer] Stream error on current server. Auto-switching to backup:", nextSrv.name);
+          retriesRef.current = 0;
+          setReconnecting(true);
+          setSelectedServerId(nextSrv.id);
+          onServerChange?.(nextSrv);
+          return;
+        }
+      }
+
       if (resolvedStream?.embedUrl) {
         // Automatic fallback to embed player
         setResolvedStream({ type: "embed", embedUrl: resolvedStream.embedUrl });
@@ -496,9 +534,19 @@ export function TvoraPlayer({
 
           if (Hls.isSupported()) {
             const hls = new Hls({
-              lowLatencyMode: live,
+              lowLatencyMode: false, // critical for live IPTV stability to prevent buffer starving
               enableWorker: true,
-              backBufferLength: 60,
+              backBufferLength: 30,
+              maxBufferLength: 30,
+              maxMaxBufferLength: 60,
+              liveSyncDurationCount: 3, // stay 3 segments behind live edge to prevent freezing
+              liveMaxLatencyDurationCount: 8,
+              manifestLoadingTimeOut: 15000,
+              manifestLoadingMaxRetry: 5,
+              levelLoadingTimeOut: 15000,
+              levelLoadingMaxRetry: 5,
+              fragLoadingTimeOut: 20000,
+              fragLoadingMaxRetry: 6,
               capLevelToPlayerSize: true,
             });
             hlsRef.current = hls;
@@ -508,6 +556,7 @@ export function TvoraPlayer({
 
             hls.on(Hls.Events.MANIFEST_PARSED, (_event, data) => {
               if (disposed) return;
+              onErrorState?.(false);
               if (data.levels && data.levels.length > 1) {
                 const levels: QualityLevel[] = data.levels.map((lvl, idx) => ({
                   id: idx,
@@ -1575,6 +1624,66 @@ export function TvoraPlayer({
                         {selectedQuality === lvl.id && <Check className="h-3.5 w-3.5" />}
                       </button>
                     ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Server Selection Menu (Live Channels) */}
+            {live && servers && servers.length > 1 && (
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setServerMenuOpen(!serverMenuOpen);
+                    setQualityMenuOpen(false);
+                    setSpeedMenuOpen(false);
+                    setSubtitleMenuOpen(false);
+                  }}
+                  aria-label="السيرفرات"
+                  aria-expanded={serverMenuOpen}
+                  className={cn(
+                    "tv-focusable flex h-9 items-center gap-1.5 rounded-full px-2.5 text-xs font-bold transition hover:bg-white/10 hover:text-white",
+                    serverMenuOpen ? "bg-[#E50914] text-white" : "text-white/80"
+                  )}
+                >
+                  <Server className="h-4 w-4" />
+                  <span className="hidden sm:inline">السيرفر</span>
+                </button>
+
+                {serverMenuOpen && (
+                  <div className="absolute end-0 bottom-11 z-30 min-w-[210px] rounded-xl border border-[#252525] bg-[#111111]/95 p-1.5 shadow-2xl backdrop-blur-md animate-in fade-in zoom-in-95">
+                    <div className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white/40">
+                      سيرفرات البث المباشر
+                    </div>
+                    {servers.map((srv, idx) => {
+                      const isCurrent = srv.id === selectedServerId || srv.url === activePlaybackUrl;
+                      return (
+                        <button
+                          key={srv.id || idx}
+                          type="button"
+                          onClick={() => {
+                            setSelectedServerId(srv.id);
+                            onServerChange?.(srv);
+                            setServerMenuOpen(false);
+                          }}
+                          className={cn(
+                            "flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-xs font-medium text-white/80 hover:bg-white/10 hover:text-white transition",
+                            isCurrent && "text-[#E50914] font-bold bg-white/5"
+                          )}
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className={cn("h-2 w-2 rounded-full", isCurrent ? "bg-[#E50914] animate-pulse" : "bg-emerald-400")} />
+                            <span className="truncate max-w-[130px]">{srv.name || `سيرفر ${idx + 1}`}</span>
+                          </div>
+                          {srv.quality && (
+                            <span className="rounded bg-white/10 px-1 py-0.5 text-[9px] font-extrabold text-white/60">
+                              {srv.quality}
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
                   </div>
                 )}
               </div>

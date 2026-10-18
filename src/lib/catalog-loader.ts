@@ -8,257 +8,1944 @@ type Dict = Record<string, any>;
 
 export const DEFAULT_CHANNELS: Dict[] = [
   {
-    id: "ch-sports-1",
-    code: "TVORA-SPORTS-1",
-    nameAr: "تڤورا سبورت 1",
-    nameEn: "TVORA Sports 1",
-    category: "sports",
-    colorA: "#C8A24B",
-    colorB: "#151310",
-    quality: "4K",
-    descriptionAr: "القناة الرياضية الأولى — أبرز المباريات والبطولات على مدار الساعة.",
-    descriptionEn: "The flagship sports channel — top matches and tournaments around the clock.",
-    nowPlayingAr: "ملخص الجولة الكبرى — تحليل واستوديو",
-    nowPlayingEn: "Round of the week — highlights & studio analysis",
-    streamType: "demo",
-    streamUrl: "/media/demo-match.mp4",
-    visible: true,
-    sortOrder: 1,
+    "id": "bein-vip-bein-sports-news",
+    "code": "BEIN-VIP-BEIN-SPORTS-NEWS",
+    "nameAr": "بي إن سبورت الإخبارية",
+    "nameEn": "beIN Sports News",
+    "category": "sports",
+    "descriptionAr": "beIN SPORTS VIP (ملفاتك الخاصة)",
+    "descriptionEn": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
+    "nowPlayingAr": "بث مباشر 24/7",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (VIP فضائي 24/7 - FHD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-news.m3u8?server=1\",\"quality\":\"1080p\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (VIP احتياطي - HD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-news.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "colorA": "#601977",
+    "colorB": "#14041b",
+    "quality": "1080p",
+    "streamType": "hls",
+    "streamUrl": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-news.m3u8",
+    "logoUrl": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
+    "servers": [
+      {
+        "id": "server-1",
+        "name": "سيرفر 1 (VIP فضائي 24/7 - FHD)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-news.m3u8?server=1",
+        "quality": "1080p",
+        "isDefault": true,
+        "status": "live"
+      },
+      {
+        "id": "server-2",
+        "name": "سيرفر 2 (VIP احتياطي - HD)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-news.m3u8?server=2",
+        "quality": "HD",
+        "status": "live"
+      }
+    ],
+    "visible": true,
+    "sortOrder": 1
   },
   {
-    id: "ch-sports-2",
-    code: "TVORA-SPORTS-2",
-    nameAr: "تڤورا سبورت 2",
-    nameEn: "TVORA Sports 2",
-    category: "sports",
-    colorA: "#D97742",
-    colorB: "#171009",
-    quality: "HD",
-    descriptionAr: "البطولات القارية والاستوديوهات التحليلية الليلية.",
-    descriptionEn: "Continental tournaments and late-night analysis studios.",
-    nowPlayingAr: "استوديو ما قبل المباراة",
-    nowPlayingEn: "Pre-match studio",
-    streamType: "demo",
-    streamUrl: "/media/demo-match.mp4",
-    visible: true,
-    sortOrder: 2,
+    "id": "bein-vip-bein-sports-global",
+    "code": "BEIN-VIP-BEIN-SPORTS-GLOBAL",
+    "nameAr": "بي إن سبورت المفتوحة",
+    "nameEn": "beIN Sports Global",
+    "category": "sports",
+    "descriptionAr": "beIN SPORTS VIP (ملفاتك الخاصة)",
+    "descriptionEn": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
+    "nowPlayingAr": "بث مباشر 24/7",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (VIP فضائي 24/7 - FHD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-global.m3u8?server=1\",\"quality\":\"1080p\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (VIP احتياطي - HD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-global.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "colorA": "#601977",
+    "colorB": "#14041b",
+    "quality": "1080p",
+    "streamType": "hls",
+    "streamUrl": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-global.m3u8",
+    "logoUrl": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
+    "servers": [
+      {
+        "id": "server-1",
+        "name": "سيرفر 1 (VIP فضائي 24/7 - FHD)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-global.m3u8?server=1",
+        "quality": "1080p",
+        "isDefault": true,
+        "status": "live"
+      },
+      {
+        "id": "server-2",
+        "name": "سيرفر 2 (VIP احتياطي - HD)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-global.m3u8?server=2",
+        "quality": "HD",
+        "status": "live"
+      }
+    ],
+    "visible": true,
+    "sortOrder": 2
   },
   {
-    id: "ch-sports-iq",
-    code: "TVORA-SPORTS-IQ",
-    nameAr: "تڤورا سبورت العراق",
-    nameEn: "TVORA Sports Iraq",
-    category: "sports",
-    colorA: "#4E9B6F",
-    colorB: "#0B120E",
-    quality: "HD",
-    descriptionAr: "الكرة العراقية أولاً — الدوري المحلي والمنتخب.",
-    descriptionEn: "Iraqi football first — the local league and the national team.",
-    nowPlayingAr: "أهداف الدوري العراقي — الموسم الحالي",
-    nowPlayingEn: "Iraq Stars League goals — current season",
-    streamType: "demo",
-    streamUrl: "/media/demo-match.mp4",
-    visible: true,
-    sortOrder: 3,
+    "id": "bein-vip-bein-sports-1",
+    "code": "BEIN-VIP-BEIN-SPORTS-1",
+    "nameAr": "بي إن سبورت 1",
+    "nameEn": "beIN Sports 1",
+    "category": "sports",
+    "descriptionAr": "beIN SPORTS VIP (ملفاتك الخاصة)",
+    "descriptionEn": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
+    "nowPlayingAr": "بث مباشر 24/7",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (VIP فضائي 24/7 - FHD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-1.m3u8?server=1\",\"quality\":\"1080p\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (VIP احتياطي - HD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-1.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "colorA": "#601977",
+    "colorB": "#14041b",
+    "quality": "1080p",
+    "streamType": "hls",
+    "streamUrl": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-1.m3u8",
+    "logoUrl": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
+    "servers": [
+      {
+        "id": "server-1",
+        "name": "سيرفر 1 (VIP فضائي 24/7 - FHD)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-1.m3u8?server=1",
+        "quality": "1080p",
+        "isDefault": true,
+        "status": "live"
+      },
+      {
+        "id": "server-2",
+        "name": "سيرفر 2 (VIP احتياطي - HD)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-1.m3u8?server=2",
+        "quality": "HD",
+        "status": "live"
+      }
+    ],
+    "visible": true,
+    "sortOrder": 3
   },
   {
-    id: "ch-cinema",
-    code: "TVORA-CINEMA",
-    nameAr: "تڤورا سينما",
-    nameEn: "TVORA Cinema",
-    category: "movies",
-    colorA: "#9A8FC2",
-    colorB: "#0F0E14",
-    quality: "4K",
-    descriptionAr: "أفلام العالم الأولى — عروض أولى كل ليلة.",
-    descriptionEn: "World cinema premieres — a new first-run film every night.",
-    nowPlayingAr: "فيلم الليلة: ملحمة الصحراء",
-    nowPlayingEn: "Tonight: Sands of the Epic",
-    streamType: "demo",
-    streamUrl: "/media/demo-film.mp4",
-    visible: true,
-    sortOrder: 4,
+    "id": "bein-vip-bein-sports-2",
+    "code": "BEIN-VIP-BEIN-SPORTS-2",
+    "nameAr": "بي إن سبورت 2",
+    "nameEn": "beIN Sports 2",
+    "category": "sports",
+    "descriptionAr": "beIN SPORTS VIP (ملفاتك الخاصة)",
+    "descriptionEn": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
+    "nowPlayingAr": "بث مباشر 24/7",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (VIP فضائي 24/7 - FHD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-2.m3u8?server=1\",\"quality\":\"1080p\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (VIP احتياطي - HD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-2.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "colorA": "#601977",
+    "colorB": "#14041b",
+    "quality": "1080p",
+    "streamType": "hls",
+    "streamUrl": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-2.m3u8",
+    "logoUrl": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
+    "servers": [
+      {
+        "id": "server-1",
+        "name": "سيرفر 1 (VIP فضائي 24/7 - FHD)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-2.m3u8?server=1",
+        "quality": "1080p",
+        "isDefault": true,
+        "status": "live"
+      },
+      {
+        "id": "server-2",
+        "name": "سيرفر 2 (VIP احتياطي - HD)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-2.m3u8?server=2",
+        "quality": "HD",
+        "status": "live"
+      }
+    ],
+    "visible": true,
+    "sortOrder": 4
   },
   {
-    id: "ch-action",
-    code: "TVORA-ACTION",
-    nameAr: "تڤورا أكشن",
-    nameEn: "TVORA Action",
-    category: "movies",
-    colorA: "#C25B5B",
-    colorB: "#150C0C",
-    quality: "HD",
-    descriptionAr: "أكشن لا يتوقف — مطاردات وانفجارات وقصص انتقام.",
-    descriptionEn: "Non-stop action — chases, explosions and revenge stories.",
-    nowPlayingAr: "ماراثون الأكشن — أربع أفلام متتالية",
-    nowPlayingEn: "Action marathon — four films back to back",
-    streamType: "demo",
-    streamUrl: "/media/demo-film.mp4",
-    visible: true,
-    sortOrder: 5,
+    "id": "bein-vip-bein-sports-3",
+    "code": "BEIN-VIP-BEIN-SPORTS-3",
+    "nameAr": "بي إن سبورت 3",
+    "nameEn": "beIN Sports 3",
+    "category": "sports",
+    "descriptionAr": "beIN SPORTS VIP (ملفاتك الخاصة)",
+    "descriptionEn": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
+    "nowPlayingAr": "بث مباشر 24/7",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (VIP فضائي 24/7 - FHD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-3.m3u8?server=1\",\"quality\":\"1080p\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (VIP احتياطي - HD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-3.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "colorA": "#601977",
+    "colorB": "#14041b",
+    "quality": "1080p",
+    "streamType": "hls",
+    "streamUrl": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-3.m3u8",
+    "logoUrl": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
+    "servers": [
+      {
+        "id": "server-1",
+        "name": "سيرفر 1 (VIP فضائي 24/7 - FHD)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-3.m3u8?server=1",
+        "quality": "1080p",
+        "isDefault": true,
+        "status": "live"
+      },
+      {
+        "id": "server-2",
+        "name": "سيرفر 2 (VIP احتياطي - HD)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-3.m3u8?server=2",
+        "quality": "HD",
+        "status": "live"
+      }
+    ],
+    "visible": true,
+    "sortOrder": 5
   },
   {
-    id: "ch-classics",
-    code: "TVORA-CLASSICS",
-    nameAr: "تڤورا كلاسيك",
-    nameEn: "TVORA Classics",
-    category: "movies",
-    colorA: "#B08A50",
-    colorB: "#131009",
-    quality: "HD",
-    descriptionAr: "الكنوز السينمائية من كل العصور، مُرممة بجودة عالية.",
-    descriptionEn: "Cinematic treasures from every era, remastered in high quality.",
-    nowPlayingAr: "كلاسيكيات الأربعينيات",
-    nowPlayingEn: "Forties classics",
-    streamType: "demo",
-    streamUrl: "/media/demo-film.mp4",
-    visible: true,
-    sortOrder: 6,
+    "id": "bein-vip-bein-sports-4",
+    "code": "BEIN-VIP-BEIN-SPORTS-4",
+    "nameAr": "بي إن سبورت 4",
+    "nameEn": "beIN Sports 4",
+    "category": "sports",
+    "descriptionAr": "beIN SPORTS VIP (ملفاتك الخاصة)",
+    "descriptionEn": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
+    "nowPlayingAr": "بث مباشر 24/7",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (VIP فضائي 24/7 - FHD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-4.m3u8?server=1\",\"quality\":\"1080p\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (VIP احتياطي - HD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-4.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "colorA": "#601977",
+    "colorB": "#14041b",
+    "quality": "1080p",
+    "streamType": "hls",
+    "streamUrl": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-4.m3u8",
+    "logoUrl": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
+    "servers": [
+      {
+        "id": "server-1",
+        "name": "سيرفر 1 (VIP فضائي 24/7 - FHD)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-4.m3u8?server=1",
+        "quality": "1080p",
+        "isDefault": true,
+        "status": "live"
+      },
+      {
+        "id": "server-2",
+        "name": "سيرفر 2 (VIP احتياطي - HD)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-4.m3u8?server=2",
+        "quality": "HD",
+        "status": "live"
+      }
+    ],
+    "visible": true,
+    "sortOrder": 6
   },
   {
-    id: "ch-drama",
-    code: "TVORA-DRAMA",
-    nameAr: "تڤورا دراما",
-    nameEn: "TVORA Drama",
-    category: "series",
-    colorA: "#8FB8D8",
-    colorB: "#0C1014",
-    quality: "HD",
-    descriptionAr: "مسلسلات درامية عالمية بترجمة احترافية وحلقات أولاً بأول.",
-    descriptionEn: "Global drama series with professional subtitles and weekly episodes.",
-    nowPlayingAr: "الموسم الجديد: أزقة الأندلس",
-    nowPlayingEn: "New season: Alleys of Andalus",
-    streamType: "demo",
-    streamUrl: "/media/demo-film.mp4",
-    visible: true,
-    sortOrder: 7,
+    "id": "bein-vip-bein-sports-5",
+    "code": "BEIN-VIP-BEIN-SPORTS-5",
+    "nameAr": "بي إن سبورت 5",
+    "nameEn": "beIN Sports 5",
+    "category": "sports",
+    "descriptionAr": "beIN SPORTS VIP (ملفاتك الخاصة)",
+    "descriptionEn": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
+    "nowPlayingAr": "بث مباشر 24/7",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (VIP فضائي 24/7 - FHD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-5.m3u8?server=1\",\"quality\":\"1080p\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (VIP احتياطي - HD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-5.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "colorA": "#601977",
+    "colorB": "#14041b",
+    "quality": "1080p",
+    "streamType": "hls",
+    "streamUrl": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-5.m3u8",
+    "logoUrl": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
+    "servers": [
+      {
+        "id": "server-1",
+        "name": "سيرفر 1 (VIP فضائي 24/7 - FHD)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-5.m3u8?server=1",
+        "quality": "1080p",
+        "isDefault": true,
+        "status": "live"
+      },
+      {
+        "id": "server-2",
+        "name": "سيرفر 2 (VIP احتياطي - HD)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-5.m3u8?server=2",
+        "quality": "HD",
+        "status": "live"
+      }
+    ],
+    "visible": true,
+    "sortOrder": 7
   },
   {
-    id: "ch-turkish",
-    code: "TVORA-TURKISH",
-    nameAr: "تڤورا تركي",
-    nameEn: "TVORA Turkish",
-    category: "series",
-    colorA: "#B04A4A",
-    colorB: "#140B0B",
-    quality: "HD",
-    descriptionAr: "أشهر المسلسلات التركية المدبلجة والمترجمة.",
-    descriptionEn: "The most beloved Turkish series, dubbed and subtitled.",
-    nowPlayingAr: "حكاية البوسفور — الحلقة 14",
-    nowPlayingEn: "Bosphorus Tale — Episode 14",
-    streamType: "demo",
-    streamUrl: "/media/demo-film.mp4",
-    visible: true,
-    sortOrder: 8,
+    "id": "bein-vip-bein-sports-6",
+    "code": "BEIN-VIP-BEIN-SPORTS-6",
+    "nameAr": "بي إن سبورت 6",
+    "nameEn": "beIN Sports 6",
+    "category": "sports",
+    "descriptionAr": "beIN SPORTS VIP (ملفاتك الخاصة)",
+    "descriptionEn": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
+    "nowPlayingAr": "بث مباشر 24/7",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (VIP فضائي 24/7 - FHD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-6.m3u8?server=1\",\"quality\":\"1080p\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (VIP احتياطي - HD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-6.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "colorA": "#601977",
+    "colorB": "#14041b",
+    "quality": "1080p",
+    "streamType": "hls",
+    "streamUrl": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-6.m3u8",
+    "logoUrl": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
+    "servers": [
+      {
+        "id": "server-1",
+        "name": "سيرفر 1 (VIP فضائي 24/7 - FHD)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-6.m3u8?server=1",
+        "quality": "1080p",
+        "isDefault": true,
+        "status": "live"
+      },
+      {
+        "id": "server-2",
+        "name": "سيرفر 2 (VIP احتياطي - HD)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-6.m3u8?server=2",
+        "quality": "HD",
+        "status": "live"
+      }
+    ],
+    "visible": true,
+    "sortOrder": 8
   },
   {
-    id: "ch-korean",
-    code: "TVORA-KOREAN",
-    nameAr: "تڤورا كوري",
-    nameEn: "TVORA Korean",
-    category: "series",
-    colorA: "#7FB09E",
-    colorB: "#0B1210",
-    quality: "HD",
-    descriptionAr: "موجة الكوريين — رومانسي وإثارة ودراما ملكية.",
-    descriptionEn: "The Korean wave — romance, thrillers and royal dramas.",
-    nowPlayingAr: "ماراثون نهاية الأسبوع",
-    nowPlayingEn: "Weekend binge marathon",
-    streamType: "demo",
-    streamUrl: "/media/demo-film.mp4",
-    visible: true,
-    sortOrder: 9,
+    "id": "bein-vip-bein-sports-7",
+    "code": "BEIN-VIP-BEIN-SPORTS-7",
+    "nameAr": "بي إن سبورت 7",
+    "nameEn": "beIN Sports 7",
+    "category": "sports",
+    "descriptionAr": "beIN SPORTS VIP (ملفاتك الخاصة)",
+    "descriptionEn": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
+    "nowPlayingAr": "بث مباشر 24/7",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (VIP فضائي 24/7 - FHD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-7.m3u8?server=1\",\"quality\":\"1080p\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (VIP احتياطي - HD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-7.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "colorA": "#601977",
+    "colorB": "#14041b",
+    "quality": "1080p",
+    "streamType": "hls",
+    "streamUrl": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-7.m3u8",
+    "logoUrl": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
+    "servers": [
+      {
+        "id": "server-1",
+        "name": "سيرفر 1 (VIP فضائي 24/7 - FHD)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-7.m3u8?server=1",
+        "quality": "1080p",
+        "isDefault": true,
+        "status": "live"
+      },
+      {
+        "id": "server-2",
+        "name": "سيرفر 2 (VIP احتياطي - HD)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-7.m3u8?server=2",
+        "quality": "HD",
+        "status": "live"
+      }
+    ],
+    "visible": true,
+    "sortOrder": 9
   },
   {
-    id: "ch-kids",
-    code: "TVORA-KIDS",
-    nameAr: "تڤورا كيدز",
-    nameEn: "TVORA Kids",
-    category: "kids",
-    colorA: "#D8A24B",
-    colorB: "#151007",
-    quality: "HD",
-    descriptionAr: "رسوم متحركة وبرامج آمنة ومرحة لكل الأعمار.",
-    descriptionEn: "Safe, joyful animation and shows for every age.",
-    nowPlayingAr: "سلسلة مغامرات الفضاء",
-    nowPlayingEn: "Space adventures series",
-    streamType: "demo",
-    streamUrl: "/media/demo-film.mp4",
-    visible: true,
-    sortOrder: 10,
+    "id": "bein-vip-bein-sports-8",
+    "code": "BEIN-VIP-BEIN-SPORTS-8",
+    "nameAr": "بي إن سبورت 8",
+    "nameEn": "beIN Sports 8",
+    "category": "sports",
+    "descriptionAr": "beIN SPORTS VIP (ملفاتك الخاصة)",
+    "descriptionEn": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
+    "nowPlayingAr": "بث مباشر 24/7",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (VIP فضائي 24/7 - FHD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-8.m3u8?server=1\",\"quality\":\"1080p\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (VIP احتياطي - HD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-8.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "colorA": "#601977",
+    "colorB": "#14041b",
+    "quality": "1080p",
+    "streamType": "hls",
+    "streamUrl": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-8.m3u8",
+    "logoUrl": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
+    "servers": [
+      {
+        "id": "server-1",
+        "name": "سيرفر 1 (VIP فضائي 24/7 - FHD)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-8.m3u8?server=1",
+        "quality": "1080p",
+        "isDefault": true,
+        "status": "live"
+      },
+      {
+        "id": "server-2",
+        "name": "سيرفر 2 (VIP احتياطي - HD)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-8.m3u8?server=2",
+        "quality": "HD",
+        "status": "live"
+      }
+    ],
+    "visible": true,
+    "sortOrder": 10
   },
   {
-    id: "ch-docu",
-    code: "TVORA-DOCU",
-    nameAr: "تڤورا وثائقي",
-    nameEn: "TVORA Docu",
-    category: "documentary",
-    colorA: "#9FB7CB",
-    colorB: "#0C0F12",
-    quality: "4K",
-    descriptionAr: "وثائقيات تاريخ وعلوم وحضارات بجودة فائقة.",
-    descriptionEn: "History, science and civilizations documentaries in ultra HD.",
-    nowPlayingAr: "أسرار المحيط العميق",
-    nowPlayingEn: "Secrets of the deep ocean",
-    streamType: "demo",
-    streamUrl: "/media/demo-film.mp4",
-    visible: true,
-    sortOrder: 11,
+    "id": "bein-vip-bein-sports-9",
+    "code": "BEIN-VIP-BEIN-SPORTS-9",
+    "nameAr": "بي إن سبورت 9",
+    "nameEn": "beIN Sports 9",
+    "category": "sports",
+    "descriptionAr": "beIN SPORTS VIP (ملفاتك الخاصة)",
+    "descriptionEn": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
+    "nowPlayingAr": "بث مباشر 24/7",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (VIP فضائي 24/7 - FHD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-9.m3u8?server=1\",\"quality\":\"1080p\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (VIP احتياطي - HD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-9.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "colorA": "#601977",
+    "colorB": "#14041b",
+    "quality": "1080p",
+    "streamType": "hls",
+    "streamUrl": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-9.m3u8",
+    "logoUrl": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
+    "servers": [
+      {
+        "id": "server-1",
+        "name": "سيرفر 1 (VIP فضائي 24/7 - FHD)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-9.m3u8?server=1",
+        "quality": "1080p",
+        "isDefault": true,
+        "status": "live"
+      },
+      {
+        "id": "server-2",
+        "name": "سيرفر 2 (VIP احتياطي - HD)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-9.m3u8?server=2",
+        "quality": "HD",
+        "status": "live"
+      }
+    ],
+    "visible": true,
+    "sortOrder": 11
   },
   {
-    id: "ch-news",
-    code: "TVORA-NEWS",
-    nameAr: "تڤورا نيوز",
-    nameEn: "TVORA News",
-    category: "news",
-    colorA: "#B8B8BE",
-    colorB: "#101012",
-    quality: "HD",
-    descriptionAr: "أخبار العالم والعربية كل ساعة، بلا توقف.",
-    descriptionEn: "World and Arab news every hour, around the clock.",
-    nowPlayingAr: "نشرة الأخبار الرئيسية",
-    nowPlayingEn: "Main evening bulletin",
-    streamType: "demo",
-    streamUrl: "/media/demo-film.mp4",
-    visible: true,
-    sortOrder: 12,
+    "id": "bein-vip-bein-sports-afc",
+    "code": "BEIN-VIP-BEIN-SPORTS-AFC",
+    "nameAr": "بي إن سبورت آسيا",
+    "nameEn": "beIN Sports AFC",
+    "category": "sports",
+    "descriptionAr": "beIN SPORTS VIP (ملفاتك الخاصة)",
+    "descriptionEn": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
+    "nowPlayingAr": "بث مباشر 24/7",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (VIP فضائي 24/7 - FHD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-afc.m3u8?server=1\",\"quality\":\"1080p\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (VIP احتياطي - HD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-afc.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "colorA": "#601977",
+    "colorB": "#14041b",
+    "quality": "1080p",
+    "streamType": "hls",
+    "streamUrl": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-afc.m3u8",
+    "logoUrl": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
+    "servers": [
+      {
+        "id": "server-1",
+        "name": "سيرفر 1 (VIP فضائي 24/7 - FHD)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-afc.m3u8?server=1",
+        "quality": "1080p",
+        "isDefault": true,
+        "status": "live"
+      },
+      {
+        "id": "server-2",
+        "name": "سيرفر 2 (VIP احتياطي - HD)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-afc.m3u8?server=2",
+        "quality": "HD",
+        "status": "live"
+      }
+    ],
+    "visible": true,
+    "sortOrder": 12
   },
   {
-    id: "ch-music",
-    code: "TVORA-MUSIC",
-    nameAr: "تڤورا ميوزك",
-    nameEn: "TVORA Music",
-    category: "music",
-    colorA: "#C98FB8",
-    colorB: "#130E12",
-    quality: "HD",
-    descriptionAr: "أغاني عربية وعالمية وكليبات حصرية.",
-    descriptionEn: "Arabic and global hits with exclusive videos.",
-    nowPlayingAr: "قائمة الأكثر طلباً",
-    nowPlayingEn: "Most-requested playlist",
-    streamType: "demo",
-    streamUrl: "/media/demo-film.mp4",
-    visible: true,
-    sortOrder: 13,
+    "id": "bein-vip-bein-sports-afc-1",
+    "code": "BEIN-VIP-BEIN-SPORTS-AFC-1",
+    "nameAr": "بي إن سبورت آسيا 1",
+    "nameEn": "beIN Sports AFC 1",
+    "category": "sports",
+    "descriptionAr": "beIN SPORTS VIP (ملفاتك الخاصة)",
+    "descriptionEn": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
+    "nowPlayingAr": "بث مباشر 24/7",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (VIP فضائي 24/7 - FHD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-afc-1.m3u8?server=1\",\"quality\":\"1080p\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (VIP احتياطي - HD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-afc-1.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "colorA": "#601977",
+    "colorB": "#14041b",
+    "quality": "1080p",
+    "streamType": "hls",
+    "streamUrl": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-afc-1.m3u8",
+    "logoUrl": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
+    "servers": [
+      {
+        "id": "server-1",
+        "name": "سيرفر 1 (VIP فضائي 24/7 - FHD)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-afc-1.m3u8?server=1",
+        "quality": "1080p",
+        "isDefault": true,
+        "status": "live"
+      },
+      {
+        "id": "server-2",
+        "name": "سيرفر 2 (VIP احتياطي - HD)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-afc-1.m3u8?server=2",
+        "quality": "HD",
+        "status": "live"
+      }
+    ],
+    "visible": true,
+    "sortOrder": 13
   },
   {
-    id: "ch-one",
-    code: "TVORA-ONE",
-    nameAr: "تڤورا ون",
-    nameEn: "TVORA One",
-    category: "general",
-    colorA: "#D8C9A3",
-    colorB: "#131009",
-    quality: "HD",
-    descriptionAr: "القناة العامة — ترفيه وحوارات وبرامج فعليات.",
-    descriptionEn: "The general channel — entertainment, talk shows and events.",
-    nowPlayingAr: "برنامج الضيف — لقاء حصري",
-    nowPlayingEn: "The Guest — exclusive interview",
-    streamType: "demo",
-    streamUrl: "/media/demo-film.mp4",
-    visible: true,
-    sortOrder: 14,
+    "id": "bein-vip-bein-sports-1-afc",
+    "code": "BEIN-VIP-BEIN-SPORTS-1-AFC",
+    "nameAr": "بي إن سبورت آسيا 1",
+    "nameEn": "beIN Sports AFC 1",
+    "category": "sports",
+    "descriptionAr": "beIN SPORTS VIP (ملفاتك الخاصة)",
+    "descriptionEn": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
+    "nowPlayingAr": "بث مباشر 24/7",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (VIP فضائي 24/7 - FHD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-1-afc.m3u8?server=1\",\"quality\":\"1080p\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (VIP احتياطي - HD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-1-afc.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "colorA": "#601977",
+    "colorB": "#14041b",
+    "quality": "1080p",
+    "streamType": "hls",
+    "streamUrl": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-1-afc.m3u8",
+    "logoUrl": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
+    "servers": [
+      {
+        "id": "server-1",
+        "name": "سيرفر 1 (VIP فضائي 24/7 - FHD)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-1-afc.m3u8?server=1",
+        "quality": "1080p",
+        "isDefault": true,
+        "status": "live"
+      },
+      {
+        "id": "server-2",
+        "name": "سيرفر 2 (VIP احتياطي - HD)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-1-afc.m3u8?server=2",
+        "quality": "HD",
+        "status": "live"
+      }
+    ],
+    "visible": true,
+    "sortOrder": 14
   },
+  {
+    "id": "bein-vip-bein-sports-2-afc",
+    "code": "BEIN-VIP-BEIN-SPORTS-2-AFC",
+    "nameAr": "بي إن سبورت آسيا 2",
+    "nameEn": "beIN Sports AFC 2",
+    "category": "sports",
+    "descriptionAr": "beIN SPORTS VIP (ملفاتك الخاصة)",
+    "descriptionEn": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
+    "nowPlayingAr": "بث مباشر 24/7",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (VIP فضائي 24/7 - FHD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-2-afc.m3u8?server=1\",\"quality\":\"1080p\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (VIP احتياطي - HD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-2-afc.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "colorA": "#601977",
+    "colorB": "#14041b",
+    "quality": "1080p",
+    "streamType": "hls",
+    "streamUrl": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-2-afc.m3u8",
+    "logoUrl": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
+    "servers": [
+      {
+        "id": "server-1",
+        "name": "سيرفر 1 (VIP فضائي 24/7 - FHD)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-2-afc.m3u8?server=1",
+        "quality": "1080p",
+        "isDefault": true,
+        "status": "live"
+      },
+      {
+        "id": "server-2",
+        "name": "سيرفر 2 (VIP احتياطي - HD)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-2-afc.m3u8?server=2",
+        "quality": "HD",
+        "status": "live"
+      }
+    ],
+    "visible": true,
+    "sortOrder": 15
+  },
+  {
+    "id": "bein-vip-bein-sports-3-afc",
+    "code": "BEIN-VIP-BEIN-SPORTS-3-AFC",
+    "nameAr": "بي إن سبورت آسيا 3",
+    "nameEn": "beIN Sports AFC 3",
+    "category": "sports",
+    "descriptionAr": "beIN SPORTS VIP (ملفاتك الخاصة)",
+    "descriptionEn": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
+    "nowPlayingAr": "بث مباشر 24/7",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (VIP فضائي 24/7 - FHD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-3-afc.m3u8?server=1\",\"quality\":\"1080p\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (VIP احتياطي - HD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-3-afc.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "colorA": "#601977",
+    "colorB": "#14041b",
+    "quality": "1080p",
+    "streamType": "hls",
+    "streamUrl": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-3-afc.m3u8",
+    "logoUrl": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
+    "servers": [
+      {
+        "id": "server-1",
+        "name": "سيرفر 1 (VIP فضائي 24/7 - FHD)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-3-afc.m3u8?server=1",
+        "quality": "1080p",
+        "isDefault": true,
+        "status": "live"
+      },
+      {
+        "id": "server-2",
+        "name": "سيرفر 2 (VIP احتياطي - HD)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-3-afc.m3u8?server=2",
+        "quality": "HD",
+        "status": "live"
+      }
+    ],
+    "visible": true,
+    "sortOrder": 16
+  },
+  {
+    "id": "bein-vip-bein-sports-afc-4",
+    "code": "BEIN-VIP-BEIN-SPORTS-AFC-4",
+    "nameAr": "بي إن سبورت آسيا 4",
+    "nameEn": "beIN Sports AFC 4",
+    "category": "sports",
+    "descriptionAr": "beIN SPORTS VIP (ملفاتك الخاصة)",
+    "descriptionEn": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
+    "nowPlayingAr": "بث مباشر 24/7",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (VIP فضائي 24/7 - FHD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-afc-4.m3u8?server=1\",\"quality\":\"1080p\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (VIP احتياطي - HD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-afc-4.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "colorA": "#601977",
+    "colorB": "#14041b",
+    "quality": "1080p",
+    "streamType": "hls",
+    "streamUrl": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-afc-4.m3u8",
+    "logoUrl": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
+    "servers": [
+      {
+        "id": "server-1",
+        "name": "سيرفر 1 (VIP فضائي 24/7 - FHD)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-afc-4.m3u8?server=1",
+        "quality": "1080p",
+        "isDefault": true,
+        "status": "live"
+      },
+      {
+        "id": "server-2",
+        "name": "سيرفر 2 (VIP احتياطي - HD)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-afc-4.m3u8?server=2",
+        "quality": "HD",
+        "status": "live"
+      }
+    ],
+    "visible": true,
+    "sortOrder": 17
+  },
+  {
+    "id": "bein-vip-bein-sports-afc-5",
+    "code": "BEIN-VIP-BEIN-SPORTS-AFC-5",
+    "nameAr": "بي إن سبورت آسيا 5",
+    "nameEn": "beIN Sports AFC 5",
+    "category": "sports",
+    "descriptionAr": "beIN SPORTS VIP (ملفاتك الخاصة)",
+    "descriptionEn": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
+    "nowPlayingAr": "بث مباشر 24/7",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (VIP فضائي 24/7 - FHD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-afc-5.m3u8?server=1\",\"quality\":\"1080p\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (VIP احتياطي - HD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-afc-5.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "colorA": "#601977",
+    "colorB": "#14041b",
+    "quality": "1080p",
+    "streamType": "hls",
+    "streamUrl": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-afc-5.m3u8",
+    "logoUrl": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
+    "servers": [
+      {
+        "id": "server-1",
+        "name": "سيرفر 1 (VIP فضائي 24/7 - FHD)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-afc-5.m3u8?server=1",
+        "quality": "1080p",
+        "isDefault": true,
+        "status": "live"
+      },
+      {
+        "id": "server-2",
+        "name": "سيرفر 2 (VIP احتياطي - HD)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-afc-5.m3u8?server=2",
+        "quality": "HD",
+        "status": "live"
+      }
+    ],
+    "visible": true,
+    "sortOrder": 18
+  },
+  {
+    "id": "bein-vip-bein-sports-1-english",
+    "code": "BEIN-VIP-BEIN-SPORTS-1-ENGLISH",
+    "nameAr": "بي إن سبورت الإنجليزية 1",
+    "nameEn": "beIN Sports 1 English",
+    "category": "sports",
+    "descriptionAr": "beIN SPORTS VIP (ملفاتك الخاصة)",
+    "descriptionEn": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
+    "nowPlayingAr": "بث مباشر 24/7",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (VIP فضائي 24/7 - FHD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-1-english.m3u8?server=1\",\"quality\":\"1080p\",\"isDefault\":true,\"status\":\"live\"}]",
+    "colorA": "#601977",
+    "colorB": "#14041b",
+    "quality": "1080p",
+    "streamType": "hls",
+    "streamUrl": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-1-english.m3u8",
+    "logoUrl": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
+    "servers": [
+      {
+        "id": "server-1",
+        "name": "سيرفر 1 (VIP فضائي 24/7 - FHD)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-1-english.m3u8?server=1",
+        "quality": "1080p",
+        "isDefault": true,
+        "status": "live"
+      }
+    ],
+    "visible": true,
+    "sortOrder": 19
+  },
+  {
+    "id": "bein-vip-bein-sports-2-english",
+    "code": "BEIN-VIP-BEIN-SPORTS-2-ENGLISH",
+    "nameAr": "بي إن سبورت الإنجليزية 2",
+    "nameEn": "beIN Sports 2 English",
+    "category": "sports",
+    "descriptionAr": "beIN SPORTS VIP (ملفاتك الخاصة)",
+    "descriptionEn": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
+    "nowPlayingAr": "بث مباشر 24/7",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (VIP فضائي 24/7 - FHD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-2-english.m3u8?server=1\",\"quality\":\"1080p\",\"isDefault\":true,\"status\":\"live\"}]",
+    "colorA": "#601977",
+    "colorB": "#14041b",
+    "quality": "1080p",
+    "streamType": "hls",
+    "streamUrl": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-2-english.m3u8",
+    "logoUrl": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
+    "servers": [
+      {
+        "id": "server-1",
+        "name": "سيرفر 1 (VIP فضائي 24/7 - FHD)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-2-english.m3u8?server=1",
+        "quality": "1080p",
+        "isDefault": true,
+        "status": "live"
+      }
+    ],
+    "visible": true,
+    "sortOrder": 20
+  },
+  {
+    "id": "bein-vip-bein-sports-1-france",
+    "code": "BEIN-VIP-BEIN-SPORTS-1-FRANCE",
+    "nameAr": "بي إن سبورت الفرنسية 1",
+    "nameEn": "beIN Sports 1 France",
+    "category": "sports",
+    "descriptionAr": "beIN SPORTS VIP (ملفاتك الخاصة)",
+    "descriptionEn": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
+    "nowPlayingAr": "بث مباشر 24/7",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (VIP فضائي 24/7 - FHD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-1-france.m3u8?server=1\",\"quality\":\"1080p\",\"isDefault\":true,\"status\":\"live\"}]",
+    "colorA": "#601977",
+    "colorB": "#14041b",
+    "quality": "1080p",
+    "streamType": "hls",
+    "streamUrl": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-1-france.m3u8",
+    "logoUrl": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
+    "servers": [
+      {
+        "id": "server-1",
+        "name": "سيرفر 1 (VIP فضائي 24/7 - FHD)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-1-france.m3u8?server=1",
+        "quality": "1080p",
+        "isDefault": true,
+        "status": "live"
+      }
+    ],
+    "visible": true,
+    "sortOrder": 21
+  },
+  {
+    "id": "bein-vip-bein-sports-2-france",
+    "code": "BEIN-VIP-BEIN-SPORTS-2-FRANCE",
+    "nameAr": "بي إن سبورت الفرنسية 2",
+    "nameEn": "beIN Sports 2 France",
+    "category": "sports",
+    "descriptionAr": "beIN SPORTS VIP (ملفاتك الخاصة)",
+    "descriptionEn": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
+    "nowPlayingAr": "بث مباشر 24/7",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (VIP فضائي 24/7 - FHD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-2-france.m3u8?server=1\",\"quality\":\"1080p\",\"isDefault\":true,\"status\":\"live\"}]",
+    "colorA": "#601977",
+    "colorB": "#14041b",
+    "quality": "1080p",
+    "streamType": "hls",
+    "streamUrl": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-2-france.m3u8",
+    "logoUrl": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
+    "servers": [
+      {
+        "id": "server-1",
+        "name": "سيرفر 1 (VIP فضائي 24/7 - FHD)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-2-france.m3u8?server=1",
+        "quality": "1080p",
+        "isDefault": true,
+        "status": "live"
+      }
+    ],
+    "visible": true,
+    "sortOrder": 22
+  },
+  {
+    "id": "bein-vip-bein-sports-3-france",
+    "code": "BEIN-VIP-BEIN-SPORTS-3-FRANCE",
+    "nameAr": "بي إن سبورت الفرنسية 3",
+    "nameEn": "beIN Sports 3 France",
+    "category": "sports",
+    "descriptionAr": "beIN SPORTS VIP (ملفاتك الخاصة)",
+    "descriptionEn": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
+    "nowPlayingAr": "بث مباشر 24/7",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (VIP فضائي 24/7 - FHD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-3-france.m3u8?server=1\",\"quality\":\"1080p\",\"isDefault\":true,\"status\":\"live\"}]",
+    "colorA": "#601977",
+    "colorB": "#14041b",
+    "quality": "1080p",
+    "streamType": "hls",
+    "streamUrl": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-3-france.m3u8",
+    "logoUrl": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
+    "servers": [
+      {
+        "id": "server-1",
+        "name": "سيرفر 1 (VIP فضائي 24/7 - FHD)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-3-france.m3u8?server=1",
+        "quality": "1080p",
+        "isDefault": true,
+        "status": "live"
+      }
+    ],
+    "visible": true,
+    "sortOrder": 23
+  },
+  {
+    "id": "tlfaz-asharq-documentary",
+    "code": "TLFAZ-ASHARQ-DOCUMENTARY",
+    "nameAr": "قناة الشرق الوثائقية",
+    "nameEn": "قناة الشرق الوثائقية",
+    "category": "documentary",
+    "descriptionAr": "قنوات وثائقية",
+    "descriptionEn": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2023%2F03%2FAsharq-Documentary.png",
+    "nowPlayingAr": "بث مباشر 24/7",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (HLS فائق الثبات 24/7)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-asharq-documentary.m3u8?server=1\",\"quality\":\"1080p\",\"isDefault\":true,\"status\":\"live\"}]",
+    "colorA": "#1d8a70",
+    "colorB": "#041712",
+    "quality": "1080p",
+    "streamType": "hls",
+    "streamUrl": "https://aspreen-tv-production.up.railway.app/live/tlfaz-asharq-documentary.m3u8",
+    "logoUrl": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2023%2F03%2FAsharq-Documentary.png",
+    "servers": [
+      {
+        "id": "server-1",
+        "name": "سيرفر 1 (HLS فائق الثبات 24/7)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-asharq-documentary.m3u8?server=1",
+        "quality": "1080p",
+        "isDefault": true,
+        "status": "live"
+      }
+    ],
+    "visible": true,
+    "sortOrder": 24
+  },
+  {
+    "id": "tlfaz-asharq-discovery",
+    "code": "TLFAZ-ASHARQ-DISCOVERY",
+    "nameAr": "قناة الشرق ديسكفري",
+    "nameEn": "قناة الشرق ديسكفري",
+    "category": "documentary",
+    "descriptionAr": "قنوات وثائقية",
+    "descriptionEn": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2024%2F03%2FAsharq-Discovery.png",
+    "nowPlayingAr": "بث مباشر 24/7",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (HLS فائق الثبات 24/7)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-asharq-discovery.m3u8?server=1\",\"quality\":\"1080p\",\"isDefault\":true,\"status\":\"live\"}]",
+    "colorA": "#1d8a70",
+    "colorB": "#041712",
+    "quality": "1080p",
+    "streamType": "hls",
+    "streamUrl": "https://aspreen-tv-production.up.railway.app/live/tlfaz-asharq-discovery.m3u8",
+    "logoUrl": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2024%2F03%2FAsharq-Discovery.png",
+    "servers": [
+      {
+        "id": "server-1",
+        "name": "سيرفر 1 (HLS فائق الثبات 24/7)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-asharq-discovery.m3u8?server=1",
+        "quality": "1080p",
+        "isDefault": true,
+        "status": "live"
+      }
+    ],
+    "visible": true,
+    "sortOrder": 25
+  },
+  {
+    "id": "tlfaz-huda-tv",
+    "code": "TLFAZ-HUDA-TV",
+    "nameAr": "قناة الهدى",
+    "nameEn": "قناة الهدى",
+    "category": "general",
+    "descriptionAr": "قنوات إسلامية ودينية",
+    "descriptionEn": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2023%2F10%2Ficon_channel.png",
+    "nowPlayingAr": "بث مباشر 24/7",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (البث المباشر)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-huda-tv.m3u8?server=1\",\"quality\":\"HD\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (مباشر CDN)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-huda-tv.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "colorA": "#2b823e",
+    "colorB": "#07190b",
+    "quality": "HD",
+    "streamType": "hls",
+    "streamUrl": "https://aspreen-tv-production.up.railway.app/live/tlfaz-huda-tv.m3u8",
+    "logoUrl": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2023%2F10%2Ficon_channel.png",
+    "servers": [
+      {
+        "id": "server-1",
+        "name": "سيرفر 1 (البث المباشر)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-huda-tv.m3u8?server=1",
+        "quality": "HD",
+        "isDefault": true,
+        "status": "live"
+      },
+      {
+        "id": "server-2",
+        "name": "سيرفر 2 (مباشر CDN)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-huda-tv.m3u8?server=2",
+        "quality": "HD",
+        "status": "live"
+      }
+    ],
+    "visible": true,
+    "sortOrder": 26
+  },
+  {
+    "id": "tlfaz-mbc-masr-2",
+    "code": "TLFAZ-MBC-MASR-2",
+    "nameAr": "قناة ام بي سي مصر 2",
+    "nameEn": "قناة ام بي سي مصر 2",
+    "category": "general",
+    "descriptionAr": "باقة قنوات MBC",
+    "descriptionEn": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2024%2F02%2Fmbc-masr-2.png",
+    "nowPlayingAr": "بث مباشر 24/7",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (HLS فائق الثبات 24/7)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-mbc-masr-2.m3u8?server=1\",\"quality\":\"1080p\",\"isDefault\":true,\"status\":\"live\"}]",
+    "colorA": "#0b72be",
+    "colorB": "#041424",
+    "quality": "1080p",
+    "streamType": "hls",
+    "streamUrl": "https://aspreen-tv-production.up.railway.app/live/tlfaz-mbc-masr-2.m3u8",
+    "logoUrl": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2024%2F02%2Fmbc-masr-2.png",
+    "servers": [
+      {
+        "id": "server-1",
+        "name": "سيرفر 1 (HLS فائق الثبات 24/7)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-mbc-masr-2.m3u8?server=1",
+        "quality": "1080p",
+        "isDefault": true,
+        "status": "live"
+      }
+    ],
+    "visible": true,
+    "sortOrder": 27
+  },
+  {
+    "id": "tlfaz-mbc-iraq",
+    "code": "TLFAZ-MBC-IRAQ",
+    "nameAr": "قناة ام بي سي العراق",
+    "nameEn": "قناة ام بي سي العراق",
+    "category": "general",
+    "descriptionAr": "باقة قنوات MBC",
+    "descriptionEn": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2023%2F03%2FMbc-IraQ.png",
+    "nowPlayingAr": "بث مباشر 24/7",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (HLS فائق الثبات 24/7)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-mbc-iraq.m3u8?server=1\",\"quality\":\"1080p\",\"isDefault\":true,\"status\":\"live\"}]",
+    "colorA": "#0b72be",
+    "colorB": "#041424",
+    "quality": "1080p",
+    "streamType": "hls",
+    "streamUrl": "https://aspreen-tv-production.up.railway.app/live/tlfaz-mbc-iraq.m3u8",
+    "logoUrl": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2023%2F03%2FMbc-IraQ.png",
+    "servers": [
+      {
+        "id": "server-1",
+        "name": "سيرفر 1 (HLS فائق الثبات 24/7)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-mbc-iraq.m3u8?server=1",
+        "quality": "1080p",
+        "isDefault": true,
+        "status": "live"
+      }
+    ],
+    "visible": true,
+    "sortOrder": 28
+  },
+  {
+    "id": "tlfaz-mbc-masr",
+    "code": "TLFAZ-MBC-MASR",
+    "nameAr": "قناة ام بي سي مصر",
+    "nameEn": "قناة ام بي سي مصر",
+    "category": "general",
+    "descriptionAr": "باقة قنوات MBC",
+    "descriptionEn": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2024%2F02%2Fmbc-masr.png",
+    "nowPlayingAr": "بث مباشر 24/7",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (البث المباشر)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-mbc-masr.m3u8?server=1\",\"quality\":\"HD\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (مباشر CDN)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-mbc-masr.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "colorA": "#0b72be",
+    "colorB": "#041424",
+    "quality": "HD",
+    "streamType": "hls",
+    "streamUrl": "https://aspreen-tv-production.up.railway.app/live/tlfaz-mbc-masr.m3u8",
+    "logoUrl": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2024%2F02%2Fmbc-masr.png",
+    "servers": [
+      {
+        "id": "server-1",
+        "name": "سيرفر 1 (البث المباشر)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-mbc-masr.m3u8?server=1",
+        "quality": "HD",
+        "isDefault": true,
+        "status": "live"
+      },
+      {
+        "id": "server-2",
+        "name": "سيرفر 2 (مباشر CDN)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-mbc-masr.m3u8?server=2",
+        "quality": "HD",
+        "status": "live"
+      }
+    ],
+    "visible": true,
+    "sortOrder": 29
+  },
+  {
+    "id": "tlfaz-mbc5",
+    "code": "TLFAZ-MBC5",
+    "nameAr": "قناة إم بي سي 5 (Mbc5)",
+    "nameEn": "قناة إم بي سي 5 (Mbc5)",
+    "category": "general",
+    "descriptionAr": "باقة قنوات MBC",
+    "descriptionEn": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2022%2F02%2Fmbc5-tv.png",
+    "nowPlayingAr": "بث مباشر 24/7",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (HLS فائق الثبات 24/7)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-mbc5.m3u8?server=1\",\"quality\":\"1080p\",\"isDefault\":true,\"status\":\"live\"}]",
+    "colorA": "#0b72be",
+    "colorB": "#041424",
+    "quality": "1080p",
+    "streamType": "hls",
+    "streamUrl": "https://aspreen-tv-production.up.railway.app/live/tlfaz-mbc5.m3u8",
+    "logoUrl": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2022%2F02%2Fmbc5-tv.png",
+    "servers": [
+      {
+        "id": "server-1",
+        "name": "سيرفر 1 (HLS فائق الثبات 24/7)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-mbc5.m3u8?server=1",
+        "quality": "1080p",
+        "isDefault": true,
+        "status": "live"
+      }
+    ],
+    "visible": true,
+    "sortOrder": 30
+  },
+  {
+    "id": "tlfaz-spacetoon",
+    "code": "TLFAZ-SPACETOON",
+    "nameAr": "قناة سبيستون",
+    "nameEn": "قناة سبيستون",
+    "category": "kids",
+    "descriptionAr": "قنوات أطفال",
+    "descriptionEn": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2023%2F02%2Fspace-toon.png",
+    "nowPlayingAr": "بث مباشر 24/7",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (HLS فائق الثبات 24/7)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-spacetoon.m3u8?server=1\",\"quality\":\"1080p\",\"isDefault\":true,\"status\":\"live\"}]",
+    "colorA": "#e04116",
+    "colorB": "#1b0701",
+    "quality": "1080p",
+    "streamType": "hls",
+    "streamUrl": "https://aspreen-tv-production.up.railway.app/live/tlfaz-spacetoon.m3u8",
+    "logoUrl": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2023%2F02%2Fspace-toon.png",
+    "servers": [
+      {
+        "id": "server-1",
+        "name": "سيرفر 1 (HLS فائق الثبات 24/7)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-spacetoon.m3u8?server=1",
+        "quality": "1080p",
+        "isDefault": true,
+        "status": "live"
+      }
+    ],
+    "visible": true,
+    "sortOrder": 31
+  },
+  {
+    "id": "tlfaz-al-aoula",
+    "code": "TLFAZ-AL-AOULA",
+    "nameAr": "القناة الأولى المغربية",
+    "nameEn": "القناة الأولى المغربية",
+    "category": "general",
+    "descriptionAr": "قنوات عربية منوعة",
+    "descriptionEn": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2022%2F02%2Fal-aoula-tv.png",
+    "nowPlayingAr": "بث مباشر 24/7",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (البث المباشر)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-al-aoula.m3u8?server=1\",\"quality\":\"HD\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (مباشر CDN)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-al-aoula.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "colorA": "#2c4c78",
+    "colorB": "#0a111a",
+    "quality": "HD",
+    "streamType": "hls",
+    "streamUrl": "https://aspreen-tv-production.up.railway.app/live/tlfaz-al-aoula.m3u8",
+    "logoUrl": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2022%2F02%2Fal-aoula-tv.png",
+    "servers": [
+      {
+        "id": "server-1",
+        "name": "سيرفر 1 (البث المباشر)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-al-aoula.m3u8?server=1",
+        "quality": "HD",
+        "isDefault": true,
+        "status": "live"
+      },
+      {
+        "id": "server-2",
+        "name": "سيرفر 2 (مباشر CDN)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-al-aoula.m3u8?server=2",
+        "quality": "HD",
+        "status": "live"
+      }
+    ],
+    "visible": true,
+    "sortOrder": 32
+  },
+  {
+    "id": "tlfaz-bahia-tv",
+    "code": "TLFAZ-BAHIA-TV",
+    "nameAr": "قناة الباهية تيفي",
+    "nameEn": "قناة الباهية تيفي",
+    "category": "general",
+    "descriptionAr": "قنوات عربية منوعة",
+    "descriptionEn": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2022%2F03%2Fbahia_tv.png",
+    "nowPlayingAr": "بث مباشر 24/7",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (البث المباشر)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-bahia-tv.m3u8?server=1\",\"quality\":\"HD\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (مباشر CDN)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-bahia-tv.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "colorA": "#2c4c78",
+    "colorB": "#0a111a",
+    "quality": "HD",
+    "streamType": "hls",
+    "streamUrl": "https://aspreen-tv-production.up.railway.app/live/tlfaz-bahia-tv.m3u8",
+    "logoUrl": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2022%2F03%2Fbahia_tv.png",
+    "servers": [
+      {
+        "id": "server-1",
+        "name": "سيرفر 1 (البث المباشر)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-bahia-tv.m3u8?server=1",
+        "quality": "HD",
+        "isDefault": true,
+        "status": "live"
+      },
+      {
+        "id": "server-2",
+        "name": "سيرفر 2 (مباشر CDN)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-bahia-tv.m3u8?server=2",
+        "quality": "HD",
+        "status": "live"
+      }
+    ],
+    "visible": true,
+    "sortOrder": 33
+  },
+  {
+    "id": "tlfaz-oman-tv",
+    "code": "TLFAZ-OMAN-TV",
+    "nameAr": "قناة عمان تي في",
+    "nameEn": "قناة عمان تي في",
+    "category": "general",
+    "descriptionAr": "قنوات عربية منوعة",
+    "descriptionEn": "",
+    "nowPlayingAr": "بث مباشر 24/7",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (البث المباشر)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-oman-tv.m3u8?server=1\",\"quality\":\"HD\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (مباشر CDN)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-oman-tv.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "colorA": "#2c4c78",
+    "colorB": "#0a111a",
+    "quality": "HD",
+    "streamType": "hls",
+    "streamUrl": "https://aspreen-tv-production.up.railway.app/live/tlfaz-oman-tv.m3u8",
+    "logoUrl": null,
+    "servers": [
+      {
+        "id": "server-1",
+        "name": "سيرفر 1 (البث المباشر)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-oman-tv.m3u8?server=1",
+        "quality": "HD",
+        "isDefault": true,
+        "status": "live"
+      },
+      {
+        "id": "server-2",
+        "name": "سيرفر 2 (مباشر CDN)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-oman-tv.m3u8?server=2",
+        "quality": "HD",
+        "status": "live"
+      }
+    ],
+    "visible": true,
+    "sortOrder": 34
+  },
+  {
+    "id": "tlfaz-el-medina-mr-tv",
+    "code": "TLFAZ-EL-MEDINA-MR-TV",
+    "nameAr": "قناة المدينة الموريتانية",
+    "nameEn": "قناة المدينة الموريتانية",
+    "category": "general",
+    "descriptionAr": "قنوات عربية منوعة",
+    "descriptionEn": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2023%2F03%2FEl-Medina-Tv.png",
+    "nowPlayingAr": "بث مباشر 24/7",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (البث المباشر)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-el-medina-mr-tv.m3u8?server=1\",\"quality\":\"HD\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (مباشر CDN)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-el-medina-mr-tv.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "colorA": "#2b823e",
+    "colorB": "#07190b",
+    "quality": "HD",
+    "streamType": "hls",
+    "streamUrl": "https://aspreen-tv-production.up.railway.app/live/tlfaz-el-medina-mr-tv.m3u8",
+    "logoUrl": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2023%2F03%2FEl-Medina-Tv.png",
+    "servers": [
+      {
+        "id": "server-1",
+        "name": "سيرفر 1 (البث المباشر)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-el-medina-mr-tv.m3u8?server=1",
+        "quality": "HD",
+        "isDefault": true,
+        "status": "live"
+      },
+      {
+        "id": "server-2",
+        "name": "سيرفر 2 (مباشر CDN)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-el-medina-mr-tv.m3u8?server=2",
+        "quality": "HD",
+        "status": "live"
+      }
+    ],
+    "visible": true,
+    "sortOrder": 35
+  },
+  {
+    "id": "tlfaz-zad-tv",
+    "code": "TLFAZ-ZAD-TV",
+    "nameAr": "قناة زاد الفضائية",
+    "nameEn": "قناة زاد الفضائية",
+    "category": "general",
+    "descriptionAr": "قنوات إسلامية ودينية",
+    "descriptionEn": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2023%2F03%2Fzad-tv.png",
+    "nowPlayingAr": "بث مباشر 24/7",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (البث المباشر)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-zad-tv.m3u8?server=1\",\"quality\":\"HD\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (مباشر CDN)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-zad-tv.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "colorA": "#2b823e",
+    "colorB": "#07190b",
+    "quality": "HD",
+    "streamType": "hls",
+    "streamUrl": "https://aspreen-tv-production.up.railway.app/live/tlfaz-zad-tv.m3u8",
+    "logoUrl": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2023%2F03%2Fzad-tv.png",
+    "servers": [
+      {
+        "id": "server-1",
+        "name": "سيرفر 1 (البث المباشر)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-zad-tv.m3u8?server=1",
+        "quality": "HD",
+        "isDefault": true,
+        "status": "live"
+      },
+      {
+        "id": "server-2",
+        "name": "سيرفر 2 (مباشر CDN)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-zad-tv.m3u8?server=2",
+        "quality": "HD",
+        "status": "live"
+      }
+    ],
+    "visible": true,
+    "sortOrder": 36
+  },
+  {
+    "id": "tlfaz-ktv-arabe",
+    "code": "TLFAZ-KTV-ARABE",
+    "nameAr": "قناة العربي الكويتية الوثائقية",
+    "nameEn": "قناة العربي الكويتية الوثائقية",
+    "category": "documentary",
+    "descriptionAr": "قنوات وثائقية",
+    "descriptionEn": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2024%2F06%2FKTV-Arabe.png",
+    "nowPlayingAr": "بث مباشر 24/7",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (البث المباشر)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-ktv-arabe.m3u8?server=1\",\"quality\":\"HD\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (مباشر CDN)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-ktv-arabe.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "colorA": "#1d8a70",
+    "colorB": "#041712",
+    "quality": "HD",
+    "streamType": "hls",
+    "streamUrl": "https://aspreen-tv-production.up.railway.app/live/tlfaz-ktv-arabe.m3u8",
+    "logoUrl": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2024%2F06%2FKTV-Arabe.png",
+    "servers": [
+      {
+        "id": "server-1",
+        "name": "سيرفر 1 (البث المباشر)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-ktv-arabe.m3u8?server=1",
+        "quality": "HD",
+        "isDefault": true,
+        "status": "live"
+      },
+      {
+        "id": "server-2",
+        "name": "سيرفر 2 (مباشر CDN)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-ktv-arabe.m3u8?server=2",
+        "quality": "HD",
+        "status": "live"
+      }
+    ],
+    "visible": true,
+    "sortOrder": 37
+  },
+  {
+    "id": "tlfaz-al-jazeera",
+    "code": "TLFAZ-AL-JAZEERA",
+    "nameAr": "قناة الجزيرة الاخبارية",
+    "nameEn": "قناة الجزيرة الاخبارية",
+    "category": "news",
+    "descriptionAr": "قنوات إخبارية وسياسية",
+    "descriptionEn": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2024%2F05%2Faljazeera.png",
+    "nowPlayingAr": "بث مباشر 24/7",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (البث المباشر)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-al-jazeera.m3u8?server=1\",\"quality\":\"HD\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (مباشر CDN)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-al-jazeera.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "colorA": "#d48208",
+    "colorB": "#180f01",
+    "quality": "HD",
+    "streamType": "hls",
+    "streamUrl": "https://aspreen-tv-production.up.railway.app/live/tlfaz-al-jazeera.m3u8",
+    "logoUrl": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2024%2F05%2Faljazeera.png",
+    "servers": [
+      {
+        "id": "server-1",
+        "name": "سيرفر 1 (البث المباشر)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-al-jazeera.m3u8?server=1",
+        "quality": "HD",
+        "isDefault": true,
+        "status": "live"
+      },
+      {
+        "id": "server-2",
+        "name": "سيرفر 2 (مباشر CDN)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-al-jazeera.m3u8?server=2",
+        "quality": "HD",
+        "status": "live"
+      }
+    ],
+    "visible": true,
+    "sortOrder": 38
+  },
+  {
+    "id": "tlfaz-yemen-tv",
+    "code": "TLFAZ-YEMEN-TV",
+    "nameAr": "قناة اليمن الفضائية البث المباشر",
+    "nameEn": "قناة اليمن الفضائية البث المباشر",
+    "category": "news",
+    "descriptionAr": "قنوات إخبارية وسياسية",
+    "descriptionEn": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2023%2F03%2FYemen-Tv.png",
+    "nowPlayingAr": "بث مباشر 24/7",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (البث المباشر)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-yemen-tv.m3u8?server=1\",\"quality\":\"HD\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (مباشر CDN)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-yemen-tv.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "colorA": "#9c2626",
+    "colorB": "#1a0404",
+    "quality": "HD",
+    "streamType": "hls",
+    "streamUrl": "https://aspreen-tv-production.up.railway.app/live/tlfaz-yemen-tv.m3u8",
+    "logoUrl": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2023%2F03%2FYemen-Tv.png",
+    "servers": [
+      {
+        "id": "server-1",
+        "name": "سيرفر 1 (البث المباشر)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-yemen-tv.m3u8?server=1",
+        "quality": "HD",
+        "isDefault": true,
+        "status": "live"
+      },
+      {
+        "id": "server-2",
+        "name": "سيرفر 2 (مباشر CDN)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-yemen-tv.m3u8?server=2",
+        "quality": "HD",
+        "status": "live"
+      }
+    ],
+    "visible": true,
+    "sortOrder": 39
+  },
+  {
+    "id": "tlfaz-alwasat-wtv",
+    "code": "TLFAZ-ALWASAT-WTV",
+    "nameAr": "قناة الوسط الليبية wtv",
+    "nameEn": "قناة الوسط الليبية wtv",
+    "category": "news",
+    "descriptionAr": "قنوات إخبارية وسياسية",
+    "descriptionEn": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2023%2F03%2FAlwasat-TV.png",
+    "nowPlayingAr": "بث مباشر 24/7",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (البث المباشر)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-alwasat-wtv.m3u8?server=1\",\"quality\":\"HD\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (مباشر CDN)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-alwasat-wtv.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "colorA": "#9c2626",
+    "colorB": "#1a0404",
+    "quality": "HD",
+    "streamType": "hls",
+    "streamUrl": "https://aspreen-tv-production.up.railway.app/live/tlfaz-alwasat-wtv.m3u8",
+    "logoUrl": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2023%2F03%2FAlwasat-TV.png",
+    "servers": [
+      {
+        "id": "server-1",
+        "name": "سيرفر 1 (البث المباشر)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-alwasat-wtv.m3u8?server=1",
+        "quality": "HD",
+        "isDefault": true,
+        "status": "live"
+      },
+      {
+        "id": "server-2",
+        "name": "سيرفر 2 (مباشر CDN)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-alwasat-wtv.m3u8?server=2",
+        "quality": "HD",
+        "status": "live"
+      }
+    ],
+    "visible": true,
+    "sortOrder": 40
+  },
+  {
+    "id": "tlfaz-elmourabiton-tv",
+    "code": "TLFAZ-ELMOURABITON-TV",
+    "nameAr": "قناة المرابطون الموريتانية",
+    "nameEn": "قناة المرابطون الموريتانية",
+    "category": "general",
+    "descriptionAr": "قنوات عربية منوعة",
+    "descriptionEn": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2023%2F03%2FelmourabitonTv.png",
+    "nowPlayingAr": "بث مباشر 24/7",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (البث المباشر)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-elmourabiton-tv.m3u8?server=1\",\"quality\":\"HD\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (مباشر CDN)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-elmourabiton-tv.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "colorA": "#2c4c78",
+    "colorB": "#0a111a",
+    "quality": "HD",
+    "streamType": "hls",
+    "streamUrl": "https://aspreen-tv-production.up.railway.app/live/tlfaz-elmourabiton-tv.m3u8",
+    "logoUrl": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2023%2F03%2FelmourabitonTv.png",
+    "servers": [
+      {
+        "id": "server-1",
+        "name": "سيرفر 1 (البث المباشر)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-elmourabiton-tv.m3u8?server=1",
+        "quality": "HD",
+        "isDefault": true,
+        "status": "live"
+      },
+      {
+        "id": "server-2",
+        "name": "سيرفر 2 (مباشر CDN)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-elmourabiton-tv.m3u8?server=2",
+        "quality": "HD",
+        "status": "live"
+      }
+    ],
+    "visible": true,
+    "sortOrder": 41
+  },
+  {
+    "id": "tlfaz-al-fallujah",
+    "code": "TLFAZ-AL-FALLUJAH",
+    "nameAr": "قناة الفلوجة",
+    "nameEn": "قناة الفلوجة",
+    "category": "news",
+    "descriptionAr": "قنوات إخبارية وسياسية",
+    "descriptionEn": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2023%2F03%2Ffallujah-tv.png",
+    "nowPlayingAr": "بث مباشر 24/7",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (البث المباشر)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-al-fallujah.m3u8?server=1\",\"quality\":\"HD\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (مباشر CDN)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-al-fallujah.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "colorA": "#9c2626",
+    "colorB": "#1a0404",
+    "quality": "HD",
+    "streamType": "hls",
+    "streamUrl": "https://aspreen-tv-production.up.railway.app/live/tlfaz-al-fallujah.m3u8",
+    "logoUrl": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2023%2F03%2Ffallujah-tv.png",
+    "servers": [
+      {
+        "id": "server-1",
+        "name": "سيرفر 1 (البث المباشر)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-al-fallujah.m3u8?server=1",
+        "quality": "HD",
+        "isDefault": true,
+        "status": "live"
+      },
+      {
+        "id": "server-2",
+        "name": "سيرفر 2 (مباشر CDN)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-al-fallujah.m3u8?server=2",
+        "quality": "HD",
+        "status": "live"
+      }
+    ],
+    "visible": true,
+    "sortOrder": 42
+  },
+  {
+    "id": "tlfaz-al-rassoul",
+    "code": "TLFAZ-AL-RASSOUL",
+    "nameAr": "قناة الرسول",
+    "nameEn": "قناة الرسول",
+    "category": "general",
+    "descriptionAr": "قنوات إسلامية ودينية",
+    "descriptionEn": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2024%2F05%2FAl-Rassoul-TV.png",
+    "nowPlayingAr": "بث مباشر 24/7",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (البث المباشر)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-al-rassoul.m3u8?server=1\",\"quality\":\"HD\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (مباشر CDN)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-al-rassoul.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "colorA": "#2b823e",
+    "colorB": "#07190b",
+    "quality": "HD",
+    "streamType": "hls",
+    "streamUrl": "https://aspreen-tv-production.up.railway.app/live/tlfaz-al-rassoul.m3u8",
+    "logoUrl": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2024%2F05%2FAl-Rassoul-TV.png",
+    "servers": [
+      {
+        "id": "server-1",
+        "name": "سيرفر 1 (البث المباشر)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-al-rassoul.m3u8?server=1",
+        "quality": "HD",
+        "isDefault": true,
+        "status": "live"
+      },
+      {
+        "id": "server-2",
+        "name": "سيرفر 2 (مباشر CDN)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-al-rassoul.m3u8?server=2",
+        "quality": "HD",
+        "status": "live"
+      }
+    ],
+    "visible": true,
+    "sortOrder": 43
+  },
+  {
+    "id": "tlfaz-bin-othaimeen",
+    "code": "TLFAZ-BIN-OTHAIMEEN",
+    "nameAr": "قناة ابن عثيمين",
+    "nameEn": "قناة ابن عثيمين",
+    "category": "general",
+    "descriptionAr": "قنوات إسلامية ودينية",
+    "descriptionEn": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2024%2F03%2FBin-Othaimeen.png",
+    "nowPlayingAr": "بث مباشر 24/7",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (البث المباشر)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-bin-othaimeen.m3u8?server=1\",\"quality\":\"HD\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (مباشر CDN)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-bin-othaimeen.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "colorA": "#2b823e",
+    "colorB": "#07190b",
+    "quality": "HD",
+    "streamType": "hls",
+    "streamUrl": "https://aspreen-tv-production.up.railway.app/live/tlfaz-bin-othaimeen.m3u8",
+    "logoUrl": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2024%2F03%2FBin-Othaimeen.png",
+    "servers": [
+      {
+        "id": "server-1",
+        "name": "سيرفر 1 (البث المباشر)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-bin-othaimeen.m3u8?server=1",
+        "quality": "HD",
+        "isDefault": true,
+        "status": "live"
+      },
+      {
+        "id": "server-2",
+        "name": "سيرفر 2 (مباشر CDN)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-bin-othaimeen.m3u8?server=2",
+        "quality": "HD",
+        "status": "live"
+      }
+    ],
+    "visible": true,
+    "sortOrder": 44
+  },
+  {
+    "id": "tlfaz-saudi24",
+    "code": "TLFAZ-SAUDI24",
+    "nameAr": "قناة سعودي 24",
+    "nameEn": "قناة سعودي 24",
+    "category": "sports",
+    "descriptionAr": "قنوات عربية منوعة",
+    "descriptionEn": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2024%2F03%2Fs24-sport.png",
+    "nowPlayingAr": "بث مباشر 24/7",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (البث المباشر)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-saudi24.m3u8?server=1\",\"quality\":\"HD\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (مباشر CDN)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-saudi24.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "colorA": "#2c4c78",
+    "colorB": "#0a111a",
+    "quality": "HD",
+    "streamType": "hls",
+    "streamUrl": "https://aspreen-tv-production.up.railway.app/live/tlfaz-saudi24.m3u8",
+    "logoUrl": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2024%2F03%2Fs24-sport.png",
+    "servers": [
+      {
+        "id": "server-1",
+        "name": "سيرفر 1 (البث المباشر)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-saudi24.m3u8?server=1",
+        "quality": "HD",
+        "isDefault": true,
+        "status": "live"
+      },
+      {
+        "id": "server-2",
+        "name": "سيرفر 2 (مباشر CDN)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-saudi24.m3u8?server=2",
+        "quality": "HD",
+        "status": "live"
+      }
+    ],
+    "visible": true,
+    "sortOrder": 45
+  },
+  {
+    "id": "tlfaz-mauritanie-2-tv",
+    "code": "TLFAZ-MAURITANIE-2-TV",
+    "nameAr": "القناة الموريتانية الثانية",
+    "nameEn": "القناة الموريتانية الثانية",
+    "category": "general",
+    "descriptionAr": "قنوات عربية منوعة",
+    "descriptionEn": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2023%2F03%2FMauritanie-2-Tv.png",
+    "nowPlayingAr": "بث مباشر 24/7",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (البث المباشر)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-mauritanie-2-tv.m3u8?server=1\",\"quality\":\"HD\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (مباشر CDN)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-mauritanie-2-tv.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "colorA": "#2c4c78",
+    "colorB": "#0a111a",
+    "quality": "HD",
+    "streamType": "hls",
+    "streamUrl": "https://aspreen-tv-production.up.railway.app/live/tlfaz-mauritanie-2-tv.m3u8",
+    "logoUrl": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2023%2F03%2FMauritanie-2-Tv.png",
+    "servers": [
+      {
+        "id": "server-1",
+        "name": "سيرفر 1 (البث المباشر)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-mauritanie-2-tv.m3u8?server=1",
+        "quality": "HD",
+        "isDefault": true,
+        "status": "live"
+      },
+      {
+        "id": "server-2",
+        "name": "سيرفر 2 (مباشر CDN)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-mauritanie-2-tv.m3u8?server=2",
+        "quality": "HD",
+        "status": "live"
+      }
+    ],
+    "visible": true,
+    "sortOrder": 46
+  },
+  {
+    "id": "tlfaz-aden-tv",
+    "code": "TLFAZ-ADEN-TV",
+    "nameAr": "قناة عدن",
+    "nameEn": "قناة عدن",
+    "category": "news",
+    "descriptionAr": "قنوات إخبارية وسياسية",
+    "descriptionEn": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2023%2F03%2FAden-TV.png",
+    "nowPlayingAr": "بث مباشر 24/7",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (البث المباشر)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-aden-tv.m3u8?server=1\",\"quality\":\"HD\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (مباشر CDN)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-aden-tv.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "colorA": "#9c2626",
+    "colorB": "#1a0404",
+    "quality": "HD",
+    "streamType": "hls",
+    "streamUrl": "https://aspreen-tv-production.up.railway.app/live/tlfaz-aden-tv.m3u8",
+    "logoUrl": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2023%2F03%2FAden-TV.png",
+    "servers": [
+      {
+        "id": "server-1",
+        "name": "سيرفر 1 (البث المباشر)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-aden-tv.m3u8?server=1",
+        "quality": "HD",
+        "isDefault": true,
+        "status": "live"
+      },
+      {
+        "id": "server-2",
+        "name": "سيرفر 2 (مباشر CDN)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-aden-tv.m3u8?server=2",
+        "quality": "HD",
+        "status": "live"
+      }
+    ],
+    "visible": true,
+    "sortOrder": 47
+  },
+  {
+    "id": "tlfaz-al-magharibia-2",
+    "code": "TLFAZ-AL-MAGHARIBIA-2",
+    "nameAr": "قناة المغاربية 2",
+    "nameEn": "قناة المغاربية 2",
+    "category": "general",
+    "descriptionAr": "قنوات عربية منوعة",
+    "descriptionEn": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2022%2F03%2Fal-magharibia-2-tv.png",
+    "nowPlayingAr": "بث مباشر 24/7",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (البث المباشر)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-al-magharibia-2.m3u8?server=1\",\"quality\":\"HD\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (مباشر CDN)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-al-magharibia-2.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "colorA": "#2c4c78",
+    "colorB": "#0a111a",
+    "quality": "HD",
+    "streamType": "hls",
+    "streamUrl": "https://aspreen-tv-production.up.railway.app/live/tlfaz-al-magharibia-2.m3u8",
+    "logoUrl": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2022%2F03%2Fal-magharibia-2-tv.png",
+    "servers": [
+      {
+        "id": "server-1",
+        "name": "سيرفر 1 (البث المباشر)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-al-magharibia-2.m3u8?server=1",
+        "quality": "HD",
+        "isDefault": true,
+        "status": "live"
+      },
+      {
+        "id": "server-2",
+        "name": "سيرفر 2 (مباشر CDN)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-al-magharibia-2.m3u8?server=2",
+        "quality": "HD",
+        "status": "live"
+      }
+    ],
+    "visible": true,
+    "sortOrder": 48
+  },
+  {
+    "id": "tlfaz-halab-today-tv",
+    "code": "TLFAZ-HALAB-TODAY-TV",
+    "nameAr": "قناة حلب اليوم",
+    "nameEn": "قناة حلب اليوم",
+    "category": "news",
+    "descriptionAr": "قنوات إخبارية وسياسية",
+    "descriptionEn": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2023%2F03%2Fhalab-today-tv.png",
+    "nowPlayingAr": "بث مباشر 24/7",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (البث المباشر)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-halab-today-tv.m3u8?server=1\",\"quality\":\"HD\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (مباشر CDN)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-halab-today-tv.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "colorA": "#9c2626",
+    "colorB": "#1a0404",
+    "quality": "HD",
+    "streamType": "hls",
+    "streamUrl": "https://aspreen-tv-production.up.railway.app/live/tlfaz-halab-today-tv.m3u8",
+    "logoUrl": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2023%2F03%2Fhalab-today-tv.png",
+    "servers": [
+      {
+        "id": "server-1",
+        "name": "سيرفر 1 (البث المباشر)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-halab-today-tv.m3u8?server=1",
+        "quality": "HD",
+        "isDefault": true,
+        "status": "live"
+      },
+      {
+        "id": "server-2",
+        "name": "سيرفر 2 (مباشر CDN)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-halab-today-tv.m3u8?server=2",
+        "quality": "HD",
+        "status": "live"
+      }
+    ],
+    "visible": true,
+    "sortOrder": 49
+  },
+  {
+    "id": "tlfaz-pnc-yom",
+    "code": "TLFAZ-PNC-YOM",
+    "nameAr": "قناة بانوراما يوم",
+    "nameEn": "قناة بانوراما يوم",
+    "category": "movies",
+    "descriptionAr": "قنوات أفلام ومسلسلات",
+    "descriptionEn": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2023%2F09%2FSada-El-Balad.png",
+    "nowPlayingAr": "بث مباشر 24/7",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (البث المباشر)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-pnc-yom.m3u8?server=1\",\"quality\":\"HD\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (مباشر CDN)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-pnc-yom.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "colorA": "#b02545",
+    "colorB": "#1b040a",
+    "quality": "HD",
+    "streamType": "hls",
+    "streamUrl": "https://aspreen-tv-production.up.railway.app/live/tlfaz-pnc-yom.m3u8",
+    "logoUrl": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2023%2F09%2FSada-El-Balad.png",
+    "servers": [
+      {
+        "id": "server-1",
+        "name": "سيرفر 1 (البث المباشر)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-pnc-yom.m3u8?server=1",
+        "quality": "HD",
+        "isDefault": true,
+        "status": "live"
+      },
+      {
+        "id": "server-2",
+        "name": "سيرفر 2 (مباشر CDN)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-pnc-yom.m3u8?server=2",
+        "quality": "HD",
+        "status": "live"
+      }
+    ],
+    "visible": true,
+    "sortOrder": 50
+  },
+  {
+    "id": "tlfaz-hadhramaut-tv",
+    "code": "TLFAZ-HADHRAMAUT-TV",
+    "nameAr": "قناة حضرموت",
+    "nameEn": "قناة حضرموت",
+    "category": "general",
+    "descriptionAr": "قنوات عربية منوعة",
+    "descriptionEn": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2023%2F03%2Fhadhramaut-tv.png",
+    "nowPlayingAr": "بث مباشر 24/7",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (البث المباشر)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-hadhramaut-tv.m3u8?server=1\",\"quality\":\"HD\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (مباشر CDN)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-hadhramaut-tv.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "colorA": "#2c4c78",
+    "colorB": "#0a111a",
+    "quality": "HD",
+    "streamType": "hls",
+    "streamUrl": "https://aspreen-tv-production.up.railway.app/live/tlfaz-hadhramaut-tv.m3u8",
+    "logoUrl": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2023%2F03%2Fhadhramaut-tv.png",
+    "servers": [
+      {
+        "id": "server-1",
+        "name": "سيرفر 1 (البث المباشر)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-hadhramaut-tv.m3u8?server=1",
+        "quality": "HD",
+        "isDefault": true,
+        "status": "live"
+      },
+      {
+        "id": "server-2",
+        "name": "سيرفر 2 (مباشر CDN)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-hadhramaut-tv.m3u8?server=2",
+        "quality": "HD",
+        "status": "live"
+      }
+    ],
+    "visible": true,
+    "sortOrder": 51
+  },
+  {
+    "id": "tlfaz-pnc-drama",
+    "code": "TLFAZ-PNC-DRAMA",
+    "nameAr": "قناة بانوراما دراما",
+    "nameEn": "قناة بانوراما دراما",
+    "category": "movies",
+    "descriptionAr": "قنوات أفلام ومسلسلات",
+    "descriptionEn": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2023%2F09%2FPNC-Drama.png",
+    "nowPlayingAr": "بث مباشر 24/7",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (البث المباشر)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-pnc-drama.m3u8?server=1\",\"quality\":\"HD\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (مباشر CDN)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-pnc-drama.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "colorA": "#b02545",
+    "colorB": "#1b040a",
+    "quality": "HD",
+    "streamType": "hls",
+    "streamUrl": "https://aspreen-tv-production.up.railway.app/live/tlfaz-pnc-drama.m3u8",
+    "logoUrl": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2023%2F09%2FPNC-Drama.png",
+    "servers": [
+      {
+        "id": "server-1",
+        "name": "سيرفر 1 (البث المباشر)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-pnc-drama.m3u8?server=1",
+        "quality": "HD",
+        "isDefault": true,
+        "status": "live"
+      },
+      {
+        "id": "server-2",
+        "name": "سيرفر 2 (مباشر CDN)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-pnc-drama.m3u8?server=2",
+        "quality": "HD",
+        "status": "live"
+      }
+    ],
+    "visible": true,
+    "sortOrder": 52
+  },
+  {
+    "id": "tlfaz-pnc-film",
+    "code": "TLFAZ-PNC-FILM",
+    "nameAr": "قناة بانوراما فيلم",
+    "nameEn": "قناة بانوراما فيلم",
+    "category": "movies",
+    "descriptionAr": "قنوات أفلام ومسلسلات",
+    "descriptionEn": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2023%2F09%2FSada-El-Balad.png",
+    "nowPlayingAr": "بث مباشر 24/7",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (البث المباشر)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-pnc-film.m3u8?server=1\",\"quality\":\"HD\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (مباشر CDN)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-pnc-film.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "colorA": "#b02545",
+    "colorB": "#1b040a",
+    "quality": "HD",
+    "streamType": "hls",
+    "streamUrl": "https://aspreen-tv-production.up.railway.app/live/tlfaz-pnc-film.m3u8",
+    "logoUrl": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2023%2F09%2FSada-El-Balad.png",
+    "servers": [
+      {
+        "id": "server-1",
+        "name": "سيرفر 1 (البث المباشر)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-pnc-film.m3u8?server=1",
+        "quality": "HD",
+        "isDefault": true,
+        "status": "live"
+      },
+      {
+        "id": "server-2",
+        "name": "سيرفر 2 (مباشر CDN)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-pnc-film.m3u8?server=2",
+        "quality": "HD",
+        "status": "live"
+      }
+    ],
+    "visible": true,
+    "sortOrder": 53
+  },
+  {
+    "id": "tlfaz-sada-elbalad-drama",
+    "code": "TLFAZ-SADA-ELBALAD-DRAMA",
+    "nameAr": "قناة صدى البلد دراما",
+    "nameEn": "قناة صدى البلد دراما",
+    "category": "movies",
+    "descriptionAr": "قنوات أفلام ومسلسلات",
+    "descriptionEn": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2023%2F09%2FSada-El-Balad.png",
+    "nowPlayingAr": "بث مباشر 24/7",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (البث المباشر)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-sada-elbalad-drama.m3u8?server=1\",\"quality\":\"HD\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (مباشر CDN)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-sada-elbalad-drama.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "colorA": "#b02545",
+    "colorB": "#1b040a",
+    "quality": "HD",
+    "streamType": "hls",
+    "streamUrl": "https://aspreen-tv-production.up.railway.app/live/tlfaz-sada-elbalad-drama.m3u8",
+    "logoUrl": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2023%2F09%2FSada-El-Balad.png",
+    "servers": [
+      {
+        "id": "server-1",
+        "name": "سيرفر 1 (البث المباشر)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-sada-elbalad-drama.m3u8?server=1",
+        "quality": "HD",
+        "isDefault": true,
+        "status": "live"
+      },
+      {
+        "id": "server-2",
+        "name": "سيرفر 2 (مباشر CDN)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-sada-elbalad-drama.m3u8?server=2",
+        "quality": "HD",
+        "status": "live"
+      }
+    ],
+    "visible": true,
+    "sortOrder": 54
+  },
+  {
+    "id": "tlfaz-sada-elbalad-2",
+    "code": "TLFAZ-SADA-ELBALAD-2",
+    "nameAr": "قناة صدى 2 البلد",
+    "nameEn": "قناة صدى 2 البلد",
+    "category": "general",
+    "descriptionAr": "قنوات عربية منوعة",
+    "descriptionEn": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2023%2F09%2FSada-El-Balad.png",
+    "nowPlayingAr": "بث مباشر 24/7",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (البث المباشر)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-sada-elbalad-2.m3u8?server=1\",\"quality\":\"HD\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (مباشر CDN)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-sada-elbalad-2.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "colorA": "#2c4c78",
+    "colorB": "#0a111a",
+    "quality": "HD",
+    "streamType": "hls",
+    "streamUrl": "https://aspreen-tv-production.up.railway.app/live/tlfaz-sada-elbalad-2.m3u8",
+    "logoUrl": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2023%2F09%2FSada-El-Balad.png",
+    "servers": [
+      {
+        "id": "server-1",
+        "name": "سيرفر 1 (البث المباشر)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-sada-elbalad-2.m3u8?server=1",
+        "quality": "HD",
+        "isDefault": true,
+        "status": "live"
+      },
+      {
+        "id": "server-2",
+        "name": "سيرفر 2 (مباشر CDN)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-sada-elbalad-2.m3u8?server=2",
+        "quality": "HD",
+        "status": "live"
+      }
+    ],
+    "visible": true,
+    "sortOrder": 55
+  },
+  {
+    "id": "tlfaz-sada-elbalad",
+    "code": "TLFAZ-SADA-ELBALAD",
+    "nameAr": "قناة صدى البلد",
+    "nameEn": "قناة صدى البلد",
+    "category": "movies",
+    "descriptionAr": "قنوات أفلام ومسلسلات",
+    "descriptionEn": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2023%2F09%2FSada-El-Balad.png",
+    "nowPlayingAr": "بث مباشر 24/7",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (البث المباشر)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-sada-elbalad.m3u8?server=1\",\"quality\":\"HD\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (مباشر CDN)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/tlfaz-sada-elbalad.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "colorA": "#b02545",
+    "colorB": "#1b040a",
+    "quality": "HD",
+    "streamType": "hls",
+    "streamUrl": "https://aspreen-tv-production.up.railway.app/live/tlfaz-sada-elbalad.m3u8",
+    "logoUrl": "https://aspreen-tv-production.up.railway.app/api/app/image-proxy?url=https%3A%2F%2Ftlfaz.com%2Fwp-content%2Fuploads%2F2023%2F09%2FSada-El-Balad.png",
+    "servers": [
+      {
+        "id": "server-1",
+        "name": "سيرفر 1 (البث المباشر)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-sada-elbalad.m3u8?server=1",
+        "quality": "HD",
+        "isDefault": true,
+        "status": "live"
+      },
+      {
+        "id": "server-2",
+        "name": "سيرفر 2 (مباشر CDN)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/tlfaz-sada-elbalad.m3u8?server=2",
+        "quality": "HD",
+        "status": "live"
+      }
+    ],
+    "visible": true,
+    "sortOrder": 56
+  }
 ];
 
 export const DEFAULT_SETTINGS: Record<string, string> = {

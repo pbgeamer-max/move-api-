@@ -5,9 +5,9 @@
 // Motion: staged hero reveal, staggered card entrance, sheen hover, pulse rings.
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Play, Radio, SignalHigh, Tv, X } from "lucide-react";
+import { AlertTriangle, Play, Radio, RotateCcw, Server, SignalHigh, Tv, Wifi, X } from "lucide-react";
 import { api } from "@/lib/api";
-import { CHANNEL_CATEGORIES, type ChannelCategory, type ChannelDTO } from "@/lib/types";
+import { CHANNEL_CATEGORIES, type ChannelCategory, type ChannelDTO, type ChannelServer } from "@/lib/types";
 import { channelLogo } from "@/lib/artwork";
 import { useT, EmptyState, DemoTag, LiveDot, ErrorState } from "../shared";
 import { TvoraPlayer } from "../player";
@@ -179,7 +179,7 @@ function ChannelCard({
           alt=""
           width={96}
           height={96}
-          className="absolute start-1/2 top-1/2 w-[84px] -translate-x-1/2 -translate-y-1/2 drop-shadow-[0_10px_28px_rgba(0,0,0,0.75)] transition-transform duration-500 ease-out group-hover/ch:scale-[1.08] rtl:translate-x-1/2"
+          className="absolute start-1/2 top-1/2 max-h-[72px] max-w-[90px] object-contain -translate-x-1/2 -translate-y-1/2 drop-shadow-[0_10px_28px_rgba(0,0,0,0.75)] transition-transform duration-500 ease-out group-hover/ch:scale-[1.08] rtl:translate-x-1/2"
           loading="lazy"
         />
         {/* badges */}
@@ -231,6 +231,18 @@ function ChannelPlayer({ channel, onClose }: { channel: ChannelDTO; onClose: () 
   const closeRef = useRef<HTMLButtonElement>(null);
   const name = lang === "ar" ? channel.nameAr : channel.nameEn;
   const nowPlaying = lang === "ar" ? channel.nowPlayingAr : channel.nowPlayingEn;
+
+  // Resolve available servers
+  const servers: ChannelServer[] = useMemo(() => {
+    if (channel.servers && channel.servers.length > 0) return channel.servers;
+    if (channel.streamUrl) {
+      return [{ id: "server-1", name: "سيرفر 1 (الأساسي)", url: channel.streamUrl, quality: channel.quality }];
+    }
+    return [];
+  }, [channel]);
+
+  const [activeServer, setActiveServer] = useState<ChannelServer | null>(servers[0] || null);
+  const [serverAlert, setServerAlert] = useState<string | null>(null);
 
   useEffect(() => {
     closeRef.current?.focus();
@@ -291,18 +303,21 @@ function ChannelPlayer({ channel, onClose }: { channel: ChannelDTO; onClose: () 
         className="w-full max-w-5xl overflow-hidden rounded-xl border border-white/10 bg-[#0b0b0d] shadow-[0_40px_120px_-30px_rgba(0,0,0,1)]"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Top bar — LIVE + name + close */}
+        {/* Top bar — Logo + LIVE + name + quality + close */}
         <div className="flex items-center gap-3 border-b border-white/8 bg-black/50 px-4 py-3">
           <span className="inline-flex shrink-0 items-center gap-1.5 rounded-sm bg-[#e5484d]/15 px-2 py-1 text-[10px] font-extrabold tracking-widest text-[#ff6b70]">
             <PulseRing />
             {t("hero.live")}
           </span>
+          {channel.logoUrl ? (
+            <img src={channel.logoUrl} alt="" className="h-6 w-6 shrink-0 object-contain rounded" />
+          ) : null}
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-bold text-white/90">{name}</p>
             {nowPlaying && <p className="truncate text-[11px] text-white/45">{nowPlaying}</p>}
           </div>
           <span className="hidden shrink-0 rounded-sm border border-white/12 px-2 py-0.5 text-[10px] font-bold text-white/60 sm:inline">
-            {channel.quality}
+            {activeServer?.quality || channel.quality}
           </span>
           <button
             ref={closeRef}
@@ -315,11 +330,81 @@ function ChannelPlayer({ channel, onClose }: { channel: ChannelDTO; onClose: () 
           </button>
         </div>
 
+        {/* Server Switcher Bar (when channel has multiple servers) */}
+        {servers.length > 1 && (
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/8 bg-[#0d0d11] px-4 py-2">
+            <div className="flex items-center gap-2 overflow-x-auto py-0.5 no-scrollbar">
+              <span className="flex items-center gap-1.5 text-xs font-bold text-white/60 shrink-0">
+                <Server className="h-3.5 w-3.5 text-[#e5484d]" />
+                السيرفرات:
+              </span>
+              <div className="flex items-center gap-1.5">
+                {servers.map((srv, idx) => {
+                  const isCurrent = activeServer?.id === srv.id || activeServer?.url === srv.url;
+                  return (
+                    <button
+                      key={srv.id || idx}
+                      type="button"
+                      onClick={() => {
+                        setActiveServer(srv);
+                        setServerAlert(null);
+                      }}
+                      className={cn(
+                        "flex shrink-0 items-center gap-1.5 rounded-md border px-3 py-1 font-bold text-xs transition active:scale-95",
+                        isCurrent
+                          ? "border-[#e5484d] bg-[#e5484d] text-white shadow-md shadow-[#e5484d]/30"
+                          : "border-white/10 bg-white/5 text-white/70 hover:border-white/25 hover:text-white"
+                      )}
+                    >
+                      <span className={cn("h-1.5 w-1.5 rounded-full", isCurrent ? "bg-white animate-pulse" : "bg-emerald-400")} />
+                      <span>{srv.name || `سيرفر ${idx + 1}`}</span>
+                      {srv.quality && (
+                        <span className={cn("rounded px-1 text-[9px] font-extrabold", isCurrent ? "bg-black/30 text-white" : "bg-white/10 text-white/50")}>
+                          {srv.quality}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            <span className="hidden sm:inline-flex items-center gap-1 text-[11px] text-emerald-400/90 font-semibold shrink-0">
+              <Wifi className="h-3 w-3" />
+              مباشر
+            </span>
+          </div>
+        )}
+
+        {/* Server Alert Warning Banner */}
+        {serverAlert && (
+          <div className="flex items-center justify-between gap-3 bg-amber-500/15 border-b border-amber-500/30 px-4 py-2 text-xs text-amber-300">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 shrink-0 text-amber-400" />
+              <span>{serverAlert}</span>
+            </div>
+            {servers.length > 1 && (
+              <button
+                type="button"
+                onClick={() => {
+                  const curIdx = servers.findIndex((s) => s.id === activeServer?.id);
+                  const nextIdx = (curIdx + 1) % servers.length;
+                  setActiveServer(servers[nextIdx]);
+                  setServerAlert(null);
+                }}
+                className="flex items-center gap-1 rounded bg-amber-500 px-2.5 py-1 text-[11px] font-bold text-black hover:bg-amber-400 transition"
+              >
+                <RotateCcw className="h-3 w-3" />
+                التبديل للسيرفر البديل
+              </button>
+            )}
+          </div>
+        )}
+
         {/* Video Area */}
         <div className="relative aspect-video w-full bg-[#080808]">
-          {channel.streamUrl ? (
+          {activeServer?.url || channel.streamUrl ? (
             <TvoraPlayer
-              src={channel.streamUrl}
+              src={activeServer?.url || channel.streamUrl || ""}
               titleId={channel.id}
               title={name}
               live={true}
@@ -328,6 +413,17 @@ function ChannelPlayer({ channel, onClose }: { channel: ChannelDTO; onClose: () 
                 channelName: name,
                 nowPlaying: nowPlaying || undefined,
                 category: channel.category,
+              }}
+              servers={servers}
+              activeServerId={activeServer?.id}
+              onServerChange={(srv) => {
+                setActiveServer(srv);
+                setServerAlert(null);
+              }}
+              onErrorState={(hasErr) => {
+                if (hasErr && servers.length > 1) {
+                  setServerAlert("السيرفر يواجه بطء أو انقطاع في البث — يمكنك التبديل لسيرفر آخر");
+                }
               }}
             />
           ) : (

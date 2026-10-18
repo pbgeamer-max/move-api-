@@ -83,6 +83,24 @@ export function serializeSeriesDetails(row: AnyRow): SeriesDetailsDTO {
 }
 
 export function serializeChannel(row: AnyRow): ChannelDTO {
+  const isLogoInDesc = typeof row.descriptionEn === "string" && row.descriptionEn.startsWith("http");
+  const logoUrl = (row.logoUrl as string) || (isLogoInDesc ? (row.descriptionEn as string) : null);
+
+  let servers: any = undefined;
+  if (Array.isArray(row.servers)) {
+    servers = row.servers;
+  } else if (typeof row.servers === "string") {
+    try {
+      servers = JSON.parse(row.servers);
+    } catch {}
+  } else if (typeof row.nowPlayingEn === "string" && row.nowPlayingEn.trim().startsWith("[")) {
+    try {
+      servers = JSON.parse(row.nowPlayingEn);
+    } catch {}
+  }
+
+  const isServersInNowPlaying = typeof row.nowPlayingEn === "string" && row.nowPlayingEn.trim().startsWith("[");
+
   return {
     id: row.id,
     code: row.code as string,
@@ -90,14 +108,16 @@ export function serializeChannel(row: AnyRow): ChannelDTO {
     nameEn: row.nameEn as string,
     category: (row.category as ChannelDTO["category"]) ?? "general",
     descriptionAr: (row.descriptionAr as string) ?? "",
-    descriptionEn: (row.descriptionEn as string) ?? "",
-    nowPlayingAr: (row.nowPlayingAr as string) ?? "",
-    nowPlayingEn: (row.nowPlayingEn as string) ?? "",
+    descriptionEn: isLogoInDesc ? "" : ((row.descriptionEn as string) ?? ""),
+    nowPlayingAr: (row.nowPlayingAr as string) ?? "بث مباشر 24/7",
+    nowPlayingEn: isServersInNowPlaying ? "Live 24/7 Stream" : ((row.nowPlayingEn as string) ?? ""),
     colorA: (row.colorA as string) ?? "#9fb7cb",
     colorB: (row.colorB as string) ?? "#171719",
     quality: (row.quality as string) ?? "HD",
     streamType: (row.streamType as string) ?? "none",
     streamUrl: (row.streamUrl as string) ?? null,
+    logoUrl,
+    servers: Array.isArray(servers) && servers.length > 0 ? servers : undefined,
     visible: Boolean(row.visible),
   };
 }

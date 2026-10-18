@@ -86,9 +86,10 @@ export function backdropFor(seed: string, title: string, subtitle?: string): str
 
 // Deterministic procedural TV-channel logo — rounded screen tile with call letters
 export function channelLogo(
-  channel: { code: string; colorA: string; colorB: string },
+  channel: { code: string; colorA: string; colorB: string; logoUrl?: string | null },
   size = 96
 ): string {
+  if (channel.logoUrl) return channel.logoUrl;
   const initials = channel.code
     .replace(/^TVORA-?/i, "")
     .replace(/[^A-Za-z0-9]/g, "")

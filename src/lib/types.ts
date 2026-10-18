@@ -85,6 +85,15 @@ export const CHANNEL_CATEGORIES: ChannelCategory[] = [
   "general",
 ];
 
+export interface ChannelServer {
+  id: string;
+  name: string;
+  url: string;
+  quality?: string;
+  isDefault?: boolean;
+  status?: string;
+}
+
 export interface ChannelDTO {
   id: string;
   code: string;
@@ -100,6 +109,8 @@ export interface ChannelDTO {
   quality: string;
   streamType: string;
   streamUrl?: string | null;
+  logoUrl?: string | null;
+  servers?: ChannelServer[];
   visible?: boolean; // admin API only — public API returns visible channels
 }
 
