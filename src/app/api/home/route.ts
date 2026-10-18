@@ -17,17 +17,25 @@ export async function GET() {
 async function buildHome(): Promise<HomePayload> {
   const [moviesFeatured, seriesFeatured, trending, featuredAll, newReleases, arabicPicks, topRated, settings] =
     await Promise.all([
-      db.title.findMany({ where: { visible: true, type: "movie", featured: true }, orderBy: { sortOrder: "asc" }, take: 3 }),
-      db.title.findMany({ where: { visible: true, type: "series", featured: true }, orderBy: { sortOrder: "asc" }, take: 2 }),
-      db.title.findMany({ where: { visible: true, trending: true }, orderBy: { sortOrder: "asc" }, take: 12 }),
-      db.title.findMany({ where: { visible: true, featured: true }, orderBy: { sortOrder: "asc" }, take: 8 }),
-      db.title.findMany({ where: { visible: true, isNew: true }, orderBy: { releaseYear: "desc" }, take: 12 }),
+      db.title.findMany({ where: { visible: true, type: "movie", featured: true }, orderBy: { rating: "desc" }, take: 4 }),
+      db.title.findMany({ where: { visible: true, type: "series", featured: true }, orderBy: { rating: "desc" }, take: 4 }),
+      db.title.findMany({ where: { visible: true, trending: true }, orderBy: { rating: "desc" }, take: 14 }),
+      db.title.findMany({ where: { visible: true, featured: true }, orderBy: { rating: "desc" }, take: 12 }),
+      db.title.findMany({ where: { visible: true, isNew: true }, orderBy: { releaseYear: "desc" }, take: 14 }),
       db.title.findMany({
-        where: { visible: true, OR: [{ genres: { contains: "Arabic" } }, { country: { in: ["Iraq", "Arab Region"] } }] },
+        where: {
+          visible: true,
+          OR: [
+            { genres: { contains: "Arabic" } },
+            { titleAr: { contains: "مدبلج" } },
+            { originalTitle: { contains: "مدبلج" } },
+            { country: { in: ["Iraq", "Arab Region", "تركيا"] } },
+          ],
+        },
         orderBy: { rating: "desc" },
-        take: 12,
+        take: 14,
       }),
-      db.title.findMany({ where: { visible: true, rating: { not: null } }, orderBy: { rating: "desc" }, take: 12 }),
+      db.title.findMany({ where: { visible: true, rating: { not: null } }, orderBy: { rating: "desc" }, skip: 4, take: 14 }),
       db.siteSetting.findUnique({ where: { key: "demoMode" } }),
     ]);
 
@@ -37,10 +45,11 @@ async function buildHome(): Promise<HomePayload> {
 
   const ser = (rows: typeof trending) => rows.map((t) => serializeTitle(t as unknown as Record<string, unknown> & { id: string }));
 
-  // Hero slides: alternate movie / series
+  // Hero slides: alternate movie / series for a dynamic cinematic carousel
   const hero: HomePayload["hero"] = [];
   const heroMovies = moviesFeatured.slice(0, 2);
-  const heroSeries = seriesFeatured.slice(0, 1);
+  const heroSeries = seriesFeatured.slice(0, 2);
+
   if (heroMovies[0]) hero.push({ kind: "movie", title: serializeTitle(heroMovies[0] as unknown as Record<string, unknown> & { id: string }) });
   if (heroSeries[0]) {
     const full = await db.title.findUnique({
@@ -50,6 +59,13 @@ async function buildHome(): Promise<HomePayload> {
     if (full) hero.push({ kind: "series", title: serializeSeriesDetails(full as unknown as Record<string, unknown> & { id: string }) });
   }
   if (heroMovies[1]) hero.push({ kind: "movie", title: serializeTitle(heroMovies[1] as unknown as Record<string, unknown> & { id: string }) });
+  if (heroSeries[1]) {
+    const full2 = await db.title.findUnique({
+      where: { id: heroSeries[1].id },
+      include: { seasons: { include: { episodes: { select: { id: true } } } } },
+    });
+    if (full2) hero.push({ kind: "series", title: serializeSeriesDetails(full2 as unknown as Record<string, unknown> & { id: string }) });
+  }
 
   return {
     hero,

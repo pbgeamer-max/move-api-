@@ -286,20 +286,73 @@ export function getLocalCatalog(): Dict[] {
     if (jsonStr) {
       const raw = JSON.parse(jsonStr);
       const list: Dict[] = [];
+
+      const cleanGenreList = (rawGenres: any, isMovie: boolean, titleText: string): string => {
+        let arr: string[] = [];
+        if (Array.isArray(rawGenres)) {
+          arr = rawGenres.map((g) => String(g).replace(/&amp;/g, "&").trim());
+        } else if (typeof rawGenres === "string") {
+          try {
+            const parsed = JSON.parse(rawGenres);
+            if (Array.isArray(parsed)) {
+              arr = parsed.map((g) => String(g).replace(/&amp;/g, "&").trim());
+            } else {
+              arr = [rawGenres.replace(/&amp;/g, "&").trim()];
+            }
+          } catch {
+            arr = [rawGenres.replace(/&amp;/g, "&").trim()];
+          }
+        }
+
+        // Add standard TVORA categorization
+        if (isMovie) {
+          if (!arr.includes("Turkish Movies")) arr.push("Turkish Movies");
+          if (!arr.includes("أفلام تركية")) arr.push("أفلام تركية");
+          if (titleText.includes("مدبلج")) {
+            if (!arr.includes("Arabic Movies")) arr.push("Arabic Movies");
+            if (!arr.includes("أفلام عربية")) arr.push("أفلام عربية");
+          }
+        } else {
+          if (!arr.includes("Turkish Series")) arr.push("Turkish Series");
+          if (!arr.includes("مسلسلات تركية")) arr.push("مسلسلات تركية");
+          if (titleText.includes("مدبلج")) {
+            if (!arr.includes("Arabic Series")) arr.push("Arabic Series");
+            if (!arr.includes("مسلسلات عربية")) arr.push("مسلسلات عربية");
+          }
+        }
+        return JSON.stringify(Array.from(new Set(arr)));
+      };
+
       for (const m of Object.values(raw.movies || {})) {
         const movie = m as Dict;
+        const text = `${movie.titleAr || ""} ${movie.originalTitle || ""} ${movie.synopsisAr || ""}`;
+        const rating = typeof movie.rating === "number" ? movie.rating : 8.5;
         list.push({
           ...movie,
-          genres: typeof movie.genres === "string" ? movie.genres : JSON.stringify(movie.genres || ["أفلام تركية"]),
+          genres: cleanGenreList(movie.genres, true, text),
+          country: movie.country || "تركيا",
+          visible: true,
+          featured: rating >= 8.9 || movie.slug?.includes("centilmen") || movie.slug?.includes("siccin"),
+          trending: rating >= 8.0,
+          isNew: (movie.releaseYear || 0) >= 2023,
         });
       }
+
       for (const s of Object.values(raw.series || {})) {
         const ser = s as Dict;
+        const text = `${ser.titleAr || ""} ${ser.originalTitle || ""} ${ser.synopsisAr || ""}`;
+        const rating = typeof ser.rating === "number" ? ser.rating : 8.8;
         list.push({
           ...ser,
-          genres: typeof ser.genres === "string" ? ser.genres : JSON.stringify(ser.genres || ["مسلسلات تركية"]),
+          genres: cleanGenreList(ser.genres, false, text),
+          country: ser.country || "تركيا",
+          visible: true,
+          featured: rating >= 9.1 || ser.slug?.includes("kurulus") || ser.slug?.includes("ertugrul") || ser.slug?.includes("cukur"),
+          trending: rating >= 8.0,
+          isNew: (ser.releaseYear || 0) >= 2023,
         });
       }
+
       _catalogCache = list;
       return list;
     }

@@ -986,7 +986,11 @@ export function TvoraPlayer({
       {isEmbedMode ? (
         <div className="absolute inset-0 h-full w-full bg-[#080808]">
           <iframe
-            src={resolvedStream.embedUrl}
+            src={
+              resolvedStream.embedUrl?.startsWith("http")
+                ? `/api/stream/embed-proxy?url=${encodeURIComponent(resolvedStream.embedUrl)}`
+                : resolvedStream.embedUrl
+            }
             title={title || "TVORA Cinema Stream"}
             className="h-full w-full border-0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"

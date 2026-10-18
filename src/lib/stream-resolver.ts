@@ -50,10 +50,14 @@ const BROWSER_HEADERS = {
  */
 function unpackDeanEdwards(packedCode: string): string | null {
   try {
-    const fnMatch = packedCode.match(/eval\((function\(p,a,c,k,e,d\)[\s\S]*?\.split\('\|'\)\))\)/);
-    if (!fnMatch) return null;
-    const fn = new Function("return " + fnMatch[1]);
-    return fn() as string;
+    const match = packedCode.match(
+      /eval\s*\(\s*(function\s*\(p,a,c,k,e,[rd]\)[\s\S]*?\.split\(['"]\|['"]\)\s*\))\s*\)/
+    );
+    if (!match) return null;
+    const unpackerCode = "return " + match[1];
+    const unpacker = new Function(unpackerCode);
+    const result = unpacker();
+    return typeof result === "string" ? result : null;
   } catch {
     return null;
   }

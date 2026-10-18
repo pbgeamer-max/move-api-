@@ -182,6 +182,117 @@ function getPrismaClient(): any {
   return globalForPrisma.prisma;
 }
 
+function filterCatalog(catalog: any[], where?: any, orderBy?: any, skip?: number, take?: number): any[] {
+  let list = [...catalog];
+
+  if (where) {
+    if (where.type) {
+      list = list.filter((item) => item.type === where.type);
+    }
+    if (where.visible !== undefined) {
+      list = list.filter((item) => Boolean(item.visible) === Boolean(where.visible));
+    }
+    if (where.featured) {
+      const feat = list.filter((item) => item.featured);
+      list = feat.length > 0 ? feat : list.slice(0, 10);
+    }
+    if (where.trending) {
+      list = list.filter((item) => item.trending);
+    }
+    if (where.isNew) {
+      list = list.filter((item) => item.isNew);
+    }
+    if (where.releaseYear !== undefined) {
+      const targetYear = typeof where.releaseYear === "object" ? where.releaseYear.equals ?? where.releaseYear.gte : where.releaseYear;
+      if (typeof targetYear === "number") {
+        list = list.filter((item) => item.releaseYear === targetYear);
+      }
+    }
+    if (where.rating) {
+      if (where.rating.not === null) {
+        list = list.filter((item) => item.rating != null);
+      } else if (typeof where.rating.gte === "number") {
+        list = list.filter((item) => item.rating != null && item.rating >= where.rating.gte);
+      }
+    }
+    if (where.genres?.contains) {
+      const targetGenre = where.genres.contains.toLowerCase();
+      list = list.filter((item) => {
+        const gStr = typeof item.genres === "string" ? item.genres.toLowerCase() : JSON.stringify(item.genres || []).toLowerCase();
+        return gStr.includes(targetGenre);
+      });
+    }
+    if (where.country) {
+      if (Array.isArray(where.country.in)) {
+        const allowed = where.country.in.map((c: string) => c.toLowerCase());
+        list = list.filter((item) => item.country && allowed.includes(item.country.toLowerCase()));
+      } else if (typeof where.country === "string") {
+        list = list.filter((item) => item.country && item.country.toLowerCase() === where.country.toLowerCase());
+      }
+    }
+    if (Array.isArray(where.OR) && where.OR.length > 0) {
+      list = list.filter((item) => {
+        return where.OR.some((cond: any) => {
+          if (cond.titleAr?.contains) {
+            const q = cond.titleAr.contains.toLowerCase();
+            if (item.titleAr && item.titleAr.toLowerCase().includes(q)) return true;
+          }
+          if (cond.titleEn?.contains) {
+            const q = cond.titleEn.contains.toLowerCase();
+            if (item.titleEn && item.titleEn.toLowerCase().includes(q)) return true;
+          }
+          if (cond.originalTitle?.contains) {
+            const q = cond.originalTitle.contains.toLowerCase();
+            if (item.originalTitle && item.originalTitle.toLowerCase().includes(q)) return true;
+          }
+          if (cond.genres?.contains) {
+            const targetGenre = cond.genres.contains.toLowerCase();
+            const gStr = typeof item.genres === "string" ? item.genres.toLowerCase() : JSON.stringify(item.genres || []).toLowerCase();
+            if (gStr.includes(targetGenre)) return true;
+          }
+          if (cond.country) {
+            if (Array.isArray(cond.country.in)) {
+              const allowed = cond.country.in.map((c: string) => c.toLowerCase());
+              if (item.country && allowed.includes(item.country.toLowerCase())) return true;
+            }
+          }
+          return false;
+        });
+      });
+    }
+  }
+
+  if (orderBy) {
+    const orderRules = Array.isArray(orderBy) ? orderBy : [orderBy];
+    for (const rule of orderRules) {
+      if (rule.rating) {
+        const dir = rule.rating === "asc" ? 1 : -1;
+        list.sort((a, b) => ((a.rating || 0) - (b.rating || 0)) * dir);
+        break;
+      }
+      if (rule.releaseYear) {
+        const dir = rule.releaseYear === "asc" ? 1 : -1;
+        list.sort((a, b) => ((a.releaseYear || 0) - (b.releaseYear || 0)) * dir);
+        break;
+      }
+      if (rule.titleEn) {
+        const dir = rule.titleEn === "desc" ? -1 : 1;
+        list.sort((a, b) => (a.titleEn || "").localeCompare(b.titleEn || "") * dir);
+        break;
+      }
+      if (rule.titleAr) {
+        const dir = rule.titleAr === "desc" ? -1 : 1;
+        list.sort((a, b) => (a.titleAr || "").localeCompare(b.titleAr || "") * dir);
+        break;
+      }
+    }
+  }
+
+  const s = skip ?? 0;
+  const t = take ?? list.length;
+  return list.slice(s, s + t);
+}
+
 /**
  * Resilient Prisma Proxy that guarantees 100% uptime:
  * - Tries live Supabase DB first
@@ -205,28 +316,11 @@ function getResilientPrismaModel(modelName: string): any {
                 console.warn("[TVORA Prisma] title.findMany error, using fallback catalog:", (err as any)?.message || err);
               }
             }
-            // Fallback to local catalog (1,222 series + 423 movies)
-            const cat = getLocalCatalog();
             const where = args[0]?.where;
-            let filtered = cat;
-            if (where?.type) {
-              filtered = filtered.filter((t) => t.type === where.type);
-            }
-            if (where?.featured) {
-              filtered = filtered.filter((t) => t.featured);
-            }
-            if (where?.trending) {
-              filtered = filtered.filter((t) => t.trending);
-            }
-            if (where?.isNew) {
-              filtered = filtered.filter((t) => t.isNew);
-            }
-            if (where?.rating?.not === null) {
-              filtered = filtered.filter((t) => t.rating != null);
-            }
-            const take = args[0]?.take ?? filtered.length;
-            const skip = args[0]?.skip ?? 0;
-            return filtered.slice(skip, skip + take);
+            const orderBy = args[0]?.orderBy;
+            const skip = args[0]?.skip;
+            const take = args[0]?.take;
+            return filterCatalog(getLocalCatalog(), where, orderBy, skip, take);
           };
         }
 
@@ -291,7 +385,8 @@ function getResilientPrismaModel(modelName: string): any {
                 if (c > 0) return c;
               } catch {}
             }
-            return getLocalCatalog().length;
+            const where = args[0]?.where;
+            return filterCatalog(getLocalCatalog(), where).length;
           };
         }
 
