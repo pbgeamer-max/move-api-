@@ -376,10 +376,70 @@ export function TvoraPlayer({
   const [nextCountdown, setNextCountdown] = useState<number | null>(null);
   const [skipFeedback, setSkipFeedback] = useState<"forward" | "rewind" | null>(null);
 
+  // ── Stream Resolver State (Auto-resolves 3isk, external streams, and embeds) ──
+  const [resolvedStream, setResolvedStream] = useState<{
+    type: "hls" | "mp4" | "embed";
+    streamUrl?: string;
+    embedUrl?: string;
+  } | null>(null);
+  const [resolving, setResolving] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (!src) return;
+    const clean = src.split("?")[0].toLowerCase();
+    if (clean.endsWith(".m3u8")) {
+      setResolvedStream({ type: "hls", streamUrl: src });
+      return;
+    }
+    if (clean.endsWith(".mp4") || clean.endsWith(".webm")) {
+      setResolvedStream({ type: "mp4", streamUrl: src });
+      return;
+    }
+
+    // Dynamic stream resolution via /api/stream/resolve
+    setResolving(true);
+    let active = true;
+
+    const params = new URLSearchParams();
+    params.set("url", src);
+    if (episodeId) params.set("episodeId", episodeId);
+    if (titleId) params.set("slug", titleId);
+
+    fetch(`/api/stream/resolve?${params.toString()}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (!active) return;
+        setResolving(false);
+        if (data && data.success) {
+          setResolvedStream({
+            type: data.type || "hls",
+            streamUrl: data.streamUrl,
+            embedUrl: data.embedUrl || data.fallbackEmbed,
+          });
+        } else {
+          setResolvedStream({ type: "embed", embedUrl: src });
+        }
+      })
+      .catch((err) => {
+        if (!active) return;
+        setResolving(false);
+        console.warn("[TvoraPlayer] Stream resolve fallback:", err);
+        setResolvedStream({ type: "embed", embedUrl: src });
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [src, episodeId, titleId]);
+
+  const activePlaybackUrl = resolvedStream?.streamUrl || (resolvedStream?.type !== "embed" ? src : null);
+  const isEmbedMode = resolvedStream?.type === "embed" && Boolean(resolvedStream.embedUrl);
+
   // ── 1. Engine Initialization (hls.js with ABR + Native Fallback) ───────────
   useEffect(() => {
+    if (isEmbedMode || resolving) return;
     const video = videoRef.current;
-    if (!video) return;
+    if (!video || !activePlaybackUrl) return;
     let disposed = false;
 
     setReady(false);
@@ -393,11 +453,16 @@ export function TvoraPlayer({
     setAudioTracks([]);
     setSelectedAudioTrack(-1);
 
-    const isHlsSrc = src.split("?")[0].endsWith(".m3u8");
+    const isHlsSrc = activePlaybackUrl.split("?")[0].endsWith(".m3u8");
     const nativeHlsSupport = video.canPlayType("application/vnd.apple.mpegurl") !== "";
 
     const handleFatalError = () => {
       if (disposed) return;
+      if (resolvedStream?.embedUrl) {
+        // Automatic fallback to embed player
+        setResolvedStream({ type: "embed", embedUrl: resolvedStream.embedUrl });
+        return;
+      }
       if (retriesRef.current < MAX_AUTO_RETRIES) {
         retriesRef.current += 1;
         setReconnecting(true);
@@ -424,7 +489,7 @@ export function TvoraPlayer({
             });
             hlsRef.current = hls;
 
-            hls.loadSource(src);
+            hls.loadSource(activePlaybackUrl);
             hls.attachMedia(video);
 
             hls.on(Hls.Events.MANIFEST_PARSED, (_event, data) => {
@@ -436,7 +501,6 @@ export function TvoraPlayer({
                   height: lvl.height,
                   bitrate: lvl.bitrate,
                 }));
-                // Sort descending (highest resolution first)
                 levels.sort((a, b) => (b.height || 0) - (a.height || 0));
                 setQualityLevels(levels);
               }
@@ -480,7 +544,7 @@ export function TvoraPlayer({
       }
 
       // Native HTML5 source
-      video.src = src;
+      video.src = activePlaybackUrl;
       video.load();
       void video.play().catch(() => {});
     })();
@@ -495,7 +559,7 @@ export function TvoraPlayer({
         video.load();
       }
     };
-  }, [src, nonce, live]);
+  }, [activePlaybackUrl, isEmbedMode, resolving, nonce, live]);
 
   // ── 2. Progress Restore (Movies & Episodes only) ───────────────────────────
   useEffect(() => {
@@ -918,66 +982,82 @@ export function TvoraPlayer({
           padding: 2px 8px;
         }
       `}</style>
-      {/* ── Video Element ──────────────────────────────────────────────────── */}
-      <video
-        ref={(el) => {
-          (videoRef as any).current = el;
-          onVideoEl?.(el);
-        }}
-        poster={poster}
-        className="absolute inset-0 h-full w-full bg-[#080808] object-contain"
-        playsInline
-        autoPlay
-        muted={muted}
-        onLoadedMetadata={onLoadedMetadata}
-        onCanPlay={() => setReady(true)}
-        onPlaying={() => {
-          setPlaying(true);
-          setReady(true);
-        }}
-        onPause={() => {
-          setPlaying(false);
-          saveProgress();
-        }}
-        onEnded={() => {
-          setPlaying(false);
-          saveProgress();
-          onEnded?.();
-        }}
-        onTimeUpdate={onTimeUpdate}
-        onProgress={onProgress}
-        onDurationChange={() => {
-          const v = videoRef.current;
-          if (v && Number.isFinite(v.duration)) setDuration(v.duration);
-        }}
-        onError={() => {
-          if (retriesRef.current < MAX_AUTO_RETRIES) {
-            retriesRef.current += 1;
-            setReconnecting(true);
-            setTimeout(() => setNonce((n) => n + 1), 1500 * retriesRef.current);
-          } else {
-            setReconnecting(false);
-            setError(true);
-          }
-        }}
-        onClick={(e) => {
-          e.stopPropagation();
-          closeAllMenus();
-          togglePlay();
-        }}
-      >
-        {/* Subtitle WebVTT Tracks */}
-        {subtitles.map((sub) => (
-          <track
-            key={sub.srclang}
-            label={sub.label}
-            kind="subtitles"
-            srcLang={sub.srclang}
-            src={sub.src}
-            default={sub.default}
+      {/* ── Video Element or Sandboxed Cinema Embed ───────────────────────── */}
+      {isEmbedMode ? (
+        <div className="absolute inset-0 h-full w-full bg-[#080808]">
+          <iframe
+            src={resolvedStream.embedUrl}
+            title={title || "TVORA Cinema Stream"}
+            className="h-full w-full border-0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+            allowFullScreen
           />
-        ))}
-      </video>
+        </div>
+      ) : (
+        <video
+          ref={(el) => {
+            (videoRef as any).current = el;
+            onVideoEl?.(el);
+          }}
+          poster={poster}
+          className="absolute inset-0 h-full w-full bg-[#080808] object-contain"
+          playsInline
+          autoPlay
+          muted={muted}
+          onLoadedMetadata={onLoadedMetadata}
+          onCanPlay={() => setReady(true)}
+          onPlaying={() => {
+            setPlaying(true);
+            setReady(true);
+          }}
+          onPause={() => {
+            setPlaying(false);
+            saveProgress();
+          }}
+          onEnded={() => {
+            setPlaying(false);
+            saveProgress();
+            onEnded?.();
+          }}
+          onTimeUpdate={onTimeUpdate}
+          onProgress={onProgress}
+          onDurationChange={() => {
+            const v = videoRef.current;
+            if (v && Number.isFinite(v.duration)) setDuration(v.duration);
+          }}
+          onError={() => {
+            if (resolvedStream?.embedUrl) {
+              setResolvedStream({ type: "embed", embedUrl: resolvedStream.embedUrl });
+              return;
+            }
+            if (retriesRef.current < MAX_AUTO_RETRIES) {
+              retriesRef.current += 1;
+              setReconnecting(true);
+              setTimeout(() => setNonce((n) => n + 1), 1500 * retriesRef.current);
+            } else {
+              setReconnecting(false);
+              setError(true);
+            }
+          }}
+          onClick={(e) => {
+            e.stopPropagation();
+            closeAllMenus();
+            togglePlay();
+          }}
+        >
+          {/* Subtitle WebVTT Tracks */}
+          {subtitles.map((sub) => (
+            <track
+              key={sub.srclang}
+              label={sub.label}
+              kind="subtitles"
+              srcLang={sub.srclang}
+              src={sub.src}
+              default={sub.default}
+            />
+          ))}
+        </video>
+      )}
 
       {/* ── Top Bar: Badges, Title, Reconnect Status ───────────────────────── */}
       <div
@@ -1044,7 +1124,7 @@ export function TvoraPlayer({
       </div>
 
       {/* ── Center Play / Pause Indicator ─────────────────────────────────── */}
-      {!playing && ready && !error && (
+      {!isEmbedMode && !playing && ready && !error && (
         <button
           type="button"
           onClick={(e) => {
@@ -1103,21 +1183,23 @@ export function TvoraPlayer({
       )}
 
       {/* ── Loading Overlay ────────────────────────────────────────────────── */}
-      {!ready && !error && <PlayerLoading label={t("player.loadingStream")} />}
+      {resolving && <PlayerLoading label="جاري استخراج رابط البث والسينما..." />}
+      {!resolving && !isEmbedMode && !ready && !error && <PlayerLoading label={t("player.loadingStream")} />}
 
       {/* ── Error Card ─────────────────────────────────────────────────────── */}
-      {error && <PlayerError onRetry={manualRetry} />}
+      {!resolving && !isEmbedMode && error && <PlayerError onRetry={manualRetry} />}
 
       {/* ── Bottom Control Bar ─────────────────────────────────────────────── */}
-      <div
-        className={cn(
-          "absolute inset-x-0 bottom-0 z-20 bg-gradient-to-t from-[#080808] via-[#080808]/80 to-transparent px-4 pb-3.5 pt-14 transition-all duration-300",
-          controlsVisible || !playing || isMenuOpen
-            ? "translate-y-0 opacity-100"
-            : "translate-y-4 opacity-0 pointer-events-none"
-        )}
-        onClick={(e) => e.stopPropagation()}
-      >
+      {!isEmbedMode && (
+        <div
+          className={cn(
+            "absolute inset-x-0 bottom-0 z-20 bg-gradient-to-t from-[#080808] via-[#080808]/80 to-transparent px-4 pb-3.5 pt-14 transition-all duration-300",
+            controlsVisible || !playing || isMenuOpen
+              ? "translate-y-0 opacity-100"
+              : "translate-y-4 opacity-0 pointer-events-none"
+          )}
+          onClick={(e) => e.stopPropagation()}
+        >
         {/* Timeline Seek Bar (or Live Badge) */}
         {live ? (
           <div className="mb-2 flex items-center justify-between gap-3 text-xs text-white/60">
@@ -1513,6 +1595,7 @@ export function TvoraPlayer({
           </div>
         </div>
       </div>
+      )}
     </div>
   );
 }
