@@ -87,6 +87,27 @@ export async function resolveStream(targetUrl: string, bypassCache = false): Pro
   if (trimmed.includes(".mp4")) {
     return { success: true, type: "mp4", streamUrl: trimmed };
   }
+  // Aspreen VOD direct stream or player
+  if (trimmed.includes("/vod/stream") || (trimmed.includes("aspreen-tv") && trimmed.includes("/vod/"))) {
+    if (trimmed.includes("/vod/player")) {
+      const streamUrl = trimmed.replace("/vod/player", "/vod/stream");
+      return {
+        success: true,
+        type: "hls",
+        streamUrl,
+        embedUrl: trimmed,
+        fallbackEmbed: trimmed,
+      };
+    }
+    const embedUrl = trimmed.replace("/vod/stream", "/vod/player");
+    return {
+      success: true,
+      type: "hls",
+      streamUrl: trimmed,
+      embedUrl,
+      fallbackEmbed: embedUrl,
+    };
+  }
 
   // 2. Check cache
   const cached = getCached(trimmed, bypassCache);

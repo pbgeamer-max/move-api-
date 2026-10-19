@@ -399,19 +399,20 @@ export function TvoraPlayer({
 
   // ── Stream Resolver State (Auto-resolves 3isk, external streams, and embeds) ──
   const isDirectMedia = Boolean(
-    src && (src.includes(".m3u8") || src.includes(".mp4") || src.includes(".webm"))
+    src && (src.includes(".m3u8") || src.includes(".mp4") || src.includes(".webm") || src.includes("/vod/stream"))
   );
+  const isHlsInitial = Boolean(src && (src.includes(".m3u8") || src.includes("/vod/stream")));
   const [resolvedStream, setResolvedStream] = useState<{
     type: "hls" | "mp4" | "embed";
     streamUrl?: string;
     embedUrl?: string;
-  } | null>(isDirectMedia ? { type: src.includes(".m3u8") ? "hls" : "mp4", streamUrl: src } : null);
+  } | null>(isDirectMedia ? { type: isHlsInitial ? "hls" : "mp4", streamUrl: src } : null);
   const [resolving, setResolving] = useState<boolean>(!isDirectMedia);
 
   useEffect(() => {
     if (!src) return;
     if (isDirectMedia) {
-      setResolvedStream({ type: src.includes(".m3u8") ? "hls" : "mp4", streamUrl: src });
+      setResolvedStream({ type: isHlsInitial ? "hls" : "mp4", streamUrl: src });
       setResolving(false);
       return;
     }
@@ -488,7 +489,10 @@ export function TvoraPlayer({
     setAudioTracks([]);
     setSelectedAudioTrack(-1);
 
-    const isHlsSrc = activePlaybackUrl.split("?")[0].endsWith(".m3u8");
+    const isHlsSrc =
+      activePlaybackUrl.split("?")[0].endsWith(".m3u8") ||
+      activePlaybackUrl.includes("/vod/stream") ||
+      activePlaybackUrl.includes(".m3u8");
     const nativeHlsSupport = video.canPlayType("application/vnd.apple.mpegurl") !== "";
 
     const handleFatalError = () => {
