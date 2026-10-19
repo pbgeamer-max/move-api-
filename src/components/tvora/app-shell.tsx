@@ -82,7 +82,7 @@ function CurrentView() {
     case "continue":
       return <ContinueView />;
     case "auth":
-      return <AuthView mode={view.mode ?? "login"} />;
+      return null;
     case "profile":
       return <ProfileView />;
     case "pricing":
@@ -122,8 +122,16 @@ export function TvoraApp() {
   }, []);
 
   // Login gate — the cinematic entry screen. Shown for visitors with no
-  // session who haven't (yet) chosen to browse as guests.
-  const showGate = mounted && authReady && !user && !guestOk;
+  // session who haven't (yet) chosen to browse as guests, OR when explicitly
+  // clicking "تسجيل الدخول" (which navigates to auth).
+  const isAuthView = view.name === "auth";
+  const showGate = mounted && authReady && ((!user && !guestOk) || (isAuthView && !user));
+
+  useEffect(() => {
+    if (user && view.name === "auth") {
+      useAppStore.getState().navigate({ name: "home" });
+    }
+  }, [user, view.name]);
 
   // Bind hash router once
   useEffect(() => bindHashRouter(), []);
@@ -207,9 +215,20 @@ export function TvoraApp() {
               onEnter={(u) => {
                 if (u) {
                   setUser(u); // real session — signing out later must bring the gate back
+                  if (view.name === "auth") {
+                    useAppStore.getState().navigate({ name: "home" });
+                  }
                 } else {
                   window.localStorage.setItem("tvora.guest", "1");
                   setGuestOk(true); // guest choice only
+                  if (view.name === "auth") {
+                    useAppStore.getState().navigate({ name: "home" });
+                  }
+                }
+              }}
+              onClose={() => {
+                if (view.name === "auth") {
+                  useAppStore.getState().navigate({ name: "home" });
                 }
               }}
             />

@@ -8,7 +8,7 @@
 // Success: Vo laughs + confetti burst → the gate dissolves into the app.
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useAnimationControls, type Variants } from "framer-motion";
-import { Eye, EyeOff, Languages, Loader2, Volume2, VolumeX } from "lucide-react";
+import { Eye, EyeOff, Languages, Loader2, Volume2, VolumeX, X } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { useAppStore } from "@/lib/store";
@@ -108,7 +108,13 @@ function Confetti({ show }: { show: boolean }) {
 }
 
 // ─── the gate ─────────────────────────────────────────────────────────────────
-export function LoginGate({ onEnter }: { onEnter: (user: SessionUser | null) => void }) {
+export function LoginGate({
+  onEnter,
+  onClose,
+}: {
+  onEnter: (user: SessionUser | null) => void;
+  onClose?: () => void;
+}) {
   const { t, lang } = useT();
   const allowed = useMotionAllowed();
   const setLang = useAppStore((s) => s.setLang);
@@ -235,7 +241,10 @@ export function LoginGate({ onEnter }: { onEnter: (user: SessionUser | null) => 
   const guest = () => {
     faceSay("guest");
     faceMood("happy", 2000);
-    window.setTimeout(() => enter(null), 700);
+    window.setTimeout(() => {
+      if (onClose) onClose();
+      else enter(null);
+    }, 700);
   };
 
   const handleGoogleSignIn = async () => {
@@ -339,6 +348,18 @@ export function LoginGate({ onEnter }: { onEnter: (user: SessionUser | null) => 
       </div>
 
       <div className="relative mx-auto grid min-h-screen w-full max-w-6xl items-center gap-10 px-4 pb-10 pt-12 sm:px-6 lg:grid-cols-2 lg:gap-6 lg:px-10 lg:py-8">
+        {/* close button (when opened as modal/view) */}
+        {onClose && (
+          <button
+            type="button"
+            onClick={onClose}
+            data-testid="gate-close"
+            aria-label={lang === "ar" ? "إغلاق" : "Close"}
+            className="tv-focusable absolute start-5 top-5 z-20 flex h-9 w-9 items-center justify-center rounded-full border border-white/12 bg-white/[0.03] text-white/60 transition hover:border-white/35 hover:text-white sm:start-8 sm:top-7"
+          >
+            <X className="h-4 w-4" aria-hidden />
+          </button>
+        )}
         {/* language toggle — top start corner */}
         <button
           type="button"
