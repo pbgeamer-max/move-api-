@@ -16,27 +16,57 @@ export const DEFAULT_CHANNELS: Dict[] = [
     "descriptionAr": "beIN SPORTS VIP (ملفاتك الخاصة)",
     "descriptionEn": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
     "nowPlayingAr": "بث مباشر 24/7",
-    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (VIP فضائي 24/7 - FHD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-news.m3u8?server=1\",\"quality\":\"1080p\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (VIP احتياطي - HD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-news.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 - فائق الدقة (4K / 1080p 60fps)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-news.m3u8?server=1\",\"quality\":\"4K\",\"resolution\":\"1920x1080\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 - المصدر المباشر (RAW Satellite)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-news.m3u8?server=2\",\"quality\":\"1080p\",\"resolution\":\"1920x1080\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-3\",\"name\":\"سيرفر 3 - عالي الوضوح (HD 720p 60fps)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-news.m3u8?server=3\",\"quality\":\"HD\",\"resolution\":\"1280x720\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-4\",\"name\":\"سيرفر 4 - للإنترنت الضعيف (SD 576p)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-news.m3u8?server=4\",\"quality\":\"SD\",\"resolution\":\"720x576\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-5\",\"name\":\"سيرفر 5 - فائق الدقة احتياطي (4K S2)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-news.m3u8?server=5\",\"quality\":\"4K\",\"resolution\":\"1920x1080\",\"isDefault\":false,\"status\":\"live\"}]",
     "colorA": "#601977",
     "colorB": "#14041b",
-    "quality": "1080p",
+    "quality": "4K",
     "streamType": "hls",
     "streamUrl": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-news.m3u8",
     "logoUrl": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
     "servers": [
       {
         "id": "server-1",
-        "name": "سيرفر 1 (VIP فضائي 24/7 - FHD)",
+        "name": "سيرفر 1 - فائق الدقة (4K / 1080p 60fps)",
         "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-news.m3u8?server=1",
-        "quality": "1080p",
+        "quality": "4K",
+        "resolution": "1920x1080",
         "isDefault": true,
         "status": "live"
       },
       {
         "id": "server-2",
-        "name": "سيرفر 2 (VIP احتياطي - HD)",
+        "name": "سيرفر 2 - المصدر المباشر (RAW Satellite)",
         "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-news.m3u8?server=2",
+        "quality": "1080p",
+        "resolution": "1920x1080",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-3",
+        "name": "سيرفر 3 - عالي الوضوح (HD 720p 60fps)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-news.m3u8?server=3",
         "quality": "HD",
+        "resolution": "1280x720",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-4",
+        "name": "سيرفر 4 - للإنترنت الضعيف (SD 576p)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-news.m3u8?server=4",
+        "quality": "SD",
+        "resolution": "720x576",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-5",
+        "name": "سيرفر 5 - فائق الدقة احتياطي (4K S2)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-news.m3u8?server=5",
+        "quality": "4K",
+        "resolution": "1920x1080",
+        "isDefault": false,
         "status": "live"
       }
     ],
@@ -52,27 +82,57 @@ export const DEFAULT_CHANNELS: Dict[] = [
     "descriptionAr": "beIN SPORTS VIP (ملفاتك الخاصة)",
     "descriptionEn": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
     "nowPlayingAr": "بث مباشر 24/7",
-    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (VIP فضائي 24/7 - FHD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-global.m3u8?server=1\",\"quality\":\"1080p\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (VIP احتياطي - HD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-global.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 - فائق الدقة (4K / 1080p 60fps)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-global.m3u8?server=1\",\"quality\":\"4K\",\"resolution\":\"1920x1080\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 - المصدر المباشر (RAW Satellite)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-global.m3u8?server=2\",\"quality\":\"1080p\",\"resolution\":\"1920x1080\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-3\",\"name\":\"سيرفر 3 - عالي الوضوح (HD 720p 60fps)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-global.m3u8?server=3\",\"quality\":\"HD\",\"resolution\":\"1280x720\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-4\",\"name\":\"سيرفر 4 - للإنترنت الضعيف (SD 576p)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-global.m3u8?server=4\",\"quality\":\"SD\",\"resolution\":\"720x576\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-5\",\"name\":\"سيرفر 5 - فائق الدقة احتياطي (4K S2)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-global.m3u8?server=5\",\"quality\":\"4K\",\"resolution\":\"1920x1080\",\"isDefault\":false,\"status\":\"live\"}]",
     "colorA": "#601977",
     "colorB": "#14041b",
-    "quality": "1080p",
+    "quality": "4K",
     "streamType": "hls",
     "streamUrl": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-global.m3u8",
     "logoUrl": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
     "servers": [
       {
         "id": "server-1",
-        "name": "سيرفر 1 (VIP فضائي 24/7 - FHD)",
+        "name": "سيرفر 1 - فائق الدقة (4K / 1080p 60fps)",
         "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-global.m3u8?server=1",
-        "quality": "1080p",
+        "quality": "4K",
+        "resolution": "1920x1080",
         "isDefault": true,
         "status": "live"
       },
       {
         "id": "server-2",
-        "name": "سيرفر 2 (VIP احتياطي - HD)",
+        "name": "سيرفر 2 - المصدر المباشر (RAW Satellite)",
         "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-global.m3u8?server=2",
+        "quality": "1080p",
+        "resolution": "1920x1080",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-3",
+        "name": "سيرفر 3 - عالي الوضوح (HD 720p 60fps)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-global.m3u8?server=3",
         "quality": "HD",
+        "resolution": "1280x720",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-4",
+        "name": "سيرفر 4 - للإنترنت الضعيف (SD 576p)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-global.m3u8?server=4",
+        "quality": "SD",
+        "resolution": "720x576",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-5",
+        "name": "سيرفر 5 - فائق الدقة احتياطي (4K S2)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-global.m3u8?server=5",
+        "quality": "4K",
+        "resolution": "1920x1080",
+        "isDefault": false,
         "status": "live"
       }
     ],
@@ -88,27 +148,84 @@ export const DEFAULT_CHANNELS: Dict[] = [
     "descriptionAr": "beIN SPORTS VIP (ملفاتك الخاصة)",
     "descriptionEn": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
     "nowPlayingAr": "بث مباشر 24/7",
-    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (VIP فضائي 24/7 - FHD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-1.m3u8?server=1\",\"quality\":\"1080p\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (VIP احتياطي - HD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-1.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 - فائق الدقة (4K / 1080p 60fps)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-1.m3u8?server=1\",\"quality\":\"4K\",\"resolution\":\"1920x1080\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 - البث الفضائي (UHD / HEVC 50fps)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-1.m3u8?server=2\",\"quality\":\"UHD\",\"resolution\":\"1920x1080\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-3\",\"name\":\"سيرفر 3 - المصدر المباشر (RAW Satellite)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-1.m3u8?server=3\",\"quality\":\"1080p\",\"resolution\":\"1920x1080\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-4\",\"name\":\"سيرفر 4 - موفر للبيانات (HEVC / FHD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-1.m3u8?server=4\",\"quality\":\"HEVC\",\"resolution\":\"1920x1080\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-5\",\"name\":\"سيرفر 5 - عالي الوضوح (HD 720p 60fps)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-1.m3u8?server=5\",\"quality\":\"HD\",\"resolution\":\"1280x720\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-6\",\"name\":\"سيرفر 6 - للإنترنت الضعيف (SD 576p)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-1.m3u8?server=6\",\"quality\":\"SD\",\"resolution\":\"720x576\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-7\",\"name\":\"سيرفر 7 - فائق الدقة احتياطي (4K S2)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-1.m3u8?server=7\",\"quality\":\"4K\",\"resolution\":\"1920x1080\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-8\",\"name\":\"سيرفر 8 - عالي الوضوح احتياطي (HD S2)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-1.m3u8?server=8\",\"quality\":\"HD\",\"resolution\":\"1280x720\",\"isDefault\":false,\"status\":\"live\"}]",
     "colorA": "#601977",
     "colorB": "#14041b",
-    "quality": "1080p",
+    "quality": "4K",
     "streamType": "hls",
     "streamUrl": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-1.m3u8",
     "logoUrl": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
     "servers": [
       {
         "id": "server-1",
-        "name": "سيرفر 1 (VIP فضائي 24/7 - FHD)",
+        "name": "سيرفر 1 - فائق الدقة (4K / 1080p 60fps)",
         "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-1.m3u8?server=1",
-        "quality": "1080p",
+        "quality": "4K",
+        "resolution": "1920x1080",
         "isDefault": true,
         "status": "live"
       },
       {
         "id": "server-2",
-        "name": "سيرفر 2 (VIP احتياطي - HD)",
+        "name": "سيرفر 2 - البث الفضائي (UHD / HEVC 50fps)",
         "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-1.m3u8?server=2",
+        "quality": "UHD",
+        "resolution": "1920x1080",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-3",
+        "name": "سيرفر 3 - المصدر المباشر (RAW Satellite)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-1.m3u8?server=3",
+        "quality": "1080p",
+        "resolution": "1920x1080",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-4",
+        "name": "سيرفر 4 - موفر للبيانات (HEVC / FHD)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-1.m3u8?server=4",
+        "quality": "HEVC",
+        "resolution": "1920x1080",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-5",
+        "name": "سيرفر 5 - عالي الوضوح (HD 720p 60fps)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-1.m3u8?server=5",
         "quality": "HD",
+        "resolution": "1280x720",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-6",
+        "name": "سيرفر 6 - للإنترنت الضعيف (SD 576p)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-1.m3u8?server=6",
+        "quality": "SD",
+        "resolution": "720x576",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-7",
+        "name": "سيرفر 7 - فائق الدقة احتياطي (4K S2)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-1.m3u8?server=7",
+        "quality": "4K",
+        "resolution": "1920x1080",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-8",
+        "name": "سيرفر 8 - عالي الوضوح احتياطي (HD S2)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-1.m3u8?server=8",
+        "quality": "HD",
+        "resolution": "1280x720",
+        "isDefault": false,
         "status": "live"
       }
     ],
@@ -124,27 +241,84 @@ export const DEFAULT_CHANNELS: Dict[] = [
     "descriptionAr": "beIN SPORTS VIP (ملفاتك الخاصة)",
     "descriptionEn": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
     "nowPlayingAr": "بث مباشر 24/7",
-    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (VIP فضائي 24/7 - FHD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-2.m3u8?server=1\",\"quality\":\"1080p\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (VIP احتياطي - HD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-2.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 - فائق الدقة (4K / 1080p 60fps)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-2.m3u8?server=1\",\"quality\":\"4K\",\"resolution\":\"1920x1080\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 - البث الفضائي (UHD / HEVC 50fps)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-2.m3u8?server=2\",\"quality\":\"UHD\",\"resolution\":\"1920x1080\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-3\",\"name\":\"سيرفر 3 - المصدر المباشر (RAW Satellite)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-2.m3u8?server=3\",\"quality\":\"1080p\",\"resolution\":\"1920x1080\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-4\",\"name\":\"سيرفر 4 - موفر للبيانات (HEVC / FHD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-2.m3u8?server=4\",\"quality\":\"HEVC\",\"resolution\":\"1920x1080\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-5\",\"name\":\"سيرفر 5 - عالي الوضوح (HD 720p 60fps)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-2.m3u8?server=5\",\"quality\":\"HD\",\"resolution\":\"1280x720\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-6\",\"name\":\"سيرفر 6 - للإنترنت الضعيف (SD 576p)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-2.m3u8?server=6\",\"quality\":\"SD\",\"resolution\":\"720x576\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-7\",\"name\":\"سيرفر 7 - فائق الدقة احتياطي (4K S2)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-2.m3u8?server=7\",\"quality\":\"4K\",\"resolution\":\"1920x1080\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-8\",\"name\":\"سيرفر 8 - عالي الوضوح احتياطي (HD S2)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-2.m3u8?server=8\",\"quality\":\"HD\",\"resolution\":\"1280x720\",\"isDefault\":false,\"status\":\"live\"}]",
     "colorA": "#601977",
     "colorB": "#14041b",
-    "quality": "1080p",
+    "quality": "4K",
     "streamType": "hls",
     "streamUrl": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-2.m3u8",
     "logoUrl": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
     "servers": [
       {
         "id": "server-1",
-        "name": "سيرفر 1 (VIP فضائي 24/7 - FHD)",
+        "name": "سيرفر 1 - فائق الدقة (4K / 1080p 60fps)",
         "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-2.m3u8?server=1",
-        "quality": "1080p",
+        "quality": "4K",
+        "resolution": "1920x1080",
         "isDefault": true,
         "status": "live"
       },
       {
         "id": "server-2",
-        "name": "سيرفر 2 (VIP احتياطي - HD)",
+        "name": "سيرفر 2 - البث الفضائي (UHD / HEVC 50fps)",
         "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-2.m3u8?server=2",
+        "quality": "UHD",
+        "resolution": "1920x1080",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-3",
+        "name": "سيرفر 3 - المصدر المباشر (RAW Satellite)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-2.m3u8?server=3",
+        "quality": "1080p",
+        "resolution": "1920x1080",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-4",
+        "name": "سيرفر 4 - موفر للبيانات (HEVC / FHD)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-2.m3u8?server=4",
+        "quality": "HEVC",
+        "resolution": "1920x1080",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-5",
+        "name": "سيرفر 5 - عالي الوضوح (HD 720p 60fps)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-2.m3u8?server=5",
         "quality": "HD",
+        "resolution": "1280x720",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-6",
+        "name": "سيرفر 6 - للإنترنت الضعيف (SD 576p)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-2.m3u8?server=6",
+        "quality": "SD",
+        "resolution": "720x576",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-7",
+        "name": "سيرفر 7 - فائق الدقة احتياطي (4K S2)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-2.m3u8?server=7",
+        "quality": "4K",
+        "resolution": "1920x1080",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-8",
+        "name": "سيرفر 8 - عالي الوضوح احتياطي (HD S2)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-2.m3u8?server=8",
+        "quality": "HD",
+        "resolution": "1280x720",
+        "isDefault": false,
         "status": "live"
       }
     ],
@@ -160,27 +334,84 @@ export const DEFAULT_CHANNELS: Dict[] = [
     "descriptionAr": "beIN SPORTS VIP (ملفاتك الخاصة)",
     "descriptionEn": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
     "nowPlayingAr": "بث مباشر 24/7",
-    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (VIP فضائي 24/7 - FHD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-3.m3u8?server=1\",\"quality\":\"1080p\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (VIP احتياطي - HD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-3.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 - فائق الدقة (4K / 1080p 60fps)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-3.m3u8?server=1\",\"quality\":\"4K\",\"resolution\":\"1920x1080\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 - البث الفضائي (UHD / HEVC 50fps)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-3.m3u8?server=2\",\"quality\":\"UHD\",\"resolution\":\"1920x1080\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-3\",\"name\":\"سيرفر 3 - المصدر المباشر (RAW Satellite)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-3.m3u8?server=3\",\"quality\":\"1080p\",\"resolution\":\"1920x1080\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-4\",\"name\":\"سيرفر 4 - موفر للبيانات (HEVC / FHD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-3.m3u8?server=4\",\"quality\":\"HEVC\",\"resolution\":\"1920x1080\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-5\",\"name\":\"سيرفر 5 - عالي الوضوح (HD 720p 60fps)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-3.m3u8?server=5\",\"quality\":\"HD\",\"resolution\":\"1280x720\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-6\",\"name\":\"سيرفر 6 - للإنترنت الضعيف (SD 576p)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-3.m3u8?server=6\",\"quality\":\"SD\",\"resolution\":\"720x576\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-7\",\"name\":\"سيرفر 7 - فائق الدقة احتياطي (4K S2)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-3.m3u8?server=7\",\"quality\":\"4K\",\"resolution\":\"1920x1080\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-8\",\"name\":\"سيرفر 8 - عالي الوضوح احتياطي (HD S2)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-3.m3u8?server=8\",\"quality\":\"HD\",\"resolution\":\"1280x720\",\"isDefault\":false,\"status\":\"live\"}]",
     "colorA": "#601977",
     "colorB": "#14041b",
-    "quality": "1080p",
+    "quality": "4K",
     "streamType": "hls",
     "streamUrl": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-3.m3u8",
     "logoUrl": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
     "servers": [
       {
         "id": "server-1",
-        "name": "سيرفر 1 (VIP فضائي 24/7 - FHD)",
+        "name": "سيرفر 1 - فائق الدقة (4K / 1080p 60fps)",
         "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-3.m3u8?server=1",
-        "quality": "1080p",
+        "quality": "4K",
+        "resolution": "1920x1080",
         "isDefault": true,
         "status": "live"
       },
       {
         "id": "server-2",
-        "name": "سيرفر 2 (VIP احتياطي - HD)",
+        "name": "سيرفر 2 - البث الفضائي (UHD / HEVC 50fps)",
         "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-3.m3u8?server=2",
+        "quality": "UHD",
+        "resolution": "1920x1080",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-3",
+        "name": "سيرفر 3 - المصدر المباشر (RAW Satellite)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-3.m3u8?server=3",
+        "quality": "1080p",
+        "resolution": "1920x1080",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-4",
+        "name": "سيرفر 4 - موفر للبيانات (HEVC / FHD)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-3.m3u8?server=4",
+        "quality": "HEVC",
+        "resolution": "1920x1080",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-5",
+        "name": "سيرفر 5 - عالي الوضوح (HD 720p 60fps)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-3.m3u8?server=5",
         "quality": "HD",
+        "resolution": "1280x720",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-6",
+        "name": "سيرفر 6 - للإنترنت الضعيف (SD 576p)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-3.m3u8?server=6",
+        "quality": "SD",
+        "resolution": "720x576",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-7",
+        "name": "سيرفر 7 - فائق الدقة احتياطي (4K S2)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-3.m3u8?server=7",
+        "quality": "4K",
+        "resolution": "1920x1080",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-8",
+        "name": "سيرفر 8 - عالي الوضوح احتياطي (HD S2)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-3.m3u8?server=8",
+        "quality": "HD",
+        "resolution": "1280x720",
+        "isDefault": false,
         "status": "live"
       }
     ],
@@ -196,27 +427,84 @@ export const DEFAULT_CHANNELS: Dict[] = [
     "descriptionAr": "beIN SPORTS VIP (ملفاتك الخاصة)",
     "descriptionEn": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
     "nowPlayingAr": "بث مباشر 24/7",
-    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (VIP فضائي 24/7 - FHD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-4.m3u8?server=1\",\"quality\":\"1080p\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (VIP احتياطي - HD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-4.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 - فائق الدقة (4K / 1080p 60fps)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-4.m3u8?server=1\",\"quality\":\"4K\",\"resolution\":\"1920x1080\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 - البث الفضائي (UHD / HEVC 50fps)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-4.m3u8?server=2\",\"quality\":\"UHD\",\"resolution\":\"1920x1080\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-3\",\"name\":\"سيرفر 3 - المصدر المباشر (RAW Satellite)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-4.m3u8?server=3\",\"quality\":\"1080p\",\"resolution\":\"1920x1080\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-4\",\"name\":\"سيرفر 4 - موفر للبيانات (HEVC / FHD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-4.m3u8?server=4\",\"quality\":\"HEVC\",\"resolution\":\"1920x1080\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-5\",\"name\":\"سيرفر 5 - عالي الوضوح (HD 720p 60fps)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-4.m3u8?server=5\",\"quality\":\"HD\",\"resolution\":\"1280x720\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-6\",\"name\":\"سيرفر 6 - للإنترنت الضعيف (SD 576p)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-4.m3u8?server=6\",\"quality\":\"SD\",\"resolution\":\"720x576\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-7\",\"name\":\"سيرفر 7 - فائق الدقة احتياطي (4K S2)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-4.m3u8?server=7\",\"quality\":\"4K\",\"resolution\":\"1920x1080\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-8\",\"name\":\"سيرفر 8 - عالي الوضوح احتياطي (HD S2)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-4.m3u8?server=8\",\"quality\":\"HD\",\"resolution\":\"1280x720\",\"isDefault\":false,\"status\":\"live\"}]",
     "colorA": "#601977",
     "colorB": "#14041b",
-    "quality": "1080p",
+    "quality": "4K",
     "streamType": "hls",
     "streamUrl": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-4.m3u8",
     "logoUrl": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
     "servers": [
       {
         "id": "server-1",
-        "name": "سيرفر 1 (VIP فضائي 24/7 - FHD)",
+        "name": "سيرفر 1 - فائق الدقة (4K / 1080p 60fps)",
         "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-4.m3u8?server=1",
-        "quality": "1080p",
+        "quality": "4K",
+        "resolution": "1920x1080",
         "isDefault": true,
         "status": "live"
       },
       {
         "id": "server-2",
-        "name": "سيرفر 2 (VIP احتياطي - HD)",
+        "name": "سيرفر 2 - البث الفضائي (UHD / HEVC 50fps)",
         "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-4.m3u8?server=2",
+        "quality": "UHD",
+        "resolution": "1920x1080",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-3",
+        "name": "سيرفر 3 - المصدر المباشر (RAW Satellite)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-4.m3u8?server=3",
+        "quality": "1080p",
+        "resolution": "1920x1080",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-4",
+        "name": "سيرفر 4 - موفر للبيانات (HEVC / FHD)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-4.m3u8?server=4",
+        "quality": "HEVC",
+        "resolution": "1920x1080",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-5",
+        "name": "سيرفر 5 - عالي الوضوح (HD 720p 60fps)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-4.m3u8?server=5",
         "quality": "HD",
+        "resolution": "1280x720",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-6",
+        "name": "سيرفر 6 - للإنترنت الضعيف (SD 576p)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-4.m3u8?server=6",
+        "quality": "SD",
+        "resolution": "720x576",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-7",
+        "name": "سيرفر 7 - فائق الدقة احتياطي (4K S2)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-4.m3u8?server=7",
+        "quality": "4K",
+        "resolution": "1920x1080",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-8",
+        "name": "سيرفر 8 - عالي الوضوح احتياطي (HD S2)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-4.m3u8?server=8",
+        "quality": "HD",
+        "resolution": "1280x720",
+        "isDefault": false,
         "status": "live"
       }
     ],
@@ -232,27 +520,84 @@ export const DEFAULT_CHANNELS: Dict[] = [
     "descriptionAr": "beIN SPORTS VIP (ملفاتك الخاصة)",
     "descriptionEn": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
     "nowPlayingAr": "بث مباشر 24/7",
-    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (VIP فضائي 24/7 - FHD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-5.m3u8?server=1\",\"quality\":\"1080p\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (VIP احتياطي - HD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-5.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 - فائق الدقة (4K / 1080p 60fps)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-5.m3u8?server=1\",\"quality\":\"4K\",\"resolution\":\"1920x1080\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 - البث الفضائي (UHD / HEVC 50fps)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-5.m3u8?server=2\",\"quality\":\"UHD\",\"resolution\":\"1920x1080\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-3\",\"name\":\"سيرفر 3 - المصدر المباشر (RAW Satellite)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-5.m3u8?server=3\",\"quality\":\"1080p\",\"resolution\":\"1920x1080\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-4\",\"name\":\"سيرفر 4 - موفر للبيانات (HEVC / FHD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-5.m3u8?server=4\",\"quality\":\"HEVC\",\"resolution\":\"1920x1080\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-5\",\"name\":\"سيرفر 5 - عالي الوضوح (HD 720p 60fps)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-5.m3u8?server=5\",\"quality\":\"HD\",\"resolution\":\"1280x720\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-6\",\"name\":\"سيرفر 6 - للإنترنت الضعيف (SD 576p)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-5.m3u8?server=6\",\"quality\":\"SD\",\"resolution\":\"720x576\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-7\",\"name\":\"سيرفر 7 - فائق الدقة احتياطي (4K S2)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-5.m3u8?server=7\",\"quality\":\"4K\",\"resolution\":\"1920x1080\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-8\",\"name\":\"سيرفر 8 - عالي الوضوح احتياطي (HD S2)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-5.m3u8?server=8\",\"quality\":\"HD\",\"resolution\":\"1280x720\",\"isDefault\":false,\"status\":\"live\"}]",
     "colorA": "#601977",
     "colorB": "#14041b",
-    "quality": "1080p",
+    "quality": "4K",
     "streamType": "hls",
     "streamUrl": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-5.m3u8",
     "logoUrl": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
     "servers": [
       {
         "id": "server-1",
-        "name": "سيرفر 1 (VIP فضائي 24/7 - FHD)",
+        "name": "سيرفر 1 - فائق الدقة (4K / 1080p 60fps)",
         "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-5.m3u8?server=1",
-        "quality": "1080p",
+        "quality": "4K",
+        "resolution": "1920x1080",
         "isDefault": true,
         "status": "live"
       },
       {
         "id": "server-2",
-        "name": "سيرفر 2 (VIP احتياطي - HD)",
+        "name": "سيرفر 2 - البث الفضائي (UHD / HEVC 50fps)",
         "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-5.m3u8?server=2",
+        "quality": "UHD",
+        "resolution": "1920x1080",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-3",
+        "name": "سيرفر 3 - المصدر المباشر (RAW Satellite)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-5.m3u8?server=3",
+        "quality": "1080p",
+        "resolution": "1920x1080",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-4",
+        "name": "سيرفر 4 - موفر للبيانات (HEVC / FHD)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-5.m3u8?server=4",
+        "quality": "HEVC",
+        "resolution": "1920x1080",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-5",
+        "name": "سيرفر 5 - عالي الوضوح (HD 720p 60fps)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-5.m3u8?server=5",
         "quality": "HD",
+        "resolution": "1280x720",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-6",
+        "name": "سيرفر 6 - للإنترنت الضعيف (SD 576p)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-5.m3u8?server=6",
+        "quality": "SD",
+        "resolution": "720x576",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-7",
+        "name": "سيرفر 7 - فائق الدقة احتياطي (4K S2)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-5.m3u8?server=7",
+        "quality": "4K",
+        "resolution": "1920x1080",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-8",
+        "name": "سيرفر 8 - عالي الوضوح احتياطي (HD S2)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-5.m3u8?server=8",
+        "quality": "HD",
+        "resolution": "1280x720",
+        "isDefault": false,
         "status": "live"
       }
     ],
@@ -268,27 +613,84 @@ export const DEFAULT_CHANNELS: Dict[] = [
     "descriptionAr": "beIN SPORTS VIP (ملفاتك الخاصة)",
     "descriptionEn": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
     "nowPlayingAr": "بث مباشر 24/7",
-    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (VIP فضائي 24/7 - FHD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-6.m3u8?server=1\",\"quality\":\"1080p\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (VIP احتياطي - HD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-6.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 - فائق الدقة (4K / 1080p 60fps)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-6.m3u8?server=1\",\"quality\":\"4K\",\"resolution\":\"1920x1080\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 - البث الفضائي (UHD / HEVC 50fps)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-6.m3u8?server=2\",\"quality\":\"UHD\",\"resolution\":\"1920x1080\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-3\",\"name\":\"سيرفر 3 - المصدر المباشر (RAW Satellite)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-6.m3u8?server=3\",\"quality\":\"1080p\",\"resolution\":\"1920x1080\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-4\",\"name\":\"سيرفر 4 - موفر للبيانات (HEVC / FHD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-6.m3u8?server=4\",\"quality\":\"HEVC\",\"resolution\":\"1920x1080\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-5\",\"name\":\"سيرفر 5 - عالي الوضوح (HD 720p 60fps)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-6.m3u8?server=5\",\"quality\":\"HD\",\"resolution\":\"1280x720\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-6\",\"name\":\"سيرفر 6 - للإنترنت الضعيف (SD 576p)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-6.m3u8?server=6\",\"quality\":\"SD\",\"resolution\":\"720x576\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-7\",\"name\":\"سيرفر 7 - فائق الدقة احتياطي (4K S2)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-6.m3u8?server=7\",\"quality\":\"4K\",\"resolution\":\"1920x1080\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-8\",\"name\":\"سيرفر 8 - عالي الوضوح احتياطي (HD S2)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-6.m3u8?server=8\",\"quality\":\"HD\",\"resolution\":\"1280x720\",\"isDefault\":false,\"status\":\"live\"}]",
     "colorA": "#601977",
     "colorB": "#14041b",
-    "quality": "1080p",
+    "quality": "4K",
     "streamType": "hls",
     "streamUrl": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-6.m3u8",
     "logoUrl": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
     "servers": [
       {
         "id": "server-1",
-        "name": "سيرفر 1 (VIP فضائي 24/7 - FHD)",
+        "name": "سيرفر 1 - فائق الدقة (4K / 1080p 60fps)",
         "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-6.m3u8?server=1",
-        "quality": "1080p",
+        "quality": "4K",
+        "resolution": "1920x1080",
         "isDefault": true,
         "status": "live"
       },
       {
         "id": "server-2",
-        "name": "سيرفر 2 (VIP احتياطي - HD)",
+        "name": "سيرفر 2 - البث الفضائي (UHD / HEVC 50fps)",
         "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-6.m3u8?server=2",
+        "quality": "UHD",
+        "resolution": "1920x1080",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-3",
+        "name": "سيرفر 3 - المصدر المباشر (RAW Satellite)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-6.m3u8?server=3",
+        "quality": "1080p",
+        "resolution": "1920x1080",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-4",
+        "name": "سيرفر 4 - موفر للبيانات (HEVC / FHD)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-6.m3u8?server=4",
+        "quality": "HEVC",
+        "resolution": "1920x1080",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-5",
+        "name": "سيرفر 5 - عالي الوضوح (HD 720p 60fps)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-6.m3u8?server=5",
         "quality": "HD",
+        "resolution": "1280x720",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-6",
+        "name": "سيرفر 6 - للإنترنت الضعيف (SD 576p)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-6.m3u8?server=6",
+        "quality": "SD",
+        "resolution": "720x576",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-7",
+        "name": "سيرفر 7 - فائق الدقة احتياطي (4K S2)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-6.m3u8?server=7",
+        "quality": "4K",
+        "resolution": "1920x1080",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-8",
+        "name": "سيرفر 8 - عالي الوضوح احتياطي (HD S2)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-6.m3u8?server=8",
+        "quality": "HD",
+        "resolution": "1280x720",
+        "isDefault": false,
         "status": "live"
       }
     ],
@@ -304,27 +706,84 @@ export const DEFAULT_CHANNELS: Dict[] = [
     "descriptionAr": "beIN SPORTS VIP (ملفاتك الخاصة)",
     "descriptionEn": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
     "nowPlayingAr": "بث مباشر 24/7",
-    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (VIP فضائي 24/7 - FHD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-7.m3u8?server=1\",\"quality\":\"1080p\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (VIP احتياطي - HD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-7.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 - فائق الدقة (4K / 1080p 60fps)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-7.m3u8?server=1\",\"quality\":\"4K\",\"resolution\":\"1920x1080\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 - البث الفضائي (UHD / HEVC 50fps)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-7.m3u8?server=2\",\"quality\":\"UHD\",\"resolution\":\"1920x1080\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-3\",\"name\":\"سيرفر 3 - المصدر المباشر (RAW Satellite)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-7.m3u8?server=3\",\"quality\":\"1080p\",\"resolution\":\"1920x1080\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-4\",\"name\":\"سيرفر 4 - موفر للبيانات (HEVC / FHD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-7.m3u8?server=4\",\"quality\":\"HEVC\",\"resolution\":\"1920x1080\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-5\",\"name\":\"سيرفر 5 - عالي الوضوح (HD 720p 60fps)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-7.m3u8?server=5\",\"quality\":\"HD\",\"resolution\":\"1280x720\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-6\",\"name\":\"سيرفر 6 - للإنترنت الضعيف (SD 576p)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-7.m3u8?server=6\",\"quality\":\"SD\",\"resolution\":\"720x576\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-7\",\"name\":\"سيرفر 7 - فائق الدقة احتياطي (4K S2)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-7.m3u8?server=7\",\"quality\":\"4K\",\"resolution\":\"1920x1080\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-8\",\"name\":\"سيرفر 8 - عالي الوضوح احتياطي (HD S2)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-7.m3u8?server=8\",\"quality\":\"HD\",\"resolution\":\"1280x720\",\"isDefault\":false,\"status\":\"live\"}]",
     "colorA": "#601977",
     "colorB": "#14041b",
-    "quality": "1080p",
+    "quality": "4K",
     "streamType": "hls",
     "streamUrl": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-7.m3u8",
     "logoUrl": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
     "servers": [
       {
         "id": "server-1",
-        "name": "سيرفر 1 (VIP فضائي 24/7 - FHD)",
+        "name": "سيرفر 1 - فائق الدقة (4K / 1080p 60fps)",
         "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-7.m3u8?server=1",
-        "quality": "1080p",
+        "quality": "4K",
+        "resolution": "1920x1080",
         "isDefault": true,
         "status": "live"
       },
       {
         "id": "server-2",
-        "name": "سيرفر 2 (VIP احتياطي - HD)",
+        "name": "سيرفر 2 - البث الفضائي (UHD / HEVC 50fps)",
         "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-7.m3u8?server=2",
+        "quality": "UHD",
+        "resolution": "1920x1080",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-3",
+        "name": "سيرفر 3 - المصدر المباشر (RAW Satellite)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-7.m3u8?server=3",
+        "quality": "1080p",
+        "resolution": "1920x1080",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-4",
+        "name": "سيرفر 4 - موفر للبيانات (HEVC / FHD)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-7.m3u8?server=4",
+        "quality": "HEVC",
+        "resolution": "1920x1080",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-5",
+        "name": "سيرفر 5 - عالي الوضوح (HD 720p 60fps)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-7.m3u8?server=5",
         "quality": "HD",
+        "resolution": "1280x720",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-6",
+        "name": "سيرفر 6 - للإنترنت الضعيف (SD 576p)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-7.m3u8?server=6",
+        "quality": "SD",
+        "resolution": "720x576",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-7",
+        "name": "سيرفر 7 - فائق الدقة احتياطي (4K S2)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-7.m3u8?server=7",
+        "quality": "4K",
+        "resolution": "1920x1080",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-8",
+        "name": "سيرفر 8 - عالي الوضوح احتياطي (HD S2)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-7.m3u8?server=8",
+        "quality": "HD",
+        "resolution": "1280x720",
+        "isDefault": false,
         "status": "live"
       }
     ],
@@ -340,27 +799,84 @@ export const DEFAULT_CHANNELS: Dict[] = [
     "descriptionAr": "beIN SPORTS VIP (ملفاتك الخاصة)",
     "descriptionEn": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
     "nowPlayingAr": "بث مباشر 24/7",
-    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (VIP فضائي 24/7 - FHD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-8.m3u8?server=1\",\"quality\":\"1080p\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (VIP احتياطي - HD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-8.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 - فائق الدقة (4K / 1080p 60fps)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-8.m3u8?server=1\",\"quality\":\"4K\",\"resolution\":\"1920x1080\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 - البث الفضائي (UHD / HEVC 50fps)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-8.m3u8?server=2\",\"quality\":\"UHD\",\"resolution\":\"1920x1080\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-3\",\"name\":\"سيرفر 3 - المصدر المباشر (RAW Satellite)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-8.m3u8?server=3\",\"quality\":\"1080p\",\"resolution\":\"1920x1080\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-4\",\"name\":\"سيرفر 4 - موفر للبيانات (HEVC / FHD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-8.m3u8?server=4\",\"quality\":\"HEVC\",\"resolution\":\"1920x1080\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-5\",\"name\":\"سيرفر 5 - عالي الوضوح (HD 720p 60fps)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-8.m3u8?server=5\",\"quality\":\"HD\",\"resolution\":\"1280x720\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-6\",\"name\":\"سيرفر 6 - للإنترنت الضعيف (SD 576p)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-8.m3u8?server=6\",\"quality\":\"SD\",\"resolution\":\"720x576\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-7\",\"name\":\"سيرفر 7 - فائق الدقة احتياطي (4K S2)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-8.m3u8?server=7\",\"quality\":\"4K\",\"resolution\":\"1920x1080\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-8\",\"name\":\"سيرفر 8 - عالي الوضوح احتياطي (HD S2)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-8.m3u8?server=8\",\"quality\":\"HD\",\"resolution\":\"1280x720\",\"isDefault\":false,\"status\":\"live\"}]",
     "colorA": "#601977",
     "colorB": "#14041b",
-    "quality": "1080p",
+    "quality": "4K",
     "streamType": "hls",
     "streamUrl": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-8.m3u8",
     "logoUrl": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
     "servers": [
       {
         "id": "server-1",
-        "name": "سيرفر 1 (VIP فضائي 24/7 - FHD)",
+        "name": "سيرفر 1 - فائق الدقة (4K / 1080p 60fps)",
         "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-8.m3u8?server=1",
-        "quality": "1080p",
+        "quality": "4K",
+        "resolution": "1920x1080",
         "isDefault": true,
         "status": "live"
       },
       {
         "id": "server-2",
-        "name": "سيرفر 2 (VIP احتياطي - HD)",
+        "name": "سيرفر 2 - البث الفضائي (UHD / HEVC 50fps)",
         "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-8.m3u8?server=2",
+        "quality": "UHD",
+        "resolution": "1920x1080",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-3",
+        "name": "سيرفر 3 - المصدر المباشر (RAW Satellite)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-8.m3u8?server=3",
+        "quality": "1080p",
+        "resolution": "1920x1080",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-4",
+        "name": "سيرفر 4 - موفر للبيانات (HEVC / FHD)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-8.m3u8?server=4",
+        "quality": "HEVC",
+        "resolution": "1920x1080",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-5",
+        "name": "سيرفر 5 - عالي الوضوح (HD 720p 60fps)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-8.m3u8?server=5",
         "quality": "HD",
+        "resolution": "1280x720",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-6",
+        "name": "سيرفر 6 - للإنترنت الضعيف (SD 576p)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-8.m3u8?server=6",
+        "quality": "SD",
+        "resolution": "720x576",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-7",
+        "name": "سيرفر 7 - فائق الدقة احتياطي (4K S2)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-8.m3u8?server=7",
+        "quality": "4K",
+        "resolution": "1920x1080",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-8",
+        "name": "سيرفر 8 - عالي الوضوح احتياطي (HD S2)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-8.m3u8?server=8",
+        "quality": "HD",
+        "resolution": "1280x720",
+        "isDefault": false,
         "status": "live"
       }
     ],
@@ -376,27 +892,84 @@ export const DEFAULT_CHANNELS: Dict[] = [
     "descriptionAr": "beIN SPORTS VIP (ملفاتك الخاصة)",
     "descriptionEn": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
     "nowPlayingAr": "بث مباشر 24/7",
-    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (VIP فضائي 24/7 - FHD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-9.m3u8?server=1\",\"quality\":\"1080p\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (VIP احتياطي - HD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-9.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 - فائق الدقة (4K / 1080p 60fps)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-9.m3u8?server=1\",\"quality\":\"4K\",\"resolution\":\"1920x1080\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 - البث الفضائي (UHD / HEVC 50fps)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-9.m3u8?server=2\",\"quality\":\"UHD\",\"resolution\":\"1920x1080\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-3\",\"name\":\"سيرفر 3 - المصدر المباشر (RAW Satellite)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-9.m3u8?server=3\",\"quality\":\"1080p\",\"resolution\":\"1920x1080\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-4\",\"name\":\"سيرفر 4 - موفر للبيانات (HEVC / FHD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-9.m3u8?server=4\",\"quality\":\"HEVC\",\"resolution\":\"1920x1080\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-5\",\"name\":\"سيرفر 5 - عالي الوضوح (HD 720p 60fps)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-9.m3u8?server=5\",\"quality\":\"HD\",\"resolution\":\"1280x720\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-6\",\"name\":\"سيرفر 6 - للإنترنت الضعيف (SD 576p)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-9.m3u8?server=6\",\"quality\":\"SD\",\"resolution\":\"720x576\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-7\",\"name\":\"سيرفر 7 - فائق الدقة احتياطي (4K S2)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-9.m3u8?server=7\",\"quality\":\"4K\",\"resolution\":\"1920x1080\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-8\",\"name\":\"سيرفر 8 - عالي الوضوح احتياطي (HD S2)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-9.m3u8?server=8\",\"quality\":\"HD\",\"resolution\":\"1280x720\",\"isDefault\":false,\"status\":\"live\"}]",
     "colorA": "#601977",
     "colorB": "#14041b",
-    "quality": "1080p",
+    "quality": "4K",
     "streamType": "hls",
     "streamUrl": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-9.m3u8",
     "logoUrl": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
     "servers": [
       {
         "id": "server-1",
-        "name": "سيرفر 1 (VIP فضائي 24/7 - FHD)",
+        "name": "سيرفر 1 - فائق الدقة (4K / 1080p 60fps)",
         "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-9.m3u8?server=1",
-        "quality": "1080p",
+        "quality": "4K",
+        "resolution": "1920x1080",
         "isDefault": true,
         "status": "live"
       },
       {
         "id": "server-2",
-        "name": "سيرفر 2 (VIP احتياطي - HD)",
+        "name": "سيرفر 2 - البث الفضائي (UHD / HEVC 50fps)",
         "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-9.m3u8?server=2",
+        "quality": "UHD",
+        "resolution": "1920x1080",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-3",
+        "name": "سيرفر 3 - المصدر المباشر (RAW Satellite)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-9.m3u8?server=3",
+        "quality": "1080p",
+        "resolution": "1920x1080",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-4",
+        "name": "سيرفر 4 - موفر للبيانات (HEVC / FHD)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-9.m3u8?server=4",
+        "quality": "HEVC",
+        "resolution": "1920x1080",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-5",
+        "name": "سيرفر 5 - عالي الوضوح (HD 720p 60fps)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-9.m3u8?server=5",
         "quality": "HD",
+        "resolution": "1280x720",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-6",
+        "name": "سيرفر 6 - للإنترنت الضعيف (SD 576p)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-9.m3u8?server=6",
+        "quality": "SD",
+        "resolution": "720x576",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-7",
+        "name": "سيرفر 7 - فائق الدقة احتياطي (4K S2)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-9.m3u8?server=7",
+        "quality": "4K",
+        "resolution": "1920x1080",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-8",
+        "name": "سيرفر 8 - عالي الوضوح احتياطي (HD S2)",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-9.m3u8?server=8",
+        "quality": "HD",
+        "resolution": "1280x720",
+        "isDefault": false,
         "status": "live"
       }
     ],
@@ -412,27 +985,39 @@ export const DEFAULT_CHANNELS: Dict[] = [
     "descriptionAr": "beIN SPORTS VIP (ملفاتك الخاصة)",
     "descriptionEn": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
     "nowPlayingAr": "بث مباشر 24/7",
-    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (VIP فضائي 24/7 - FHD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-afc.m3u8?server=1\",\"quality\":\"1080p\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (VIP احتياطي - HD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-afc.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 - BEIN SPORTS AFC 4K\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-afc.m3u8?server=1\",\"quality\":\"4K\",\"resolution\":\"1920x1080\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 - BEIN SPORTS AFC HD\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-afc.m3u8?server=2\",\"quality\":\"HD\",\"resolution\":\"1280x720\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-3\",\"name\":\"سيرفر 3 - BEIN SPORTS AFC\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-afc.m3u8?server=3\",\"quality\":\"SD\",\"resolution\":\"720x576\",\"isDefault\":false,\"status\":\"live\"}]",
     "colorA": "#601977",
     "colorB": "#14041b",
-    "quality": "1080p",
+    "quality": "4K",
     "streamType": "hls",
     "streamUrl": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-afc.m3u8",
     "logoUrl": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
     "servers": [
       {
         "id": "server-1",
-        "name": "سيرفر 1 (VIP فضائي 24/7 - FHD)",
+        "name": "سيرفر 1 - BEIN SPORTS AFC 4K",
         "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-afc.m3u8?server=1",
-        "quality": "1080p",
+        "quality": "4K",
+        "resolution": "1920x1080",
         "isDefault": true,
         "status": "live"
       },
       {
         "id": "server-2",
-        "name": "سيرفر 2 (VIP احتياطي - HD)",
+        "name": "سيرفر 2 - BEIN SPORTS AFC HD",
         "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-afc.m3u8?server=2",
         "quality": "HD",
+        "resolution": "1280x720",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-3",
+        "name": "سيرفر 3 - BEIN SPORTS AFC",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-afc.m3u8?server=3",
+        "quality": "SD",
+        "resolution": "720x576",
+        "isDefault": false,
         "status": "live"
       }
     ],
@@ -448,27 +1033,30 @@ export const DEFAULT_CHANNELS: Dict[] = [
     "descriptionAr": "beIN SPORTS VIP (ملفاتك الخاصة)",
     "descriptionEn": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
     "nowPlayingAr": "بث مباشر 24/7",
-    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (VIP فضائي 24/7 - FHD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-afc-1.m3u8?server=1\",\"quality\":\"1080p\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (VIP احتياطي - HD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-afc-1.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 - BEIN SPORTS AFC 1 4K\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-afc-1.m3u8?server=1\",\"quality\":\"4K\",\"resolution\":\"1920x1080\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 - BEIN SPORTS AFC 1 HD\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-afc-1.m3u8?server=2\",\"quality\":\"HD\",\"resolution\":\"1280x720\",\"isDefault\":false,\"status\":\"live\"}]",
     "colorA": "#601977",
     "colorB": "#14041b",
-    "quality": "1080p",
+    "quality": "4K",
     "streamType": "hls",
     "streamUrl": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-afc-1.m3u8",
     "logoUrl": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
     "servers": [
       {
         "id": "server-1",
-        "name": "سيرفر 1 (VIP فضائي 24/7 - FHD)",
+        "name": "سيرفر 1 - BEIN SPORTS AFC 1 4K",
         "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-afc-1.m3u8?server=1",
-        "quality": "1080p",
+        "quality": "4K",
+        "resolution": "1920x1080",
         "isDefault": true,
         "status": "live"
       },
       {
         "id": "server-2",
-        "name": "سيرفر 2 (VIP احتياطي - HD)",
+        "name": "سيرفر 2 - BEIN SPORTS AFC 1 HD",
         "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-afc-1.m3u8?server=2",
         "quality": "HD",
+        "resolution": "1280x720",
+        "isDefault": false,
         "status": "live"
       }
     ],
@@ -484,27 +1072,39 @@ export const DEFAULT_CHANNELS: Dict[] = [
     "descriptionAr": "beIN SPORTS VIP (ملفاتك الخاصة)",
     "descriptionEn": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
     "nowPlayingAr": "بث مباشر 24/7",
-    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (VIP فضائي 24/7 - FHD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-1-afc.m3u8?server=1\",\"quality\":\"1080p\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (VIP احتياطي - HD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-1-afc.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 - BEIN SPORTS AFC 1 4K\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-1-afc.m3u8?server=1\",\"quality\":\"4K\",\"resolution\":\"1920x1080\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 - BEIN SPORTS AFC 1 HD\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-1-afc.m3u8?server=2\",\"quality\":\"HD\",\"resolution\":\"1280x720\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-3\",\"name\":\"سيرفر 3 - BEIN SPORTS 1 AFC\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-1-afc.m3u8?server=3\",\"quality\":\"SD\",\"resolution\":\"720x576\",\"isDefault\":false,\"status\":\"live\"}]",
     "colorA": "#601977",
     "colorB": "#14041b",
-    "quality": "1080p",
+    "quality": "4K",
     "streamType": "hls",
     "streamUrl": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-1-afc.m3u8",
     "logoUrl": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
     "servers": [
       {
         "id": "server-1",
-        "name": "سيرفر 1 (VIP فضائي 24/7 - FHD)",
+        "name": "سيرفر 1 - BEIN SPORTS AFC 1 4K",
         "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-1-afc.m3u8?server=1",
-        "quality": "1080p",
+        "quality": "4K",
+        "resolution": "1920x1080",
         "isDefault": true,
         "status": "live"
       },
       {
         "id": "server-2",
-        "name": "سيرفر 2 (VIP احتياطي - HD)",
+        "name": "سيرفر 2 - BEIN SPORTS AFC 1 HD",
         "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-1-afc.m3u8?server=2",
         "quality": "HD",
+        "resolution": "1280x720",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-3",
+        "name": "سيرفر 3 - BEIN SPORTS 1 AFC",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-1-afc.m3u8?server=3",
+        "quality": "SD",
+        "resolution": "720x576",
+        "isDefault": false,
         "status": "live"
       }
     ],
@@ -520,27 +1120,39 @@ export const DEFAULT_CHANNELS: Dict[] = [
     "descriptionAr": "beIN SPORTS VIP (ملفاتك الخاصة)",
     "descriptionEn": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
     "nowPlayingAr": "بث مباشر 24/7",
-    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (VIP فضائي 24/7 - FHD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-2-afc.m3u8?server=1\",\"quality\":\"1080p\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (VIP احتياطي - HD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-2-afc.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 - BEIN SPORTS 2 AFC 4K\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-2-afc.m3u8?server=1\",\"quality\":\"4K\",\"resolution\":\"1920x1080\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 - BEIN SPORTS 2 AFC HD\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-2-afc.m3u8?server=2\",\"quality\":\"HD\",\"resolution\":\"1280x720\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-3\",\"name\":\"سيرفر 3 - BEIN SPORTS 2 AFC\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-2-afc.m3u8?server=3\",\"quality\":\"SD\",\"resolution\":\"720x576\",\"isDefault\":false,\"status\":\"live\"}]",
     "colorA": "#601977",
     "colorB": "#14041b",
-    "quality": "1080p",
+    "quality": "4K",
     "streamType": "hls",
     "streamUrl": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-2-afc.m3u8",
     "logoUrl": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
     "servers": [
       {
         "id": "server-1",
-        "name": "سيرفر 1 (VIP فضائي 24/7 - FHD)",
+        "name": "سيرفر 1 - BEIN SPORTS 2 AFC 4K",
         "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-2-afc.m3u8?server=1",
-        "quality": "1080p",
+        "quality": "4K",
+        "resolution": "1920x1080",
         "isDefault": true,
         "status": "live"
       },
       {
         "id": "server-2",
-        "name": "سيرفر 2 (VIP احتياطي - HD)",
+        "name": "سيرفر 2 - BEIN SPORTS 2 AFC HD",
         "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-2-afc.m3u8?server=2",
         "quality": "HD",
+        "resolution": "1280x720",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-3",
+        "name": "سيرفر 3 - BEIN SPORTS 2 AFC",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-2-afc.m3u8?server=3",
+        "quality": "SD",
+        "resolution": "720x576",
+        "isDefault": false,
         "status": "live"
       }
     ],
@@ -556,27 +1168,39 @@ export const DEFAULT_CHANNELS: Dict[] = [
     "descriptionAr": "beIN SPORTS VIP (ملفاتك الخاصة)",
     "descriptionEn": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
     "nowPlayingAr": "بث مباشر 24/7",
-    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (VIP فضائي 24/7 - FHD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-3-afc.m3u8?server=1\",\"quality\":\"1080p\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (VIP احتياطي - HD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-3-afc.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 - BEIN SPORTS 3 AFC 4K\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-3-afc.m3u8?server=1\",\"quality\":\"4K\",\"resolution\":\"1920x1080\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 - BEIN SPORTS 3 AFC HD\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-3-afc.m3u8?server=2\",\"quality\":\"HD\",\"resolution\":\"1280x720\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-3\",\"name\":\"سيرفر 3 - BEIN SPORTS 3 AFC\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-3-afc.m3u8?server=3\",\"quality\":\"SD\",\"resolution\":\"720x576\",\"isDefault\":false,\"status\":\"live\"}]",
     "colorA": "#601977",
     "colorB": "#14041b",
-    "quality": "1080p",
+    "quality": "4K",
     "streamType": "hls",
     "streamUrl": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-3-afc.m3u8",
     "logoUrl": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
     "servers": [
       {
         "id": "server-1",
-        "name": "سيرفر 1 (VIP فضائي 24/7 - FHD)",
+        "name": "سيرفر 1 - BEIN SPORTS 3 AFC 4K",
         "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-3-afc.m3u8?server=1",
-        "quality": "1080p",
+        "quality": "4K",
+        "resolution": "1920x1080",
         "isDefault": true,
         "status": "live"
       },
       {
         "id": "server-2",
-        "name": "سيرفر 2 (VIP احتياطي - HD)",
+        "name": "سيرفر 2 - BEIN SPORTS 3 AFC HD",
         "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-3-afc.m3u8?server=2",
         "quality": "HD",
+        "resolution": "1280x720",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-3",
+        "name": "سيرفر 3 - BEIN SPORTS 3 AFC",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-3-afc.m3u8?server=3",
+        "quality": "SD",
+        "resolution": "720x576",
+        "isDefault": false,
         "status": "live"
       }
     ],
@@ -592,27 +1216,39 @@ export const DEFAULT_CHANNELS: Dict[] = [
     "descriptionAr": "beIN SPORTS VIP (ملفاتك الخاصة)",
     "descriptionEn": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
     "nowPlayingAr": "بث مباشر 24/7",
-    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (VIP فضائي 24/7 - FHD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-afc-4.m3u8?server=1\",\"quality\":\"1080p\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (VIP احتياطي - HD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-afc-4.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 - BEIN SPORTS AFC 4 4K\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-afc-4.m3u8?server=1\",\"quality\":\"4K\",\"resolution\":\"1920x1080\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 - BEIN SPORTS AFC 4 HD\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-afc-4.m3u8?server=2\",\"quality\":\"HD\",\"resolution\":\"1280x720\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-3\",\"name\":\"سيرفر 3 - BEIN SPORTS AFC 4\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-afc-4.m3u8?server=3\",\"quality\":\"SD\",\"resolution\":\"720x576\",\"isDefault\":false,\"status\":\"live\"}]",
     "colorA": "#601977",
     "colorB": "#14041b",
-    "quality": "1080p",
+    "quality": "4K",
     "streamType": "hls",
     "streamUrl": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-afc-4.m3u8",
     "logoUrl": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
     "servers": [
       {
         "id": "server-1",
-        "name": "سيرفر 1 (VIP فضائي 24/7 - FHD)",
+        "name": "سيرفر 1 - BEIN SPORTS AFC 4 4K",
         "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-afc-4.m3u8?server=1",
-        "quality": "1080p",
+        "quality": "4K",
+        "resolution": "1920x1080",
         "isDefault": true,
         "status": "live"
       },
       {
         "id": "server-2",
-        "name": "سيرفر 2 (VIP احتياطي - HD)",
+        "name": "سيرفر 2 - BEIN SPORTS AFC 4 HD",
         "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-afc-4.m3u8?server=2",
         "quality": "HD",
+        "resolution": "1280x720",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-3",
+        "name": "سيرفر 3 - BEIN SPORTS AFC 4",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-afc-4.m3u8?server=3",
+        "quality": "SD",
+        "resolution": "720x576",
+        "isDefault": false,
         "status": "live"
       }
     ],
@@ -628,27 +1264,39 @@ export const DEFAULT_CHANNELS: Dict[] = [
     "descriptionAr": "beIN SPORTS VIP (ملفاتك الخاصة)",
     "descriptionEn": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
     "nowPlayingAr": "بث مباشر 24/7",
-    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (VIP فضائي 24/7 - FHD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-afc-5.m3u8?server=1\",\"quality\":\"1080p\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 (VIP احتياطي - HD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-afc-5.m3u8?server=2\",\"quality\":\"HD\",\"status\":\"live\"}]",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 - BEIN SPORTS AFC 5 4K\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-afc-5.m3u8?server=1\",\"quality\":\"4K\",\"resolution\":\"1920x1080\",\"isDefault\":true,\"status\":\"live\"},{\"id\":\"server-2\",\"name\":\"سيرفر 2 - BEIN SPORTS AFC 5 HD\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-afc-5.m3u8?server=2\",\"quality\":\"HD\",\"resolution\":\"1280x720\",\"isDefault\":false,\"status\":\"live\"},{\"id\":\"server-3\",\"name\":\"سيرفر 3 - BEIN SPORTS AFC 5\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-afc-5.m3u8?server=3\",\"quality\":\"SD\",\"resolution\":\"720x576\",\"isDefault\":false,\"status\":\"live\"}]",
     "colorA": "#601977",
     "colorB": "#14041b",
-    "quality": "1080p",
+    "quality": "4K",
     "streamType": "hls",
     "streamUrl": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-afc-5.m3u8",
     "logoUrl": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
     "servers": [
       {
         "id": "server-1",
-        "name": "سيرفر 1 (VIP فضائي 24/7 - FHD)",
+        "name": "سيرفر 1 - BEIN SPORTS AFC 5 4K",
         "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-afc-5.m3u8?server=1",
-        "quality": "1080p",
+        "quality": "4K",
+        "resolution": "1920x1080",
         "isDefault": true,
         "status": "live"
       },
       {
         "id": "server-2",
-        "name": "سيرفر 2 (VIP احتياطي - HD)",
+        "name": "سيرفر 2 - BEIN SPORTS AFC 5 HD",
         "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-afc-5.m3u8?server=2",
         "quality": "HD",
+        "resolution": "1280x720",
+        "isDefault": false,
+        "status": "live"
+      },
+      {
+        "id": "server-3",
+        "name": "سيرفر 3 - BEIN SPORTS AFC 5",
+        "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-afc-5.m3u8?server=3",
+        "quality": "SD",
+        "resolution": "720x576",
+        "isDefault": false,
         "status": "live"
       }
     ],
@@ -664,7 +1312,7 @@ export const DEFAULT_CHANNELS: Dict[] = [
     "descriptionAr": "beIN SPORTS VIP (ملفاتك الخاصة)",
     "descriptionEn": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
     "nowPlayingAr": "بث مباشر 24/7",
-    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (VIP فضائي 24/7 - FHD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-1-english.m3u8?server=1\",\"quality\":\"1080p\",\"isDefault\":true,\"status\":\"live\"}]",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 - المصدر المباشر بدون ضغط (RAW)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-1-english.m3u8?server=1\",\"quality\":\"1080p\",\"resolution\":\"1920x1080\",\"isDefault\":true,\"status\":\"live\"}]",
     "colorA": "#601977",
     "colorB": "#14041b",
     "quality": "1080p",
@@ -674,9 +1322,10 @@ export const DEFAULT_CHANNELS: Dict[] = [
     "servers": [
       {
         "id": "server-1",
-        "name": "سيرفر 1 (VIP فضائي 24/7 - FHD)",
+        "name": "سيرفر 1 - المصدر المباشر بدون ضغط (RAW)",
         "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-1-english.m3u8?server=1",
         "quality": "1080p",
+        "resolution": "1920x1080",
         "isDefault": true,
         "status": "live"
       }
@@ -693,7 +1342,7 @@ export const DEFAULT_CHANNELS: Dict[] = [
     "descriptionAr": "beIN SPORTS VIP (ملفاتك الخاصة)",
     "descriptionEn": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
     "nowPlayingAr": "بث مباشر 24/7",
-    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (VIP فضائي 24/7 - FHD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-2-english.m3u8?server=1\",\"quality\":\"1080p\",\"isDefault\":true,\"status\":\"live\"}]",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 - المصدر المباشر بدون ضغط (RAW)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-2-english.m3u8?server=1\",\"quality\":\"1080p\",\"resolution\":\"1920x1080\",\"isDefault\":true,\"status\":\"live\"}]",
     "colorA": "#601977",
     "colorB": "#14041b",
     "quality": "1080p",
@@ -703,9 +1352,10 @@ export const DEFAULT_CHANNELS: Dict[] = [
     "servers": [
       {
         "id": "server-1",
-        "name": "سيرفر 1 (VIP فضائي 24/7 - FHD)",
+        "name": "سيرفر 1 - المصدر المباشر بدون ضغط (RAW)",
         "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-2-english.m3u8?server=1",
         "quality": "1080p",
+        "resolution": "1920x1080",
         "isDefault": true,
         "status": "live"
       }
@@ -722,7 +1372,7 @@ export const DEFAULT_CHANNELS: Dict[] = [
     "descriptionAr": "beIN SPORTS VIP (ملفاتك الخاصة)",
     "descriptionEn": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
     "nowPlayingAr": "بث مباشر 24/7",
-    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (VIP فضائي 24/7 - FHD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-1-france.m3u8?server=1\",\"quality\":\"1080p\",\"isDefault\":true,\"status\":\"live\"}]",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 - المصدر المباشر بدون ضغط (RAW)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-1-france.m3u8?server=1\",\"quality\":\"1080p\",\"resolution\":\"1920x1080\",\"isDefault\":true,\"status\":\"live\"}]",
     "colorA": "#601977",
     "colorB": "#14041b",
     "quality": "1080p",
@@ -732,9 +1382,10 @@ export const DEFAULT_CHANNELS: Dict[] = [
     "servers": [
       {
         "id": "server-1",
-        "name": "سيرفر 1 (VIP فضائي 24/7 - FHD)",
+        "name": "سيرفر 1 - المصدر المباشر بدون ضغط (RAW)",
         "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-1-france.m3u8?server=1",
         "quality": "1080p",
+        "resolution": "1920x1080",
         "isDefault": true,
         "status": "live"
       }
@@ -751,7 +1402,7 @@ export const DEFAULT_CHANNELS: Dict[] = [
     "descriptionAr": "beIN SPORTS VIP (ملفاتك الخاصة)",
     "descriptionEn": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
     "nowPlayingAr": "بث مباشر 24/7",
-    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (VIP فضائي 24/7 - FHD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-2-france.m3u8?server=1\",\"quality\":\"1080p\",\"isDefault\":true,\"status\":\"live\"}]",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 - المصدر المباشر بدون ضغط (RAW)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-2-france.m3u8?server=1\",\"quality\":\"1080p\",\"resolution\":\"1920x1080\",\"isDefault\":true,\"status\":\"live\"}]",
     "colorA": "#601977",
     "colorB": "#14041b",
     "quality": "1080p",
@@ -761,9 +1412,10 @@ export const DEFAULT_CHANNELS: Dict[] = [
     "servers": [
       {
         "id": "server-1",
-        "name": "سيرفر 1 (VIP فضائي 24/7 - FHD)",
+        "name": "سيرفر 1 - المصدر المباشر بدون ضغط (RAW)",
         "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-2-france.m3u8?server=1",
         "quality": "1080p",
+        "resolution": "1920x1080",
         "isDefault": true,
         "status": "live"
       }
@@ -780,7 +1432,7 @@ export const DEFAULT_CHANNELS: Dict[] = [
     "descriptionAr": "beIN SPORTS VIP (ملفاتك الخاصة)",
     "descriptionEn": "https://aspreen-tv-production.up.railway.app/logos/bein-sports.png",
     "nowPlayingAr": "بث مباشر 24/7",
-    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 (VIP فضائي 24/7 - FHD)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-3-france.m3u8?server=1\",\"quality\":\"1080p\",\"isDefault\":true,\"status\":\"live\"}]",
+    "nowPlayingEn": "[{\"id\":\"server-1\",\"name\":\"سيرفر 1 - المصدر المباشر بدون ضغط (RAW)\",\"url\":\"https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-3-france.m3u8?server=1\",\"quality\":\"1080p\",\"resolution\":\"1920x1080\",\"isDefault\":true,\"status\":\"live\"}]",
     "colorA": "#601977",
     "colorB": "#14041b",
     "quality": "1080p",
@@ -790,9 +1442,10 @@ export const DEFAULT_CHANNELS: Dict[] = [
     "servers": [
       {
         "id": "server-1",
-        "name": "سيرفر 1 (VIP فضائي 24/7 - FHD)",
+        "name": "سيرفر 1 - المصدر المباشر بدون ضغط (RAW)",
         "url": "https://aspreen-tv-production.up.railway.app/live/bein-vip-bein-sports-3-france.m3u8?server=1",
         "quality": "1080p",
+        "resolution": "1920x1080",
         "isDefault": true,
         "status": "live"
       }

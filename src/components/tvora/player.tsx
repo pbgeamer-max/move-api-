@@ -378,6 +378,14 @@ export function TvoraPlayer({
     if (activeServerId) setSelectedServerId(activeServerId);
   }, [activeServerId]);
 
+  useEffect(() => {
+    if (servers && servers.length > 0) {
+      if (!selectedServerId || !servers.some((s) => s.id === selectedServerId)) {
+        setSelectedServerId(activeServerId || servers[0].id);
+      }
+    }
+  }, [servers, activeServerId, selectedServerId]);
+
   // Popover menus state
   const [speedMenuOpen, setSpeedMenuOpen] = useState(false);
   const [qualityMenuOpen, setQualityMenuOpen] = useState(false);
@@ -387,6 +395,7 @@ export function TvoraPlayer({
   // HLS Qualities, Audio Tracks & Subtitles state
   const [qualityLevels, setQualityLevels] = useState<QualityLevel[]>([]);
   const [selectedQuality, setSelectedQuality] = useState<number>(-1); // -1 = Auto
+  const [actualPlayingLevel, setActualPlayingLevel] = useState<number | null>(null);
   const [audioTracks, setAudioTracks] = useState<AudioTrackOption[]>([]);
   const [selectedAudioTrack, setSelectedAudioTrack] = useState<number>(-1);
   const [selectedSubtitle, setSelectedSubtitle] = useState<string>("off");
@@ -398,14 +407,44 @@ export function TvoraPlayer({
   const [nextCountdown, setNextCountdown] = useState<number | null>(null);
   const [skipFeedback, setSkipFeedback] = useState<"forward" | "rewind" | null>(null);
 
-  // ── Direct Stream URL ─────────────────────────────────────────────────────────
+  // ── Active Server & Stream URL ──────────────────────────────────────────────
+  const activeServerObj = useMemo(() => {
+    if (!servers || servers.length === 0) return null;
+    return (
+      servers.find((s) => s.id === selectedServerId) ||
+      servers[0] ||
+      null
+    );
+  }, [servers, selectedServerId]);
+
   const activePlaybackUrl = useMemo(() => {
-    if (selectedServerId && servers?.length) {
-      const match = servers.find((s) => s.id === selectedServerId);
-      if (match?.url) return match.url;
-    }
+    if (activeServerObj?.url) return activeServerObj.url;
     return src;
-  }, [selectedServerId, servers, src]);
+  }, [activeServerObj, src]);
+
+  // Current Quality Label (for control button & top badge)
+  const currentQualityLabel = useMemo(() => {
+    if (selectedQuality !== -1) {
+      const lvl = qualityLevels.find((l) => l.id === selectedQuality);
+      if (lvl) return lvl.label;
+    }
+    if (qualityLevels.length > 0) {
+      if (actualPlayingLevel !== null) {
+        const lvl = qualityLevels.find((l) => l.id === actualPlayingLevel);
+        if (lvl) return `${lvl.label}`;
+      }
+      return "Auto";
+    }
+    if (activeServerObj?.quality) {
+      return activeServerObj.quality;
+    }
+    return "Auto";
+  }, [selectedQuality, qualityLevels, actualPlayingLevel, activeServerObj]);
+
+  const currentServerBadge = useMemo(() => {
+    if (!activeServerObj) return null;
+    return activeServerObj.quality || activeServerObj.name?.split(" - ")[0] || "سيرفر";
+  }, [activeServerObj]);
 
   // ── 1. Engine Initialization (hls.js with ABR + Native Fallback) ───────────
   useEffect(() => {
@@ -489,7 +528,7 @@ export function TvoraPlayer({
         if (disposed) return;
         onErrorState?.(false);
         setError(false);
-        if (data.levels && data.levels.length > 1) {
+        if (data.levels && data.levels.length > 0) {
           const levels: QualityLevel[] = data.levels.map((lvl, idx) => ({
             id: idx,
             label: lvl.height ? `${lvl.height}p` : `${Math.round(lvl.bitrate / 1000)}k`,
@@ -501,6 +540,11 @@ export function TvoraPlayer({
         }
         setReady(true);
         void video.play().catch(() => {});
+      });
+
+      hls.on(Hls.Events.LEVEL_SWITCHED, (_event, data) => {
+        if (disposed) return;
+        setActualPlayingLevel(data.level);
       });
 
       hls.on(Hls.Events.AUDIO_TRACKS_UPDATED, (_event, data) => {
@@ -787,6 +831,15 @@ export function TvoraPlayer({
     resetIdleTimer();
   };
 
+  const handleServerChangeInternal = (server: ChannelServer) => {
+    setSelectedServerId(server.id);
+    onServerChange?.(server);
+    setServerMenuOpen(false);
+    setQualityMenuOpen(false);
+    setError(false);
+    resetIdleTimer();
+  };
+
   const handleSubtitleChange = (langCode: string) => {
     const v = videoRef.current;
     if (!v) return;
@@ -941,9 +994,10 @@ export function TvoraPlayer({
     setQualityMenuOpen(false);
     setSubtitleMenuOpen(false);
     setAudioMenuOpen(false);
+    setServerMenuOpen(false);
   };
 
-  const isMenuOpen = speedMenuOpen || qualityMenuOpen || subtitleMenuOpen || audioMenuOpen;
+  const isMenuOpen = speedMenuOpen || qualityMenuOpen || subtitleMenuOpen || audioMenuOpen || serverMenuOpen;
 
   return (
     <div
@@ -1091,8 +1145,43 @@ export function TvoraPlayer({
           )}
         </div>
 
-        {/* Resuming / Reconnecting Notices */}
+        {/* Quick Server & Quality Badges + Resuming / Reconnecting Notices */}
         <div className="flex items-center gap-2">
+          {activeServerObj && servers && servers.length > 0 && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setServerMenuOpen((v) => !v);
+                setQualityMenuOpen(false);
+              }}
+              className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-[#111111]/85 border border-white/15 px-2.5 py-1 text-xs font-bold text-white/90 backdrop-blur-md transition hover:border-[#E50914] hover:text-white"
+              title="تغيير السيرفر"
+            >
+              <Server className="h-3 w-3 text-[#ff8a8e]" />
+              <span className="truncate max-w-[130px]">{activeServerObj.name?.split(" - ")[0] || "السيرفر"}</span>
+              {activeServerObj.quality && (
+                <span className="rounded bg-[#E50914] px-1.5 py-0.2 text-[9px] font-mono font-extrabold text-white">
+                  {activeServerObj.quality}
+                </span>
+              )}
+            </button>
+          )}
+
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setQualityMenuOpen((v) => !v);
+              setServerMenuOpen(false);
+            }}
+            className="hidden md:inline-flex items-center gap-1 rounded-full bg-[#111111]/85 border border-white/15 px-2.5 py-1 text-xs font-mono font-bold text-white/90 backdrop-blur-md transition hover:border-[#E50914] hover:text-white"
+            title="تغيير الدقة"
+          >
+            <Sliders className="h-3 w-3 text-white/70" />
+            <span>{currentQualityLabel}</span>
+          </button>
+
           {resumingNotice && (
             <div className="rounded-full bg-[#111111]/90 border border-[#252525] px-3.5 py-1 text-xs font-semibold text-white/95 backdrop-blur-md shadow-lg animate-in fade-in">
               {resumingNotice}
@@ -1494,62 +1583,156 @@ export function TvoraPlayer({
               </div>
             )}
 
-            {/* Quality Menu (HLS ABR Levels) */}
-            {qualityLevels.length > 0 && (
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setQualityMenuOpen(!qualityMenuOpen);
-                    setSpeedMenuOpen(false);
-                    setSubtitleMenuOpen(false);
-                  }}
-                  aria-label={t("player.quality")}
-                  aria-expanded={qualityMenuOpen}
-                  className="tv-focusable flex h-9 w-9 items-center justify-center rounded-full text-white/80 transition hover:bg-white/10 hover:text-white"
-                >
-                  <Settings className="h-4.5 w-4.5" />
-                </button>
-
-                {qualityMenuOpen && (
-                  <div className="absolute end-0 bottom-11 z-30 min-w-[140px] rounded-xl border border-[#252525] bg-[#111111]/95 p-1.5 shadow-2xl backdrop-blur-md animate-in fade-in zoom-in-95">
-                    <div className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white/40">
-                      {t("player.quality")}
-                    </div>
-                    {/* Auto */}
-                    <button
-                      type="button"
-                      onClick={() => handleQualityChange(-1)}
-                      className={cn(
-                        "flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium text-white/80 hover:bg-white/10 hover:text-white",
-                        selectedQuality === -1 && "text-[#E50914] font-bold"
-                      )}
-                    >
-                      <span>{t("player.auto")}</span>
-                      {selectedQuality === -1 && <Check className="h-3.5 w-3.5" />}
-                    </button>
-                    {/* Available levels */}
-                    {qualityLevels.map((lvl) => (
-                      <button
-                        key={lvl.id}
-                        type="button"
-                        onClick={() => handleQualityChange(lvl.id)}
-                        className={cn(
-                          "flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium text-white/80 hover:bg-white/10 hover:text-white",
-                          selectedQuality === lvl.id && "text-[#E50914] font-bold"
-                        )}
-                      >
-                        <span>{lvl.label}</span>
-                        {selectedQuality === lvl.id && <Check className="h-3.5 w-3.5" />}
-                      </button>
-                    ))}
-                  </div>
+            {/* Quality & Resolution Menu (Always visible for full user control) */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => {
+                  setQualityMenuOpen(!qualityMenuOpen);
+                  setServerMenuOpen(false);
+                  setSpeedMenuOpen(false);
+                  setSubtitleMenuOpen(false);
+                  setAudioMenuOpen(false);
+                }}
+                aria-label={t("player.quality")}
+                aria-expanded={qualityMenuOpen}
+                className={cn(
+                  "tv-focusable flex h-9 items-center gap-1.5 rounded-full px-2.5 sm:px-3 text-xs font-bold transition",
+                  qualityMenuOpen
+                    ? "bg-[#E50914] text-white shadow-[0_0_12px_rgba(229,9,20,0.5)]"
+                    : "bg-white/10 text-white/85 hover:bg-white/20 hover:text-white"
                 )}
-              </div>
-            )}
+                title="الدقة والجودة"
+              >
+                <Sliders className="h-4 w-4 text-white/80" />
+                <span className="font-mono text-[11px] font-bold">
+                  {currentQualityLabel}
+                </span>
+              </button>
+
+              {qualityMenuOpen && (
+                <div
+                  className="absolute end-0 bottom-11 z-30 w-72 max-w-[85vw] rounded-xl border border-[#252525] bg-[#111111]/98 p-2 shadow-2xl backdrop-blur-xl animate-in fade-in zoom-in-95"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="flex items-center justify-between border-b border-[#252525] px-2.5 pb-2 pt-1">
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-white">
+                      <Sliders className="h-3.5 w-3.5 text-[#E50914]" />
+                      <span>{t("player.quality")} والدقة</span>
+                    </div>
+                    <span className="rounded bg-white/10 px-1.5 py-0.5 font-mono text-[10px] font-bold text-[#ff8a8e]">
+                      {currentQualityLabel}
+                    </span>
+                  </div>
+
+                  <div className="max-h-64 overflow-y-auto py-1 space-y-2 no-scrollbar">
+                    {/* HLS Adaptive Levels if available */}
+                    {qualityLevels.length > 0 && (
+                      <div className="space-y-1">
+                        <div className="px-2 pt-1 text-[10px] font-bold uppercase tracking-wider text-white/40">
+                          الدقات التلقائية (Adaptive Stream)
+                        </div>
+
+                        {/* Auto */}
+                        <button
+                          type="button"
+                          onClick={() => handleQualityChange(-1)}
+                          className={cn(
+                            "flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium transition",
+                            selectedQuality === -1
+                              ? "bg-[#E50914]/20 text-[#E50914] font-bold border border-[#E50914]/40"
+                              : "text-white/80 hover:bg-white/10 hover:text-white"
+                          )}
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className={cn("h-1.5 w-1.5 rounded-full", selectedQuality === -1 ? "bg-[#E50914] animate-pulse" : "bg-white/30")} />
+                            <span>{t("player.auto")} (تلقائي ذكي)</span>
+                          </div>
+                          {selectedQuality === -1 && <Check className="h-3.5 w-3.5 text-[#E50914]" />}
+                        </button>
+
+                        {/* Levels */}
+                        {qualityLevels.map((lvl) => {
+                          const isSelected = selectedQuality === lvl.id;
+                          return (
+                            <button
+                              key={lvl.id}
+                              type="button"
+                              onClick={() => handleQualityChange(lvl.id)}
+                              className={cn(
+                                "flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium transition",
+                                isSelected
+                                  ? "bg-[#E50914]/20 text-[#E50914] font-bold border border-[#E50914]/40"
+                                  : "text-white/80 hover:bg-white/10 hover:text-white"
+                              )}
+                            >
+                              <div className="flex items-center gap-2">
+                                <span className={cn("h-1.5 w-1.5 rounded-full", isSelected ? "bg-[#E50914]" : "bg-white/20")} />
+                                <span className="font-mono font-bold">{lvl.label}</span>
+                                {lvl.height && (
+                                  <span className="text-[10px] text-white/40">
+                                    {lvl.height >= 1080 ? "FHD" : lvl.height >= 720 ? "HD" : "SD"}
+                                  </span>
+                                )}
+                              </div>
+                              {isSelected && <Check className="h-3.5 w-3.5 text-[#E50914]" />}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    {/* Server Qualities if channel has multiple servers */}
+                    {servers && servers.length > 1 && (
+                      <div className={cn("space-y-1", qualityLevels.length > 0 && "border-t border-[#252525] pt-1.5")}>
+                        <div className="px-2 pt-1 text-[10px] font-bold uppercase tracking-wider text-white/40">
+                          دقات السيرفرات المتوفرة
+                        </div>
+                        {servers.map((srv, idx) => {
+                          const isCurrent = srv.id === selectedServerId || srv.url === activePlaybackUrl;
+                          return (
+                            <button
+                              key={srv.id || idx}
+                              type="button"
+                              onClick={() => handleServerChangeInternal(srv)}
+                              className={cn(
+                                "flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium transition text-start",
+                                isCurrent
+                                  ? "bg-[#E50914]/20 text-[#E50914] font-bold border border-[#E50914]/40"
+                                  : "text-white/80 hover:bg-white/10 hover:text-white"
+                              )}
+                            >
+                              <div className="flex items-center gap-2 min-w-0">
+                                <span className={cn("h-1.5 w-1.5 rounded-full shrink-0", isCurrent ? "bg-[#E50914] animate-pulse" : "bg-emerald-400")} />
+                                <span className="truncate font-semibold">{srv.quality || `سيرفر ${idx + 1}`}</span>
+                                <span className="truncate text-[10px] text-white/40">({srv.name?.split(" - ")[0] || `سيرفر ${idx + 1}`})</span>
+                              </div>
+                              <div className="flex items-center gap-1.5 shrink-0">
+                                {srv.resolution && (
+                                  <span className="font-mono text-[9px] text-white/40 hidden sm:inline">{srv.resolution}</span>
+                                )}
+                                {isCurrent && <Check className="h-3.5 w-3.5 text-[#E50914]" />}
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    {/* Single stream info */}
+                    {qualityLevels.length <= 1 && (!servers || servers.length <= 1) && (
+                      <div className="p-3 text-center text-xs text-white/60">
+                        <div className="font-bold text-white mb-1">دقة البث المباشر</div>
+                        <p className="text-[11px] text-white/40">يعمل البث بأعلى جودة متوفرة من المصدر ({currentQualityLabel}).</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* Server Selection Menu (Live Channels & VOD) */}
-            {servers && servers.length > 1 && (
+            {servers && servers.length > 0 && (
               <div className="relative">
                 <button
                   type="button"
@@ -1558,52 +1741,96 @@ export function TvoraPlayer({
                     setQualityMenuOpen(false);
                     setSpeedMenuOpen(false);
                     setSubtitleMenuOpen(false);
+                    setAudioMenuOpen(false);
                   }}
                   aria-label="السيرفرات"
                   aria-expanded={serverMenuOpen}
                   className={cn(
-                    "tv-focusable flex h-9 items-center gap-1.5 rounded-full px-2.5 text-xs font-bold transition hover:bg-white/10 hover:text-white",
-                    serverMenuOpen ? "bg-[#E50914] text-white" : "text-white/80"
+                    "tv-focusable flex h-9 items-center gap-1.5 rounded-full px-2.5 sm:px-3 text-xs font-bold transition",
+                    serverMenuOpen
+                      ? "bg-[#E50914] text-white shadow-[0_0_12px_rgba(229,9,20,0.5)]"
+                      : "bg-white/10 text-white/85 hover:bg-white/20 hover:text-white"
                   )}
+                  title="سيرفرات البث"
                 >
-                  <Server className="h-4 w-4" />
+                  <Server className="h-4 w-4 text-[#ff8a8e]" />
                   <span className="hidden sm:inline">السيرفر</span>
+                  {activeServerObj?.quality && (
+                    <span className="rounded bg-black/40 px-1.5 py-0.5 text-[10px] font-mono font-extrabold text-[#ffb4b7]">
+                      {activeServerObj.quality}
+                    </span>
+                  )}
                 </button>
 
                 {serverMenuOpen && (
-                  <div className="absolute end-0 bottom-11 z-30 min-w-[210px] rounded-xl border border-[#252525] bg-[#111111]/95 p-1.5 shadow-2xl backdrop-blur-md animate-in fade-in zoom-in-95">
-                    <div className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white/40">
-                      {live ? "سيرفرات البث المباشر" : "سيرفرات المشاهدة"}
+                  <div
+                    className="absolute end-0 bottom-11 z-30 w-80 max-w-[88vw] rounded-xl border border-[#252525] bg-[#111111]/98 p-2 shadow-2xl backdrop-blur-xl animate-in fade-in zoom-in-95"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div className="flex items-center justify-between border-b border-[#252525] px-2.5 pb-2 pt-1">
+                      <div className="flex items-center gap-1.5 text-xs font-bold text-white">
+                        <Server className="h-3.5 w-3.5 text-[#E50914]" />
+                        <span>{live ? "سيرفرات البث المباشر" : "سيرفرات المشاهدة"}</span>
+                      </div>
+                      <span className="text-[10px] text-white/40 font-mono">
+                        {servers.length} {servers.length === 1 ? "سيرفر" : "سيرفرات"}
+                      </span>
                     </div>
-                    {servers.map((srv, idx) => {
-                      const isCurrent = srv.id === selectedServerId || srv.url === activePlaybackUrl;
-                      return (
-                        <button
-                          key={srv.id || idx}
-                          type="button"
-                          onClick={() => {
-                            setSelectedServerId(srv.id);
-                            onServerChange?.(srv);
-                            setServerMenuOpen(false);
-                            setError(false);
-                          }}
-                          className={cn(
-                            "flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-xs font-medium text-white/80 hover:bg-white/10 hover:text-white transition",
-                            isCurrent && "text-[#E50914] font-bold bg-white/5"
-                          )}
-                        >
-                          <div className="flex items-center gap-2">
-                            <span className={cn("h-2 w-2 rounded-full", isCurrent ? "bg-[#E50914] animate-pulse" : "bg-emerald-400")} />
-                            <span className="truncate max-w-[130px]">{srv.name || `سيرفر ${idx + 1}`}</span>
-                          </div>
-                          {srv.quality && (
-                            <span className="rounded bg-white/10 px-1 py-0.5 text-[9px] font-extrabold text-white/60">
-                              {srv.quality}
-                            </span>
-                          )}
-                        </button>
-                      );
-                    })}
+
+                    <div className="max-h-72 overflow-y-auto py-1 space-y-1 no-scrollbar">
+                      {servers.map((srv, idx) => {
+                        const isCurrent = srv.id === selectedServerId || srv.url === activePlaybackUrl;
+                        return (
+                          <button
+                            key={srv.id || idx}
+                            type="button"
+                            onClick={() => handleServerChangeInternal(srv)}
+                            className={cn(
+                              "flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-xs font-medium transition text-start",
+                              isCurrent
+                                ? "bg-[#E50914]/20 text-white font-bold border border-[#E50914]/50 shadow-[0_0_10px_rgba(229,9,20,0.2)]"
+                                : "text-white/80 hover:bg-white/10 hover:text-white"
+                            )}
+                          >
+                            <div className="flex items-center gap-2 min-w-0">
+                              <span
+                                className={cn(
+                                  "h-2 w-2 rounded-full shrink-0",
+                                  isCurrent ? "bg-[#E50914] animate-pulse shadow-[0_0_8px_#E50914]" : "bg-emerald-400"
+                                )}
+                              />
+                              <div className="min-w-0">
+                                <p className="truncate text-xs font-bold leading-tight text-white">
+                                  {srv.name || `سيرفر ${idx + 1}`}
+                                </p>
+                                {srv.resolution && (
+                                  <p className="text-[10px] text-white/45 font-mono">
+                                    {srv.resolution}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-1.5 shrink-0 ms-2">
+                              {srv.quality && (
+                                <span
+                                  className={cn(
+                                    "rounded px-1.5 py-0.5 text-[10px] font-extrabold uppercase font-mono",
+                                    isCurrent ? "bg-[#E50914] text-white" : "bg-white/10 text-white/70"
+                                  )}
+                                >
+                                  {srv.quality}
+                                </span>
+                              )}
+                              {isCurrent && <Check className="h-4 w-4 text-[#E50914]" />}
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <div className="border-t border-[#252525] mt-1 pt-1.5 px-2 text-[10px] text-white/40 text-center">
+                      إذا واجهت تقطيعاً أو تأخيراً في البث، اختر سيرفر بجودة أقل (مثل 720p أو SD)
+                    </div>
                   </div>
                 )}
               </div>

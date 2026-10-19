@@ -90,6 +90,7 @@ export interface ChannelServer {
   name: string;
   url: string;
   quality?: string;
+  resolution?: string;
   isDefault?: boolean;
   status?: string;
 }
