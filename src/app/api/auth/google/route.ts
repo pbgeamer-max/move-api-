@@ -81,6 +81,7 @@ export async function POST(req: NextRequest) {
       const randomPw = crypto.randomBytes(24).toString("hex");
       user = await db.user.create({
         data: {
+          id: `usr_${crypto.randomBytes(12).toString("hex")}`,
           email: verifiedEmail,
           name: verifiedName || verifiedEmail.split("@")[0],
           passwordHash: hashPassword(randomPw),

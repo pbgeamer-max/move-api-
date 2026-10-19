@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import * as crypto from "crypto";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { createSession, hashPassword } from "@/lib/auth";
@@ -24,6 +25,7 @@ export async function POST(req: NextRequest) {
 
     const user = await db.user.create({
       data: {
+        id: `usr_${crypto.randomBytes(12).toString("hex")}`,
         email,
         name: body.data.name || email.split("@")[0],
         passwordHash: hashPassword(body.data.password),

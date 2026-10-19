@@ -1,10 +1,6 @@
 // TVORA unified database router
-// Hybrid architecture:
-// - Authentication & Users: Managed via Google Firebase Firestore (user, session)
-// - Content & Catalog: Managed via Supabase PostgreSQL / Prisma (title, season, episode, channel, siteSetting, etc.)
-// - Resilient zero-downtime fallback to local catalog & channels for 100% uptime
-import { isFirebaseConfigured } from "./firebase-admin";
-import { firestoreDb } from "./firestore-db";
+// 100% Supabase PostgreSQL / Prisma architecture for Authentication, Users, Sessions, and Catalog
+import * as crypto from "crypto";
 import { getLocalCatalog, DEFAULT_CHANNELS, DEFAULT_SETTINGS } from "./catalog-loader";
 
 let _PrismaClientClass: any = null;
@@ -338,6 +334,48 @@ function filterCatalog(catalog: any[], where?: any, orderBy?: any, skip?: number
 function getResilientPrismaModel(modelName: string): any {
   const client = getPrismaClient();
   const target = client ? client[modelName] : null;
+
+  if (modelName === "user") {
+    return new Proxy(target || {}, {
+      get(_t, method: string) {
+        return async (...args: any[]) => {
+          if (target && typeof target[method] === "function") {
+            try {
+              if ((method === "create" || method === "upsert") && args[0]?.data && !args[0].data.id) {
+                args[0].data.id = `usr_${crypto.randomBytes(12).toString("hex")}`;
+              }
+              return await target[method](...args);
+            } catch (err: any) {
+              console.error(`[Supabase User DB ${method} Error]:`, err?.message || err);
+              throw err;
+            }
+          }
+          return null;
+        };
+      },
+    });
+  }
+
+  if (modelName === "session") {
+    return new Proxy(target || {}, {
+      get(_t, method: string) {
+        return async (...args: any[]) => {
+          if (target && typeof target[method] === "function") {
+            try {
+              if ((method === "create" || method === "upsert") && args[0]?.data && !args[0].data.id) {
+                args[0].data.id = `sess_${crypto.randomBytes(16).toString("hex")}`;
+              }
+              return await target[method](...args);
+            } catch (err: any) {
+              console.error(`[Supabase Session DB ${method} Error]:`, err?.message || err);
+              throw err;
+            }
+          }
+          return null;
+        };
+      },
+    });
+  }
 
   if (modelName === "title") {
     return new Proxy(target || {}, {
@@ -721,43 +759,11 @@ function getResilientPrismaModel(modelName: string): any {
   });
 }
 
-// Proxy database router: routes user & session to Firebase, and catalog/content to Supabase (Prisma)
+// Unified database router: 100% Supabase PostgreSQL / Prisma for all models
 export const db: any = new Proxy(
   {},
   {
     get(_target, prop: string) {
-      const provider = (process.env.DATABASE_PROVIDER || "").toLowerCase();
-
-      // Explicit full firebase mode
-      if (provider === "firebase-all") {
-        return (firestoreDb as any)[prop];
-      }
-
-      // Auth & User Management: Routed to Firebase Firestore
-      if (prop === "user" || prop === "session") {
-        if (isFirebaseConfigured()) {
-          return (firestoreDb as any)[prop];
-        }
-        return getResilientPrismaModel(prop);
-      }
-
-      // Catalog & Content (titles, seasons, episodes, channels, settings, lists, progress):
-      // Routed to Supabase PostgreSQL / Prisma
-      if (
-        provider === "supabase" ||
-        provider === "postgres" ||
-        provider === "postgresql" ||
-        provider === "sqlite" ||
-        process.env.DATABASE_URL?.startsWith("postgres")
-      ) {
-        return getResilientPrismaModel(prop);
-      }
-
-      // Fallback: If Firebase is configured and provider is not set to supabase, route via firestoreDb
-      if (isFirebaseConfigured()) {
-        return (firestoreDb as any)[prop];
-      }
-
       return getResilientPrismaModel(prop);
     },
   }

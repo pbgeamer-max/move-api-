@@ -24,7 +24,14 @@ export function verifyPassword(password: string, stored: string): boolean {
 export async function createSession(userId: string): Promise<string> {
   const token = crypto.randomBytes(32).toString("hex");
   const expiresAt = new Date(Date.now() + SESSION_DAYS * 24 * 3600 * 1000);
-  await db.session.create({ data: { token, userId, expiresAt } });
+  await db.session.create({
+    data: {
+      id: `sess_${crypto.randomBytes(16).toString("hex")}`,
+      token,
+      userId,
+      expiresAt,
+    },
+  });
   const jar = await cookies();
   jar.set(SESSION_COOKIE, token, {
     httpOnly: true,
