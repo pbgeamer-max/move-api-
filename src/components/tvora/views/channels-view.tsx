@@ -330,58 +330,6 @@ function ChannelPlayer({ channel, onClose }: { channel: ChannelDTO; onClose: () 
           </button>
         </div>
 
-        {/* Server Switcher Bar (when channel has multiple servers) */}
-        {servers.length > 1 && (
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/8 bg-[#0d0d11] px-4 py-2">
-            <div className="flex items-center gap-2 overflow-x-auto py-0.5 no-scrollbar">
-              <span className="flex items-center gap-1.5 text-xs font-bold text-white/60 shrink-0">
-                <Server className="h-3.5 w-3.5 text-[#e5484d]" />
-                السيرفرات:
-              </span>
-              <div className="flex items-center gap-1.5">
-                {servers.map((srv, idx) => {
-                  const isCurrent = activeServer?.id === srv.id || activeServer?.url === srv.url;
-                  const shortName = srv.name?.split(" - ")[0] || `سيرفر ${idx + 1}`;
-                  const details = srv.name?.split(" - ")[1]?.replace(/\(|\)/g, "") || "";
-                  return (
-                    <button
-                      key={srv.id || idx}
-                      type="button"
-                      title={srv.name || `سيرفر ${idx + 1}`}
-                      onClick={() => {
-                        setActiveServer(srv);
-                        setServerAlert(null);
-                      }}
-                      className={cn(
-                        "flex shrink-0 items-center gap-1.5 rounded-md border px-2.5 py-1 font-bold text-xs transition active:scale-95",
-                        isCurrent
-                          ? "border-[#e5484d] bg-[#e5484d] text-white shadow-md shadow-[#e5484d]/30"
-                          : "border-white/10 bg-white/5 text-white/70 hover:border-white/25 hover:text-white"
-                      )}
-                    >
-                      <span className={cn("h-1.5 w-1.5 rounded-full", isCurrent ? "bg-white animate-pulse" : "bg-emerald-400")} />
-                      <span>{shortName}</span>
-                      {srv.quality && (
-                        <span className={cn("rounded px-1 text-[9px] font-extrabold uppercase font-mono", isCurrent ? "bg-black/30 text-white" : "bg-white/10 text-white/60")}>
-                          {srv.quality}
-                        </span>
-                      )}
-                      {details && !isCurrent && (
-                        <span className="hidden md:inline text-[9px] text-white/40 font-normal">
-                          {details.slice(0, 15)}
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-            <span className="hidden sm:inline-flex items-center gap-1 text-[11px] text-emerald-400/90 font-semibold shrink-0">
-              <Wifi className="h-3 w-3" />
-              مباشر
-            </span>
-          </div>
-        )}
 
         {/* Server Alert Warning Banner */}
         {serverAlert && (

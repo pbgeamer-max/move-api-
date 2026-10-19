@@ -1145,42 +1145,8 @@ export function TvoraPlayer({
           )}
         </div>
 
-        {/* Quick Server & Quality Badges + Resuming / Reconnecting Notices */}
+        {/* Resuming / Reconnecting Notices */}
         <div className="flex items-center gap-2">
-          {activeServerObj && servers && servers.length > 0 && (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setServerMenuOpen((v) => !v);
-                setQualityMenuOpen(false);
-              }}
-              className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-[#111111]/85 border border-white/15 px-2.5 py-1 text-xs font-bold text-white/90 backdrop-blur-md transition hover:border-[#E50914] hover:text-white"
-              title="تغيير السيرفر"
-            >
-              <Server className="h-3 w-3 text-[#ff8a8e]" />
-              <span className="truncate max-w-[130px]">{activeServerObj.name?.split(" - ")[0] || "السيرفر"}</span>
-              {activeServerObj.quality && (
-                <span className="rounded bg-[#E50914] px-1.5 py-0.2 text-[9px] font-mono font-extrabold text-white">
-                  {activeServerObj.quality}
-                </span>
-              )}
-            </button>
-          )}
-
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              setQualityMenuOpen((v) => !v);
-              setServerMenuOpen(false);
-            }}
-            className="hidden md:inline-flex items-center gap-1 rounded-full bg-[#111111]/85 border border-white/15 px-2.5 py-1 text-xs font-mono font-bold text-white/90 backdrop-blur-md transition hover:border-[#E50914] hover:text-white"
-            title="تغيير الدقة"
-          >
-            <Sliders className="h-3 w-3 text-white/70" />
-            <span>{currentQualityLabel}</span>
-          </button>
 
           {resumingNotice && (
             <div className="rounded-full bg-[#111111]/90 border border-[#252525] px-3.5 py-1 text-xs font-semibold text-white/95 backdrop-blur-md shadow-lg animate-in fade-in">
@@ -1605,7 +1571,8 @@ export function TvoraPlayer({
                 title="الدقة والجودة"
               >
                 <Sliders className="h-4 w-4 text-white/80" />
-                <span className="font-mono text-[11px] font-bold">
+                <span className="hidden sm:inline">الدقة</span>
+                <span className="rounded bg-black/40 px-1.5 py-0.5 text-[10px] font-mono font-extrabold text-white">
                   {currentQualityLabel}
                 </span>
               </button>
