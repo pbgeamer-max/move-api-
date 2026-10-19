@@ -399,9 +399,11 @@ export function TvoraPlayer({
 
   // ── Stream Resolver State (Auto-resolves 3isk, external streams, and embeds) ──
   const isDirectMedia = Boolean(
-    src && (src.includes(".m3u8") || src.includes(".mp4") || src.includes(".webm") || src.includes("/vod/stream") || src.includes("/api/stream/vod"))
+    src && (src.includes(".m3u8") || src.includes(".mp4") || src.includes(".webm") || src.includes("/vod/stream") || src.includes("/api/stream") || src.includes("/stream/vod"))
   );
-  const isHlsInitial = Boolean(src && (src.includes(".m3u8") || src.includes("/vod/stream") || src.includes("/api/stream/vod")));
+  const isHlsInitial = Boolean(
+    src && (src.includes(".m3u8") || src.includes("/vod/stream") || src.includes("/api/stream") || src.includes("/stream/vod") || (!src.includes(".mp4") && !src.includes(".webm")))
+  );
 
   // Derive Aspreen embed player URL as reliable fallback
   const aspreenEmbedUrl = useMemo(() => {
@@ -464,9 +466,13 @@ export function TvoraPlayer({
               type: "embed",
               embedUrl: candidateEmbed,
             });
+          } else if (aspreenEmbedUrl) {
+            setResolvedStream({ type: "embed", embedUrl: aspreenEmbedUrl });
           } else {
             setError(true);
           }
+        } else if (aspreenEmbedUrl) {
+          setResolvedStream({ type: "embed", embedUrl: aspreenEmbedUrl });
         } else {
           setError(true);
         }
@@ -475,13 +481,17 @@ export function TvoraPlayer({
         if (!active) return;
         setResolving(false);
         console.warn("[TvoraPlayer] Stream resolve fallback:", err);
-        setError(true);
+        if (aspreenEmbedUrl) {
+          setResolvedStream({ type: "embed", embedUrl: aspreenEmbedUrl });
+        } else {
+          setError(true);
+        }
       });
 
     return () => {
       active = false;
     };
-  }, [src, episodeId, titleId, isDirectMedia]);
+  }, [src, episodeId, titleId, isDirectMedia, aspreenEmbedUrl]);
 
   const activePlaybackUrl = resolvedStream?.streamUrl || (isDirectMedia ? src : null);
   const isEmbedMode = resolvedStream?.type === "embed" && Boolean(resolvedStream.embedUrl);
@@ -505,9 +515,11 @@ export function TvoraPlayer({
     setSelectedAudioTrack(-1);
 
     const isHlsSrc =
-      activePlaybackUrl.split("?")[0].endsWith(".m3u8") ||
+      activePlaybackUrl.includes(".m3u8") ||
       activePlaybackUrl.includes("/vod/stream") ||
-      activePlaybackUrl.includes(".m3u8");
+      activePlaybackUrl.includes("/stream/vod") ||
+      activePlaybackUrl.includes("/api/stream") ||
+      (!activePlaybackUrl.includes(".mp4") && !activePlaybackUrl.includes(".webm"));
     const nativeHlsSupport = video.canPlayType("application/vnd.apple.mpegurl") !== "";
 
     const handleFatalError = () => {
@@ -534,6 +546,11 @@ export function TvoraPlayer({
         retriesRef.current += 1;
         setReconnecting(true);
         setTimeout(() => setNonce((n) => n + 1), 1500 * retriesRef.current);
+      } else if (aspreenEmbedUrl) {
+        console.warn("[TvoraPlayer] Native HLS retries exhausted. Auto-falling back to Aspreen embed player:", aspreenEmbedUrl);
+        setReconnecting(false);
+        setError(false);
+        setResolvedStream({ type: "embed", embedUrl: aspreenEmbedUrl });
       } else {
         setReconnecting(false);
         setError(true);
@@ -1112,6 +1129,11 @@ export function TvoraPlayer({
               retriesRef.current += 1;
               setReconnecting(true);
               setTimeout(() => setNonce((n) => n + 1), 1500 * retriesRef.current);
+            } else if (aspreenEmbedUrl) {
+              console.warn("[TvoraPlayer] Native video error. Falling back to Aspreen embed player:", aspreenEmbedUrl);
+              setReconnecting(false);
+              setError(false);
+              setResolvedStream({ type: "embed", embedUrl: aspreenEmbedUrl });
             } else {
               setReconnecting(false);
               setError(true);
