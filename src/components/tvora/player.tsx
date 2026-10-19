@@ -45,6 +45,7 @@ import { useT } from "./shared";
 import { PulseRing } from "./motion-fx";
 import { cn } from "@/lib/utils";
 import type { ChannelServer } from "@/lib/types";
+import Hls from "hls.js";
 
 const MAX_AUTO_RETRIES = 3;
 
@@ -397,108 +398,18 @@ export function TvoraPlayer({
   const [nextCountdown, setNextCountdown] = useState<number | null>(null);
   const [skipFeedback, setSkipFeedback] = useState<"forward" | "rewind" | null>(null);
 
-  // ── Stream Resolver State (Auto-resolves 3isk, external streams, and embeds) ──
-  const isDirectMedia = Boolean(
-    src && (src.includes(".m3u8") || src.includes(".mp4") || src.includes(".webm") || src.includes("/vod/stream") || src.includes("/api/stream") || src.includes("/stream/vod"))
-  );
-  const isHlsInitial = Boolean(
-    src && (src.includes(".m3u8") || src.includes("/vod/stream") || src.includes("/api/stream") || src.includes("/stream/vod") || (!src.includes(".mp4") && !src.includes(".webm")))
-  );
-
-  // Derive Aspreen embed player URL as reliable fallback
-  const aspreenEmbedUrl = useMemo(() => {
-    if (!src) return undefined;
-    if (src.includes("/vod/player")) return src;
-    const idMatch = src.match(/[?&]id=([^&]+)/);
-    if (idMatch) return `https://aspreen-tv-production.up.railway.app/api/app/vod/player?id=${idMatch[1]}`;
-    if (src.includes("/vod/stream")) return src.replace("/vod/stream", "/vod/player");
-    return undefined;
-  }, [src]);
-
-  const [resolvedStream, setResolvedStream] = useState<{
-    type: "hls" | "mp4" | "embed";
-    streamUrl?: string;
-    embedUrl?: string;
-  } | null>(
-    isDirectMedia
-      ? { type: isHlsInitial ? "hls" : "mp4", streamUrl: src }
-      : null
-  );
-  const [resolving, setResolving] = useState<boolean>(!isDirectMedia);
-
-  useEffect(() => {
-    if (!src) return;
-    if (isDirectMedia) {
-      setResolvedStream({ type: isHlsInitial ? "hls" : "mp4", streamUrl: src });
-      setResolving(false);
-      return;
+  // ── Direct Stream URL ─────────────────────────────────────────────────────────
+  const activePlaybackUrl = useMemo(() => {
+    if (selectedServerId && servers?.length) {
+      const match = servers.find((s) => s.id === selectedServerId);
+      if (match?.url) return match.url;
     }
-
-    // Dynamic stream resolution via /api/stream/resolve
-    setResolving(true);
-    let active = true;
-
-    const params = new URLSearchParams();
-    params.set("url", src);
-    if (episodeId) params.set("episodeId", episodeId);
-    if (titleId) params.set("slug", titleId);
-
-    fetch(`/api/stream/resolve?${params.toString()}`)
-      .then((r) => r.json())
-      .then((data) => {
-        if (!active) return;
-        setResolving(false);
-        if (data && data.success && data.streamUrl) {
-          setResolvedStream({
-            type: data.type || "hls",
-            streamUrl: data.streamUrl,
-            embedUrl: data.fallbackEmbed || data.embedUrl,
-          });
-        } else if (data && data.success && (data.fallbackEmbed || data.embedUrl)) {
-          const candidateEmbed = data.fallbackEmbed || data.embedUrl;
-          if (
-            candidateEmbed &&
-            !candidateEmbed.includes("/watch/") &&
-            !candidateEmbed.includes("3iskk.xyz") &&
-            !candidateEmbed.includes("3isk.icu")
-          ) {
-            setResolvedStream({
-              type: "embed",
-              embedUrl: candidateEmbed,
-            });
-          } else if (aspreenEmbedUrl) {
-            setResolvedStream({ type: "embed", embedUrl: aspreenEmbedUrl });
-          } else {
-            setError(true);
-          }
-        } else if (aspreenEmbedUrl) {
-          setResolvedStream({ type: "embed", embedUrl: aspreenEmbedUrl });
-        } else {
-          setError(true);
-        }
-      })
-      .catch((err) => {
-        if (!active) return;
-        setResolving(false);
-        console.warn("[TvoraPlayer] Stream resolve fallback:", err);
-        if (aspreenEmbedUrl) {
-          setResolvedStream({ type: "embed", embedUrl: aspreenEmbedUrl });
-        } else {
-          setError(true);
-        }
-      });
-
-    return () => {
-      active = false;
-    };
-  }, [src, episodeId, titleId, isDirectMedia, aspreenEmbedUrl]);
-
-  const activePlaybackUrl = resolvedStream?.streamUrl || (isDirectMedia ? src : null);
-  const isEmbedMode = resolvedStream?.type === "embed" && Boolean(resolvedStream.embedUrl);
+    return src;
+  }, [selectedServerId, servers, src]);
 
   // ── 1. Engine Initialization (hls.js with ABR + Native Fallback) ───────────
   useEffect(() => {
-    if (isEmbedMode || resolving || !activePlaybackUrl) return;
+    if (!activePlaybackUrl) return;
     const video = videoRef.current;
     if (!video) return;
     let disposed = false;
@@ -518,6 +429,7 @@ export function TvoraPlayer({
       activePlaybackUrl.includes(".m3u8") ||
       activePlaybackUrl.includes("/vod/stream") ||
       activePlaybackUrl.includes("/stream/vod") ||
+      activePlaybackUrl.includes("/api/app/vod/stream") ||
       activePlaybackUrl.includes("/api/stream") ||
       (!activePlaybackUrl.includes(".mp4") && !activePlaybackUrl.includes(".webm"));
     const nativeHlsSupport = video.canPlayType("application/vnd.apple.mpegurl") !== "";
@@ -537,7 +449,6 @@ export function TvoraPlayer({
           setError(false);
           setSelectedServerId(nextSrv.id);
           onServerChange?.(nextSrv);
-          setResolvedStream({ type: "hls", streamUrl: nextSrv.url });
           return;
         }
       }
@@ -546,107 +457,97 @@ export function TvoraPlayer({
         retriesRef.current += 1;
         setReconnecting(true);
         setTimeout(() => setNonce((n) => n + 1), 1500 * retriesRef.current);
-      } else if (aspreenEmbedUrl) {
-        console.warn("[TvoraPlayer] Native HLS retries exhausted. Auto-falling back to Aspreen embed player:", aspreenEmbedUrl);
-        setReconnecting(false);
-        setError(false);
-        setResolvedStream({ type: "embed", embedUrl: aspreenEmbedUrl });
       } else {
         setReconnecting(false);
         setError(true);
       }
     };
 
-    (async () => {
-      if (isHlsSrc && !nativeHlsSupport) {
-        try {
-          const mod = await import("hls.js");
-          const Hls = mod.default;
-          if (disposed) return;
+    if (isHlsSrc && !nativeHlsSupport && Hls.isSupported()) {
+      const hls = new Hls({
+        lowLatencyMode: false,
+        enableWorker: true,
+        backBufferLength: 60,
+        maxBufferLength: 60,
+        maxMaxBufferLength: 120,
+        liveSyncDurationCount: 3,
+        liveMaxLatencyDurationCount: 8,
+        manifestLoadingTimeOut: 20000,
+        manifestLoadingMaxRetry: 6,
+        levelLoadingTimeOut: 20000,
+        levelLoadingMaxRetry: 6,
+        fragLoadingTimeOut: 25000,
+        fragLoadingMaxRetry: 8,
+        capLevelToPlayerSize: false,
+      });
+      hlsRef.current = hls;
 
-          if (Hls.isSupported()) {
-            const hls = new Hls({
-              lowLatencyMode: false,
-              enableWorker: true,
-              backBufferLength: 60,
-              maxBufferLength: 60,
-              maxMaxBufferLength: 120,
-              liveSyncDurationCount: 3,
-              liveMaxLatencyDurationCount: 8,
-              manifestLoadingTimeOut: 15000,
-              manifestLoadingMaxRetry: 5,
-              levelLoadingTimeOut: 15000,
-              levelLoadingMaxRetry: 5,
-              fragLoadingTimeOut: 20000,
-              fragLoadingMaxRetry: 6,
-              capLevelToPlayerSize: false,
-            });
-            hlsRef.current = hls;
+      hls.loadSource(activePlaybackUrl);
+      hls.attachMedia(video);
 
-            hls.loadSource(activePlaybackUrl);
-            hls.attachMedia(video);
-
-            hls.on(Hls.Events.MANIFEST_PARSED, (_event, data) => {
-              if (disposed) return;
-              onErrorState?.(false);
-              if (data.levels && data.levels.length > 1) {
-                const levels: QualityLevel[] = data.levels.map((lvl, idx) => ({
-                  id: idx,
-                  label: lvl.height ? `${lvl.height}p` : `${Math.round(lvl.bitrate / 1000)}k`,
-                  height: lvl.height,
-                  bitrate: lvl.bitrate,
-                }));
-                levels.sort((a, b) => (b.height || 0) - (a.height || 0));
-                setQualityLevels(levels);
-              }
-              setReady(true);
-            });
-
-            hls.on(Hls.Events.AUDIO_TRACKS_UPDATED, (_event, data) => {
-              if (disposed) return;
-              if (data.audioTracks && data.audioTracks.length > 1) {
-                setAudioTracks(
-                  data.audioTracks.map((trk, idx) => ({
-                    id: idx,
-                    label: trk.name || trk.lang || `Track ${idx + 1}`,
-                    lang: trk.lang,
-                  }))
-                );
-              }
-            });
-
-            hls.on(Hls.Events.ERROR, (_event, data) => {
-              if (data.fatal) {
-                switch (data.type) {
-                  case Hls.ErrorTypes.NETWORK_ERROR:
-                    if (data.details === "keyLoadError" || data.details === "keyLoadTimeOut") {
-                      handleFatalError();
-                      break;
-                    }
-                    hls.startLoad();
-                    break;
-                  case Hls.ErrorTypes.MEDIA_ERROR:
-                    hls.recoverMediaError();
-                    break;
-                  default:
-                    handleFatalError();
-                    break;
-                }
-              }
-            });
-
-            return;
-          }
-        } catch {
-          // Dynamic import fallback to native
+      hls.on(Hls.Events.MANIFEST_PARSED, (_event, data) => {
+        if (disposed) return;
+        onErrorState?.(false);
+        setError(false);
+        if (data.levels && data.levels.length > 1) {
+          const levels: QualityLevel[] = data.levels.map((lvl, idx) => ({
+            id: idx,
+            label: lvl.height ? `${lvl.height}p` : `${Math.round(lvl.bitrate / 1000)}k`,
+            height: lvl.height,
+            bitrate: lvl.bitrate,
+          }));
+          levels.sort((a, b) => (b.height || 0) - (a.height || 0));
+          setQualityLevels(levels);
         }
-      }
+        setReady(true);
+        void video.play().catch(() => {});
+      });
 
-      // Native HTML5 source
-      video.src = activePlaybackUrl;
-      video.load();
-      void video.play().catch(() => {});
-    })();
+      hls.on(Hls.Events.AUDIO_TRACKS_UPDATED, (_event, data) => {
+        if (disposed) return;
+        if (data.audioTracks && data.audioTracks.length > 1) {
+          setAudioTracks(
+            data.audioTracks.map((trk, idx) => ({
+              id: idx,
+              label: trk.name || trk.lang || `Track ${idx + 1}`,
+              lang: trk.lang,
+            }))
+          );
+        }
+      });
+
+      hls.on(Hls.Events.ERROR, (_event, data) => {
+        if (data.fatal) {
+          console.warn("[TvoraPlayer] Hls fatal error:", data.type, data.details);
+          switch (data.type) {
+            case Hls.ErrorTypes.NETWORK_ERROR:
+              if (data.details === "keyLoadError" || data.details === "keyLoadTimeOut") {
+                handleFatalError();
+                break;
+              }
+              hls.startLoad();
+              break;
+            case Hls.ErrorTypes.MEDIA_ERROR:
+              hls.recoverMediaError();
+              break;
+            default:
+              handleFatalError();
+              break;
+          }
+        }
+      });
+
+      return () => {
+        disposed = true;
+        hls.destroy();
+        hlsRef.current = null;
+      };
+    }
+
+    // Native HTML5 source (Safari iOS/macOS or direct MP4)
+    video.src = activePlaybackUrl;
+    video.load();
+    void video.play().catch(() => {});
 
     return () => {
       disposed = true;
@@ -658,7 +559,7 @@ export function TvoraPlayer({
         video.load();
       }
     };
-  }, [activePlaybackUrl, isEmbedMode, resolving, nonce, live]);
+  }, [activePlaybackUrl, nonce, live]);
 
   // ── 2. Progress Restore (Movies & Episodes only) ───────────────────────────
   useEffect(() => {
@@ -1081,83 +982,66 @@ export function TvoraPlayer({
           padding: 2px 8px;
         }
       `}</style>
-      {/* ── Video Element or Sandboxed Cinema Embed ───────────────────────── */}
-      {isEmbedMode ? (
-        <div className="absolute inset-0 h-full w-full bg-[#080808]">
-          <iframe
-            src={resolvedStream.embedUrl}
-            title={title || "TVORA Cinema Stream"}
-            className="h-full w-full border-0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-            allowFullScreen
+      {/* ── Native Video Element ─────────────────────────────────────────── */}
+      <video
+        ref={(el) => {
+          (videoRef as any).current = el;
+          onVideoEl?.(el);
+        }}
+        poster={poster}
+        className="absolute inset-0 h-full w-full bg-[#080808] object-contain"
+        playsInline
+        autoPlay
+        muted={muted}
+        onLoadedMetadata={onLoadedMetadata}
+        onCanPlay={() => setReady(true)}
+        onPlaying={() => {
+          setPlaying(true);
+          setReady(true);
+        }}
+        onPause={() => {
+          setPlaying(false);
+          saveProgress();
+        }}
+        onEnded={() => {
+          setPlaying(false);
+          saveProgress();
+          onEnded?.();
+        }}
+        onTimeUpdate={onTimeUpdate}
+        onProgress={onProgress}
+        onDurationChange={() => {
+          const v = videoRef.current;
+          if (v && Number.isFinite(v.duration)) setDuration(v.duration);
+        }}
+        onError={() => {
+          if (retriesRef.current < MAX_AUTO_RETRIES) {
+            retriesRef.current += 1;
+            setReconnecting(true);
+            setTimeout(() => setNonce((n) => n + 1), 1500 * retriesRef.current);
+          } else {
+            setReconnecting(false);
+            setError(true);
+          }
+        }}
+        onClick={(e) => {
+          e.stopPropagation();
+          closeAllMenus();
+          togglePlay();
+        }}
+      >
+        {/* Subtitle WebVTT Tracks */}
+        {subtitles.map((sub) => (
+          <track
+            key={sub.srclang}
+            label={sub.label}
+            kind="subtitles"
+            srcLang={sub.srclang}
+            src={sub.src}
+            default={sub.default}
           />
-        </div>
-      ) : (
-        <video
-          ref={(el) => {
-            (videoRef as any).current = el;
-            onVideoEl?.(el);
-          }}
-          poster={poster}
-          className="absolute inset-0 h-full w-full bg-[#080808] object-contain"
-          playsInline
-          autoPlay
-          muted={muted}
-          onLoadedMetadata={onLoadedMetadata}
-          onCanPlay={() => setReady(true)}
-          onPlaying={() => {
-            setPlaying(true);
-            setReady(true);
-          }}
-          onPause={() => {
-            setPlaying(false);
-            saveProgress();
-          }}
-          onEnded={() => {
-            setPlaying(false);
-            saveProgress();
-            onEnded?.();
-          }}
-          onTimeUpdate={onTimeUpdate}
-          onProgress={onProgress}
-          onDurationChange={() => {
-            const v = videoRef.current;
-            if (v && Number.isFinite(v.duration)) setDuration(v.duration);
-          }}
-          onError={() => {
-            if (retriesRef.current < MAX_AUTO_RETRIES) {
-              retriesRef.current += 1;
-              setReconnecting(true);
-              setTimeout(() => setNonce((n) => n + 1), 1500 * retriesRef.current);
-            } else if (aspreenEmbedUrl) {
-              console.warn("[TvoraPlayer] Native video error. Falling back to Aspreen embed player:", aspreenEmbedUrl);
-              setReconnecting(false);
-              setError(false);
-              setResolvedStream({ type: "embed", embedUrl: aspreenEmbedUrl });
-            } else {
-              setReconnecting(false);
-              setError(true);
-            }
-          }}
-          onClick={(e) => {
-            e.stopPropagation();
-            closeAllMenus();
-            togglePlay();
-          }}
-        >
-          {/* Subtitle WebVTT Tracks */}
-          {subtitles.map((sub) => (
-            <track
-              key={sub.srclang}
-              label={sub.label}
-              kind="subtitles"
-              srcLang={sub.srclang}
-              src={sub.src}
-              default={sub.default}
-            />
-          ))}
-        </video>
-      )}
+        ))}
+      </video>
 
       {/* ── Top Bar: Badges, Title, Reconnect Status ───────────────────────── */}
       <div
@@ -1224,7 +1108,7 @@ export function TvoraPlayer({
       </div>
 
       {/* ── Center Play / Pause Indicator ─────────────────────────────────── */}
-      {!isEmbedMode && !playing && ready && !error && (
+      {!playing && ready && !error && (
         <button
           type="button"
           onClick={(e) => {
@@ -1283,16 +1167,14 @@ export function TvoraPlayer({
       )}
 
       {/* ── Loading Overlay ────────────────────────────────────────────────── */}
-      {resolving && <PlayerLoading label="جاري استخراج رابط البث والسينما..." />}
-      {!resolving && !isEmbedMode && !ready && !error && <PlayerLoading label={t("player.loadingStream")} />}
+      {!ready && !error && <PlayerLoading label={t("player.loadingStream")} />}
 
       {/* ── Error Card ─────────────────────────────────────────────────────── */}
-      {!resolving && !isEmbedMode && error && <PlayerError onRetry={manualRetry} />}
+      {error && <PlayerError onRetry={manualRetry} />}
 
       {/* ── Bottom Control Bar ─────────────────────────────────────────────── */}
-      {!isEmbedMode && (
-        <div
-          className={cn(
+      <div
+        className={cn(
             "absolute inset-x-0 bottom-0 z-20 bg-gradient-to-t from-[#080808] via-[#080808]/80 to-transparent px-4 pb-3.5 pt-14 transition-all duration-300",
             controlsVisible || !playing || isMenuOpen
               ? "translate-y-0 opacity-100"
@@ -1704,11 +1586,6 @@ export function TvoraPlayer({
                             onServerChange?.(srv);
                             setServerMenuOpen(false);
                             setError(false);
-                            if (srv.url.includes("/vod/player")) {
-                              setResolvedStream({ type: "embed", embedUrl: srv.url });
-                            } else {
-                              setResolvedStream({ type: "hls", streamUrl: srv.url, embedUrl: aspreenEmbedUrl });
-                            }
                           }}
                           className={cn(
                             "flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-xs font-medium text-white/80 hover:bg-white/10 hover:text-white transition",
@@ -1761,7 +1638,6 @@ export function TvoraPlayer({
           </div>
         </div>
       </div>
-      )}
     </div>
   );
 }

@@ -172,17 +172,12 @@ export function WatchView({ id, episodeId }: { id: string; episodeId?: string })
   const goEpisode = (ep: EpisodeDTO) => navigate({ name: "watch", id, ep: ep.id });
 
   const primaryStreamUrl = useMemo(() => {
-    if (!source?.src) return "";
-    const s = source.src;
-    const idMatch = s.match(/[?&]id=([^&]+)/);
-    if (idMatch) return `/api/stream/vod?id=${encodeURIComponent(idMatch[1])}`;
-    if (s.includes(".m3u8") || s.includes("/vod/stream")) return `/api/stream/vod?url=${encodeURIComponent(s)}`;
-    return s;
+    return source?.src || "";
   }, [source?.src]);
 
   const vodServers = useMemo<ChannelServer[]>(() => {
     if (!source?.src) return [];
-    const directUrl = primaryStreamUrl;
+    const directUrl = source.src;
 
     return [
       {
@@ -201,7 +196,7 @@ export function WatchView({ id, episodeId }: { id: string; episodeId?: string })
         status: "live",
       },
     ];
-  }, [source?.src, primaryStreamUrl]);
+  }, [source?.src]);
 
   // ── States ──────────────────────────────────────────────────────────────────
   if (loading) {
