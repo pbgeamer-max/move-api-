@@ -419,7 +419,7 @@ export function TvoraPlayer({
     embedUrl?: string;
   } | null>(
     isDirectMedia
-      ? { type: isHlsInitial ? "hls" : "mp4", streamUrl: src, embedUrl: aspreenEmbedUrl }
+      ? { type: isHlsInitial ? "hls" : "mp4", streamUrl: src }
       : null
   );
   const [resolving, setResolving] = useState<boolean>(!isDirectMedia);
@@ -427,7 +427,7 @@ export function TvoraPlayer({
   useEffect(() => {
     if (!src) return;
     if (isDirectMedia) {
-      setResolvedStream({ type: isHlsInitial ? "hls" : "mp4", streamUrl: src, embedUrl: aspreenEmbedUrl });
+      setResolvedStream({ type: isHlsInitial ? "hls" : "mp4", streamUrl: src });
       setResolving(false);
       return;
     }
@@ -525,23 +525,9 @@ export function TvoraPlayer({
           setError(false);
           setSelectedServerId(nextSrv.id);
           onServerChange?.(nextSrv);
-          if (nextSrv.url.includes("/vod/player")) {
-            setResolvedStream({ type: "embed", embedUrl: nextSrv.url });
-          } else {
-            setResolvedStream({ type: "hls", streamUrl: nextSrv.url, embedUrl: aspreenEmbedUrl });
-          }
+          setResolvedStream({ type: "hls", streamUrl: nextSrv.url });
           return;
         }
-      }
-
-      const fallback = resolvedStream?.embedUrl || aspreenEmbedUrl;
-      if (fallback) {
-        console.warn("[TvoraPlayer] Stream playback error, auto-recovering to embed player:", fallback);
-        setResolvedStream({ type: "embed", embedUrl: fallback });
-        setError(false);
-        setReconnecting(false);
-        setReady(true);
-        return;
       }
 
       if (retriesRef.current < MAX_AUTO_RETRIES) {
@@ -563,12 +549,12 @@ export function TvoraPlayer({
 
           if (Hls.isSupported()) {
             const hls = new Hls({
-              lowLatencyMode: false, // critical for live IPTV stability to prevent buffer starving
+              lowLatencyMode: false,
               enableWorker: true,
-              backBufferLength: 30,
-              maxBufferLength: 30,
-              maxMaxBufferLength: 60,
-              liveSyncDurationCount: 3, // stay 3 segments behind live edge to prevent freezing
+              backBufferLength: 60,
+              maxBufferLength: 60,
+              maxMaxBufferLength: 120,
+              liveSyncDurationCount: 3,
               liveMaxLatencyDurationCount: 8,
               manifestLoadingTimeOut: 15000,
               manifestLoadingMaxRetry: 5,
@@ -576,7 +562,7 @@ export function TvoraPlayer({
               levelLoadingMaxRetry: 5,
               fragLoadingTimeOut: 20000,
               fragLoadingMaxRetry: 6,
-              capLevelToPlayerSize: true,
+              capLevelToPlayerSize: false,
             });
             hlsRef.current = hls;
 
@@ -1122,14 +1108,6 @@ export function TvoraPlayer({
             if (v && Number.isFinite(v.duration)) setDuration(v.duration);
           }}
           onError={() => {
-            const fallback = resolvedStream?.embedUrl || aspreenEmbedUrl;
-            if (fallback) {
-              setResolvedStream({ type: "embed", embedUrl: fallback });
-              setError(false);
-              setReconnecting(false);
-              setReady(true);
-              return;
-            }
             if (retriesRef.current < MAX_AUTO_RETRIES) {
               retriesRef.current += 1;
               setReconnecting(true);

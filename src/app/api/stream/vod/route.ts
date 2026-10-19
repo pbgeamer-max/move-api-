@@ -31,34 +31,57 @@ export async function GET(req: NextRequest) {
     }
 
     const contentType = res.headers.get("content-type") || "";
-    if (!contentType.includes("mpegurl") && !contentType.includes("application/x-mpegURL") && !fetchUrl.includes(".m3u8") && !id) {
-      // If it's a binary key or TS segment (fallback), stream directly
+
+    // 1. If it's a binary file (AES-128 encryption key or TS segment), stream bytes directly
+    const isPlaylist =
+      contentType.includes("mpegurl") ||
+      contentType.includes("application/x-mpegURL") ||
+      fetchUrl.includes(".m3u8") ||
+      Boolean(id);
+
+    if (!isPlaylist) {
       const buffer = await res.arrayBuffer();
       return new NextResponse(buffer, {
         headers: {
-          "Content-Type": contentType,
+          "Content-Type": contentType || "application/octet-stream",
           "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
+          "Cache-Control": "public, max-age=86400",
         },
       });
     }
 
+    // 2. Parse and rewrite M3U8 playlist
     let playlistText = await res.text();
 
-    // 1. Fix unproxied AES-128 encryption key:
-    // Some HLS streams have URI="https://s48.grzcdn.com/.../encryption.key" which blocks external browsers with 400/CORS.
-    // Proxying through Aspreen's stream?url= endpoint returns 200 OK.
+    // 2.1. Rewrite AES-128 encryption keys to pass through our local proxy
+    // (Bypasses origin/referer blocking on CDN keys like s*.grzcdn.com)
     playlistText = playlistText.replace(
-      /#EXT-X-KEY:METHOD=([A-Z0-9-]+),URI=["'](https?:\/\/[^"']+)["']/g,
+      /#EXT-X-KEY:METHOD=([^,\r\n]+),URI=["']?([^"'\r\n]+)["']?/g,
       (_match, method, keyUrl) => {
-        const proxiedKey = `https://aspreen-tv-production.up.railway.app/api/app/vod/stream?url=${encodeURIComponent(keyUrl)}`;
+        if (keyUrl.startsWith("/api/stream/vod")) {
+          return `#EXT-X-KEY:METHOD=${method},URI="${keyUrl}"`;
+        }
+        const proxiedKey = `/api/stream/vod?url=${encodeURIComponent(keyUrl)}`;
         return `#EXT-X-KEY:METHOD=${method},URI="${proxiedKey}"`;
       }
     );
 
-    // 2. If it's a master playlist pointing to sub-playlists (e.g. index-v1-a1.m3u8), route sub-playlists through this proxy
+    // 2.2. Rewrite master playlist variant sub-playlists to go through /api/stream/vod
+    playlistText = playlistText.replace(
+      /(#EXT-X-STREAM-INF:[^\r\n]+[\r\n]+)(https?:\/\/[^\r\n]+)/g,
+      (_match, tag, uri) => `${tag}/api/stream/vod?url=${encodeURIComponent(uri)}`
+    );
     playlistText = playlistText.replace(
       /^(https?:\/\/[^\r\n]+\.m3u8[^\r\n]*)$/gm,
-      (subM3u8) => `/api/stream/vod?url=${encodeURIComponent(subM3u8)}`
+      (uri) => `/api/stream/vod?url=${encodeURIComponent(uri)}`
+    );
+
+    // 2.3. If any raw TS segments point directly to unproxied CDNs that block referer, proxy them
+    playlistText = playlistText.replace(
+      /^(https?:\/\/[^\/]*grzcdn\.com\/[^\r\n]+\.ts[^\r\n]*)$/gm,
+      (tsUrl) =>
+        `https://aspreen-tv-production.up.railway.app/api/app/vod/stream?url=${encodeURIComponent(tsUrl)}`
     );
 
     return new NextResponse(playlistText, {
@@ -66,6 +89,7 @@ export async function GET(req: NextRequest) {
       headers: {
         "Content-Type": "application/vnd.apple.mpegurl; charset=utf-8",
         "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
         "Cache-Control": "public, max-age=3600",
       },
     });

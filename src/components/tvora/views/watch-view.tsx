@@ -171,30 +171,36 @@ export function WatchView({ id, episodeId }: { id: string; episodeId?: string })
 
   const goEpisode = (ep: EpisodeDTO) => navigate({ name: "watch", id, ep: ep.id });
 
+  const primaryStreamUrl = useMemo(() => {
+    if (!source?.src) return "";
+    const s = source.src;
+    const idMatch = s.match(/[?&]id=([^&]+)/);
+    if (idMatch) return `/api/stream/vod?id=${encodeURIComponent(idMatch[1])}`;
+    if (s.includes(".m3u8") || s.includes("/vod/stream")) return `/api/stream/vod?url=${encodeURIComponent(s)}`;
+    return s;
+  }, [source?.src]);
+
   const vodServers = useMemo<ChannelServer[]>(() => {
     if (!source?.src) return [];
     const s = source.src;
     const idMatch = s.match(/[?&]id=([^&]+)/);
     const id = idMatch ? idMatch[1] : "";
     const directUrl = id ? `/api/stream/vod?id=${id}` : s;
-    const embedUrl = id
-      ? `https://aspreen-tv-production.up.railway.app/api/app/vod/player?id=${id}`
-      : s.replace("/vod/stream", "/vod/player");
 
     return [
       {
         id: "server-direct",
-        name: "سيرفر 1 (البث المباشر FHD)",
+        name: "سيرفر رئيسي (FHD فائق السرعة)",
         url: directUrl,
         quality: "1080p",
         isDefault: true,
         status: "live",
       },
       {
-        id: "server-embed",
-        name: "سيرفر 2 (المشغل البديل السريع)",
-        url: embedUrl,
-        quality: "HD",
+        id: "server-backup",
+        name: "سيرفر احتياطي (HD)",
+        url: directUrl.includes("?") ? `${directUrl}&srv=2` : `${directUrl}?srv=2`,
+        quality: "720p",
         status: "live",
       },
     ];
@@ -257,7 +263,7 @@ export function WatchView({ id, episodeId }: { id: string; episodeId?: string })
         <div className="overflow-hidden rounded-xl border border-white/10 bg-black shadow-[0_30px_80px_-30px_rgba(0,0,0,0.95)]">
         {source.src ? (
           <TvoraPlayer
-            src={source.src}
+            src={primaryStreamUrl}
             servers={vodServers}
             titleId={source.title.id}
             episodeId={source.kind === "episode" && currentEpisode ? currentEpisode.id : undefined}
