@@ -171,6 +171,35 @@ export function WatchView({ id, episodeId }: { id: string; episodeId?: string })
 
   const goEpisode = (ep: EpisodeDTO) => navigate({ name: "watch", id, ep: ep.id });
 
+  const vodServers = useMemo<ChannelServer[]>(() => {
+    if (!source?.src) return [];
+    const s = source.src;
+    const idMatch = s.match(/[?&]id=([^&]+)/);
+    const id = idMatch ? idMatch[1] : "";
+    const directUrl = id ? `/api/stream/vod?id=${id}` : s;
+    const embedUrl = id
+      ? `https://aspreen-tv-production.up.railway.app/api/app/vod/player?id=${id}`
+      : s.replace("/vod/stream", "/vod/player");
+
+    return [
+      {
+        id: "server-direct",
+        name: "سيرفر 1 (البث المباشر FHD)",
+        url: directUrl,
+        quality: "1080p",
+        isDefault: true,
+        status: "live",
+      },
+      {
+        id: "server-embed",
+        name: "سيرفر 2 (المشغل البديل السريع)",
+        url: embedUrl,
+        quality: "HD",
+        status: "live",
+      },
+    ];
+  }, [source?.src]);
+
   // ── States ──────────────────────────────────────────────────────────────────
   if (loading) {
     return (
@@ -213,35 +242,6 @@ export function WatchView({ id, episodeId }: { id: string; episodeId?: string })
   const poster = source.title.backdropUrl || undefined;
 
   const genreLabel = (g: string) => (lang === "ar" ? GENRES_AR[g] || g : g);
-
-  const vodServers = useMemo<ChannelServer[]>(() => {
-    if (!source?.src) return [];
-    const s = source.src;
-    const idMatch = s.match(/[?&]id=([^&]+)/);
-    const id = idMatch ? idMatch[1] : "";
-    const directUrl = id ? `/api/stream/vod?id=${id}` : s;
-    const embedUrl = id
-      ? `https://aspreen-tv-production.up.railway.app/api/app/vod/player?id=${id}`
-      : s.replace("/vod/stream", "/vod/player");
-
-    return [
-      {
-        id: "server-direct",
-        name: "سيرفر 1 (البث المباشر FHD)",
-        url: directUrl,
-        quality: "1080p",
-        isDefault: true,
-        status: "live",
-      },
-      {
-        id: "server-embed",
-        name: "سيرفر 2 (المشغل البديل السريع)",
-        url: embedUrl,
-        quality: "HD",
-        status: "live",
-      },
-    ];
-  }, [source?.src]);
 
   return (
     <div className="mx-auto max-w-[1400px] px-4 pb-16 pt-20 md:px-8 md:pt-24" data-testid="watch-view">
