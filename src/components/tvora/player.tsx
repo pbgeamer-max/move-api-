@@ -399,20 +399,35 @@ export function TvoraPlayer({
 
   // ── Stream Resolver State (Auto-resolves 3isk, external streams, and embeds) ──
   const isDirectMedia = Boolean(
-    src && (src.includes(".m3u8") || src.includes(".mp4") || src.includes(".webm") || src.includes("/vod/stream"))
+    src && (src.includes(".m3u8") || src.includes(".mp4") || src.includes(".webm") || src.includes("/vod/stream") || src.includes("/api/stream/vod"))
   );
-  const isHlsInitial = Boolean(src && (src.includes(".m3u8") || src.includes("/vod/stream")));
+  const isHlsInitial = Boolean(src && (src.includes(".m3u8") || src.includes("/vod/stream") || src.includes("/api/stream/vod")));
+
+  // Derive Aspreen embed player URL as reliable fallback
+  const aspreenEmbedUrl = useMemo(() => {
+    if (!src) return undefined;
+    if (src.includes("/vod/player")) return src;
+    const idMatch = src.match(/[?&]id=([^&]+)/);
+    if (idMatch) return `https://aspreen-tv-production.up.railway.app/api/app/vod/player?id=${idMatch[1]}`;
+    if (src.includes("/vod/stream")) return src.replace("/vod/stream", "/vod/player");
+    return undefined;
+  }, [src]);
+
   const [resolvedStream, setResolvedStream] = useState<{
     type: "hls" | "mp4" | "embed";
     streamUrl?: string;
     embedUrl?: string;
-  } | null>(isDirectMedia ? { type: isHlsInitial ? "hls" : "mp4", streamUrl: src } : null);
+  } | null>(
+    isDirectMedia
+      ? { type: isHlsInitial ? "hls" : "mp4", streamUrl: src, embedUrl: aspreenEmbedUrl }
+      : null
+  );
   const [resolving, setResolving] = useState<boolean>(!isDirectMedia);
 
   useEffect(() => {
     if (!src) return;
     if (isDirectMedia) {
-      setResolvedStream({ type: isHlsInitial ? "hls" : "mp4", streamUrl: src });
+      setResolvedStream({ type: isHlsInitial ? "hls" : "mp4", streamUrl: src, embedUrl: aspreenEmbedUrl });
       setResolving(false);
       return;
     }
@@ -497,28 +512,38 @@ export function TvoraPlayer({
 
     const handleFatalError = () => {
       if (disposed) return;
-      onErrorState?.(true);
 
       // Auto-failover to backup server if available
       if (servers && servers.length > 1) {
         const currentIdx = servers.findIndex((s) => s.id === selectedServerId || s.url === activePlaybackUrl);
         const nextIdx = (currentIdx + 1) % servers.length;
         const nextSrv = servers[nextIdx];
-        if (nextSrv && nextSrv.url !== activePlaybackUrl && retriesRef.current >= 1) {
+        if (nextSrv && nextSrv.url !== activePlaybackUrl) {
           console.warn("[TvoraPlayer] Stream error on current server. Auto-switching to backup:", nextSrv.name);
           retriesRef.current = 0;
-          setReconnecting(true);
+          setReconnecting(false);
+          setError(false);
           setSelectedServerId(nextSrv.id);
           onServerChange?.(nextSrv);
+          if (nextSrv.url.includes("/vod/player")) {
+            setResolvedStream({ type: "embed", embedUrl: nextSrv.url });
+          } else {
+            setResolvedStream({ type: "hls", streamUrl: nextSrv.url, embedUrl: aspreenEmbedUrl });
+          }
           return;
         }
       }
 
-      if (resolvedStream?.embedUrl) {
-        // Automatic fallback to embed player
-        setResolvedStream({ type: "embed", embedUrl: resolvedStream.embedUrl });
+      const fallback = resolvedStream?.embedUrl || aspreenEmbedUrl;
+      if (fallback) {
+        console.warn("[TvoraPlayer] Stream playback error, auto-recovering to embed player:", fallback);
+        setResolvedStream({ type: "embed", embedUrl: fallback });
+        setError(false);
+        setReconnecting(false);
+        setReady(true);
         return;
       }
+
       if (retriesRef.current < MAX_AUTO_RETRIES) {
         retriesRef.current += 1;
         setReconnecting(true);
@@ -591,6 +616,10 @@ export function TvoraPlayer({
               if (data.fatal) {
                 switch (data.type) {
                   case Hls.ErrorTypes.NETWORK_ERROR:
+                    if (data.details === "keyLoadError" || data.details === "keyLoadTimeOut") {
+                      handleFatalError();
+                      break;
+                    }
                     hls.startLoad();
                     break;
                   case Hls.ErrorTypes.MEDIA_ERROR:
@@ -1093,8 +1122,12 @@ export function TvoraPlayer({
             if (v && Number.isFinite(v.duration)) setDuration(v.duration);
           }}
           onError={() => {
-            if (resolvedStream?.embedUrl) {
-              setResolvedStream({ type: "embed", embedUrl: resolvedStream.embedUrl });
+            const fallback = resolvedStream?.embedUrl || aspreenEmbedUrl;
+            if (fallback) {
+              setResolvedStream({ type: "embed", embedUrl: fallback });
+              setError(false);
+              setReconnecting(false);
+              setReady(true);
               return;
             }
             if (retriesRef.current < MAX_AUTO_RETRIES) {
@@ -1633,8 +1666,8 @@ export function TvoraPlayer({
               </div>
             )}
 
-            {/* Server Selection Menu (Live Channels) */}
-            {live && servers && servers.length > 1 && (
+            {/* Server Selection Menu (Live Channels & VOD) */}
+            {servers && servers.length > 1 && (
               <div className="relative">
                 <button
                   type="button"
@@ -1658,7 +1691,7 @@ export function TvoraPlayer({
                 {serverMenuOpen && (
                   <div className="absolute end-0 bottom-11 z-30 min-w-[210px] rounded-xl border border-[#252525] bg-[#111111]/95 p-1.5 shadow-2xl backdrop-blur-md animate-in fade-in zoom-in-95">
                     <div className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white/40">
-                      سيرفرات البث المباشر
+                      {live ? "سيرفرات البث المباشر" : "سيرفرات المشاهدة"}
                     </div>
                     {servers.map((srv, idx) => {
                       const isCurrent = srv.id === selectedServerId || srv.url === activePlaybackUrl;
@@ -1670,6 +1703,12 @@ export function TvoraPlayer({
                             setSelectedServerId(srv.id);
                             onServerChange?.(srv);
                             setServerMenuOpen(false);
+                            setError(false);
+                            if (srv.url.includes("/vod/player")) {
+                              setResolvedStream({ type: "embed", embedUrl: srv.url });
+                            } else {
+                              setResolvedStream({ type: "hls", streamUrl: srv.url, embedUrl: aspreenEmbedUrl });
+                            }
                           }}
                           className={cn(
                             "flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-xs font-medium text-white/80 hover:bg-white/10 hover:text-white transition",

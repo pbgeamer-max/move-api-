@@ -7,7 +7,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AlertTriangle, ChevronDown, ChevronLeft, ChevronRight, Clock, Users } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
-import { localized, parseGenres, GENRES_AR, type EpisodeDTO, type SeriesDetailsDTO, type TitleDTO } from "@/lib/types";
+import { localized, parseGenres, GENRES_AR, type EpisodeDTO, type SeriesDetailsDTO, type TitleDTO, type ChannelServer } from "@/lib/types";
 import { useAppStore } from "@/lib/store";
 import { useT, EmptyState, DemoTag, Row, TitleCard, Reveal } from "../shared";
 import { TvoraPlayer, PlayerSkeleton } from "../player";
@@ -214,6 +214,35 @@ export function WatchView({ id, episodeId }: { id: string; episodeId?: string })
 
   const genreLabel = (g: string) => (lang === "ar" ? GENRES_AR[g] || g : g);
 
+  const vodServers = useMemo<ChannelServer[]>(() => {
+    if (!source?.src) return [];
+    const s = source.src;
+    const idMatch = s.match(/[?&]id=([^&]+)/);
+    const id = idMatch ? idMatch[1] : "";
+    const directUrl = id ? `/api/stream/vod?id=${id}` : s;
+    const embedUrl = id
+      ? `https://aspreen-tv-production.up.railway.app/api/app/vod/player?id=${id}`
+      : s.replace("/vod/stream", "/vod/player");
+
+    return [
+      {
+        id: "server-direct",
+        name: "سيرفر 1 (البث المباشر FHD)",
+        url: directUrl,
+        quality: "1080p",
+        isDefault: true,
+        status: "live",
+      },
+      {
+        id: "server-embed",
+        name: "سيرفر 2 (المشغل البديل السريع)",
+        url: embedUrl,
+        quality: "HD",
+        status: "live",
+      },
+    ];
+  }, [source?.src]);
+
   return (
     <div className="mx-auto max-w-[1400px] px-4 pb-16 pt-20 md:px-8 md:pt-24" data-testid="watch-view">
       <button
@@ -229,6 +258,7 @@ export function WatchView({ id, episodeId }: { id: string; episodeId?: string })
         {source.src ? (
           <TvoraPlayer
             src={source.src}
+            servers={vodServers}
             titleId={source.title.id}
             episodeId={source.kind === "episode" && currentEpisode ? currentEpisode.id : undefined}
             title={heading}

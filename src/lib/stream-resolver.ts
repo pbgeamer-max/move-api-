@@ -89,21 +89,17 @@ export async function resolveStream(targetUrl: string, bypassCache = false): Pro
   }
   // Aspreen VOD direct stream or player
   if (trimmed.includes("/vod/stream") || (trimmed.includes("aspreen-tv") && trimmed.includes("/vod/"))) {
-    if (trimmed.includes("/vod/player")) {
-      const streamUrl = trimmed.replace("/vod/player", "/vod/stream");
-      return {
-        success: true,
-        type: "hls",
-        streamUrl,
-        embedUrl: trimmed,
-        fallbackEmbed: trimmed,
-      };
-    }
-    const embedUrl = trimmed.replace("/vod/stream", "/vod/player");
+    const idMatch = trimmed.match(/[?&]id=([^&]+)/);
+    const id = idMatch ? idMatch[1] : "";
+    const embedUrl = id
+      ? `https://aspreen-tv-production.up.railway.app/api/app/vod/player?id=${id}`
+      : (trimmed.includes("/vod/player") ? trimmed : trimmed.replace("/vod/stream", "/vod/player"));
+    const streamUrl = id ? `/api/stream/vod?id=${id}` : (trimmed.includes("/vod/player") ? trimmed.replace("/vod/player", "/vod/stream") : trimmed);
+
     return {
       success: true,
       type: "hls",
-      streamUrl: trimmed,
+      streamUrl,
       embedUrl,
       fallbackEmbed: embedUrl,
     };
