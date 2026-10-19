@@ -8,7 +8,7 @@
 // Success: Vo laughs + confetti burst → the gate dissolves into the app.
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useAnimationControls, type Variants } from "framer-motion";
-import { Eye, EyeOff, Languages, Loader2, Volume2, VolumeX, X } from "lucide-react";
+import { Eye, EyeOff, Languages, Loader2, Volume2, VolumeX } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { useAppStore } from "@/lib/store";
@@ -21,6 +21,9 @@ import { InteractiveWordmark } from "./interactive-wordmark";
 import { cn } from "@/lib/utils";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const GOOGLE_CLIENT_ID =
+  process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ||
+  "514013837952-ikduagf5013ve2c9lqgiv840ah136u9k.apps.googleusercontent.com";
 
 type Step = "email" | "password" | "register";
 
@@ -123,9 +126,6 @@ export function LoginGate({ onEnter }: { onEnter: (user: SessionUser | null) => 
   const [celebrate, setCelebrate] = useState(false);
   const [sound, setSound] = useState(true);
   const [googleBusy, setGoogleBusy] = useState(false);
-  const [googleModal, setGoogleModal] = useState(false);
-  const [customGoogleEmail, setCustomGoogleEmail] = useState("");
-  const [customClientIdInput, setCustomClientIdInput] = useState("");
   const enteredRef = useRef(false);
 
   const field =
@@ -243,19 +243,6 @@ export function LoginGate({ onEnter }: { onEnter: (user: SessionUser | null) => 
     faceMood("happy", 1800);
     setGoogleBusy(true);
 
-    let savedClientId = "";
-    try {
-      savedClientId = localStorage.getItem("tvora.google_client_id") || "";
-    } catch {}
-
-    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || savedClientId || "";
-
-    if (!clientId) {
-      setGoogleBusy(false);
-      setGoogleModal(true);
-      return;
-    }
-
     try {
       const loaded = await loadGoogleScript();
       if (!loaded || !(window as any).google?.accounts?.oauth2) {
@@ -263,55 +250,59 @@ export function LoginGate({ onEnter }: { onEnter: (user: SessionUser | null) => 
       }
 
       const client = (window as any).google.accounts.oauth2.initTokenClient({
-        client_id: clientId,
+        client_id: GOOGLE_CLIENT_ID,
         scope: "email profile openid",
+        prompt: "select_account",
         callback: async (tokenResponse: any) => {
           if (tokenResponse.error) {
             setGoogleBusy(false);
-            fail("wrong", t("auth.invalid"));
+            if (tokenResponse.error !== "popup_closed_by_user") {
+              toast.error(tokenResponse.error_description || "Google sign-in cancelled");
+            }
             return;
           }
           try {
             const res = await api.googleAuth({ accessToken: tokenResponse.access_token });
             celebrateAndEnter(res.user, res.user.name || undefined);
-          } catch {
-            fail("wrong", t("auth.invalid"));
+          } catch (err: any) {
+            fail("wrong", err?.message || t("auth.invalid"));
           } finally {
             setGoogleBusy(false);
           }
         },
       });
 
-      client.requestAccessToken();
-    } catch (err) {
-      console.warn("Direct Google GIS notice:", err);
+      client.requestAccessToken({ prompt: "select_account" });
+    } catch (err: any) {
+      console.error("Google sign-in launch error:", err);
       setGoogleBusy(false);
-      setGoogleModal(true);
+      toast.error(err?.message || "Google sign-in error");
     }
   };
 
-  const handleManualGoogleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!customGoogleEmail.trim() || !EMAIL_RE.test(customGoogleEmail.trim())) {
-      fail("badEmail", t("auth.invalidEmail"));
-      return;
-    }
-    setGoogleBusy(true);
-    try {
-      if (customClientIdInput.trim()) {
-        try {
-          localStorage.setItem("tvora.google_client_id", customClientIdInput.trim());
-        } catch {}
-      }
-      const res = await api.googleAuth({ email: customGoogleEmail.trim() });
-      setGoogleModal(false);
-      celebrateAndEnter(res.user, res.user.name || undefined);
-    } catch {
-      fail("wrong", t("auth.invalid"));
-    } finally {
-      setGoogleBusy(false);
-    }
-  };
+  useEffect(() => {
+    loadGoogleScript().then((ok) => {
+      if (!ok || !(window as any).google?.accounts?.id) return;
+      try {
+        (window as any).google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: async (response: { credential?: string }) => {
+            if (response.credential) {
+              setGoogleBusy(true);
+              try {
+                const res = await api.googleAuth({ credential: response.credential });
+                celebrateAndEnter(res.user, res.user.name || undefined);
+              } catch {
+                fail("wrong", t("auth.invalid"));
+              } finally {
+                setGoogleBusy(false);
+              }
+            }
+          },
+        });
+      } catch {}
+    });
+  }, [celebrateAndEnter, t]);
 
   useEffect(() => {
     setSound(soundEnabled());
@@ -612,85 +603,6 @@ export function LoginGate({ onEnter }: { onEnter: (user: SessionUser | null) => 
           </motion.div>
         </section>
       </div>
-
-      {/* Google Authentication Dialog */}
-      <AnimatePresence>
-        {googleModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md" data-testid="gate-google-modal">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.94, y: 12 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.94, y: 12 }}
-              className="relative w-full max-w-md rounded-2xl border border-white/15 bg-[#121216] p-6 text-white shadow-2xl"
-              dir={lang === "ar" ? "rtl" : "ltr"}
-            >
-              <button
-                type="button"
-                onClick={() => setGoogleModal(false)}
-                className="tv-focusable absolute end-4 top-4 flex h-8 w-8 items-center justify-center rounded-full text-white/50 hover:bg-white/10 hover:text-white"
-                aria-label="Close"
-              >
-                <X className="h-4 w-4" />
-              </button>
-
-              <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/5 border border-white/10">
-                  <GoogleG className="h-6 w-6" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold">{t("gate.googleModalTitle")}</h3>
-                  <p className="text-xs text-white/50 leading-relaxed mt-0.5">{t("gate.googleModalSub")}</p>
-                </div>
-              </div>
-
-              <form onSubmit={handleManualGoogleLogin} className="mt-5 space-y-4">
-                <div>
-                  <label className="block text-xs font-semibold text-white/70 mb-1.5">
-                    {t("gate.googleEmailPlaceholder")}
-                  </label>
-                  <input
-                    type="email"
-                    dir="ltr"
-                    required
-                    placeholder="username@gmail.com"
-                    value={customGoogleEmail}
-                    onChange={(e) => setCustomGoogleEmail(e.target.value)}
-                    className={field}
-                    autoFocus
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-white/50 mb-1.5">
-                    {t("gate.googleClientIdPlaceholder")}
-                  </label>
-                  <input
-                    type="text"
-                    dir="ltr"
-                    placeholder="xxxx.apps.googleusercontent.com"
-                    value={customClientIdInput}
-                    onChange={(e) => setCustomClientIdInput(e.target.value)}
-                    className={cn(field, "text-xs font-mono text-white/70")}
-                  />
-                  <p className="mt-1 text-[11px] text-white/40 leading-relaxed">
-                    {t("gate.googleConfigHint")}
-                  </p>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={googleBusy}
-                  className="tv-btn-sheen tv-focusable flex h-11 w-full items-center justify-center gap-2 rounded-full bg-white text-sm font-extrabold text-black transition hover:bg-[#e8eef4] disabled:opacity-60"
-                >
-                  {googleBusy && <Loader2 className="h-4 w-4 animate-spin text-black" />}
-                  <GoogleG />
-                  <span>{t("gate.googleEnterBtn")}</span>
-                </button>
-              </form>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }
