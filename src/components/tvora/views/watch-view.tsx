@@ -182,10 +182,7 @@ export function WatchView({ id, episodeId }: { id: string; episodeId?: string })
 
   const vodServers = useMemo<ChannelServer[]>(() => {
     if (!source?.src) return [];
-    const s = source.src;
-    const idMatch = s.match(/[?&]id=([^&]+)/);
-    const id = idMatch ? idMatch[1] : "";
-    const directUrl = id ? `/api/stream/vod?id=${id}` : s;
+    const directUrl = primaryStreamUrl;
 
     return [
       {
@@ -204,7 +201,7 @@ export function WatchView({ id, episodeId }: { id: string; episodeId?: string })
         status: "live",
       },
     ];
-  }, [source?.src]);
+  }, [source?.src, primaryStreamUrl]);
 
   // ── States ──────────────────────────────────────────────────────────────────
   if (loading) {

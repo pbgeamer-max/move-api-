@@ -17,12 +17,21 @@ export async function GET(req: NextRequest) {
   }
 
   try {
+    const headers: Record<string, string> = {
+      "User-Agent":
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36",
+      Accept: "*/*",
+    };
+
+    if (fetchUrl.includes("grzcdn.com") || fetchUrl.includes("ukrcdn") || fetchUrl.includes("miravd")) {
+      headers["Referer"] = "https://miravd.com/";
+      headers["Origin"] = "https://miravd.com";
+    } else if (fetchUrl.includes("vidmoly")) {
+      headers["Referer"] = "https://vidmoly.to/";
+    }
+
     const res = await fetch(fetchUrl, {
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-        Accept: "*/*",
-      },
+      headers,
       signal: AbortSignal.timeout(15000),
     });
 
