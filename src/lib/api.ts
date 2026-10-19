@@ -74,6 +74,8 @@ export const api = {
     req<{ user: SessionUser }>("/api/auth/login", { method: "POST", body: JSON.stringify({ email, password }) }),
   register: (email: string, password: string, name: string) =>
     req<{ user: SessionUser }>("/api/auth/register", { method: "POST", body: JSON.stringify({ email, password, name }) }),
+  googleAuth: (data: { credential?: string; accessToken?: string; email?: string; name?: string; picture?: string }) =>
+    req<{ user: SessionUser }>("/api/auth/google", { method: "POST", body: JSON.stringify(data) }),
   logout: () => req<{ ok: true }>("/api/auth/logout", { method: "POST" }),
   forgot: (email: string) => req<{ ok: true }>("/api/auth/forgot", { method: "POST", body: JSON.stringify({ email }) }),
 

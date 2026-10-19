@@ -34,7 +34,6 @@ async function main() {
   await prisma.user.createMany({
     data: [
       { email: 'admin@tvora.tv', name: 'TVORA Admin', passwordHash: hashPassword('tvora-admin-2025'), role: 'admin', preferredLanguage: 'ar' },
-      { email: 'demo@tvora.tv', name: 'مستخدم تجريبي', passwordHash: hashPassword('demo1234'), role: 'user', preferredLanguage: 'ar' },
     ],
   });
 

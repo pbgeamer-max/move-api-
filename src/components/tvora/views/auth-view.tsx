@@ -4,7 +4,7 @@
 // password strength meter, demo-credentials fill, list sync on success.
 import { useState } from "react";
 import { motion, useAnimationControls, type Variants } from "framer-motion";
-import { Eye, EyeOff, KeyRound, Loader2, MailCheck, Quote, Sparkles } from "lucide-react";
+import { Eye, EyeOff, Loader2, MailCheck, Quote } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { useAppStore, type ViewName } from "@/lib/store";
@@ -395,40 +395,7 @@ function AuthForm({ mode }: { mode: Mode }) {
         </motion.div>
       )}
 
-      {/* Demo credentials (login) */}
-      {mode === "login" && !sent && (
-        <motion.div variants={formItem} className="mt-8 rounded-xl border border-white/8 bg-white/[0.015] p-4" dir={lang === "ar" ? "rtl" : "ltr"}>
-          <p className="mb-2.5 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.22em] text-white/40">
-            <KeyRound className="h-3 w-3" aria-hidden /> {t("auth.demoTitle")}
-          </p>
-          <div className="space-y-1.5">
-            <DemoRow user="demo@tvora.tv" password="demo1234" onFill={() => fill("demo@tvora.tv", "demo1234")} fillLabel={t("auth.fill")} />
-            <DemoRow user="admin@tvora.tv" password="tvora-admin-2025" onFill={() => fill("admin@tvora.tv", "tvora-admin-2025")} fillLabel={t("auth.fill")} />
-          </div>
-          <p className="mt-3 flex items-start gap-1.5 text-[10px] leading-relaxed text-white/30">
-            <Sparkles className="mt-0.5 h-2.5 w-2.5 shrink-0 text-[#d8c9a3]/60" aria-hidden />
-            {t("auth.guestNote")}
-          </p>
-        </motion.div>
-      )}
     </motion.div>
-  );
-}
-
-function DemoRow({ user, password, onFill, fillLabel }: { user: string; password: string; onFill: () => void; fillLabel: string }) {
-  return (
-    <div className="flex items-center justify-between gap-2 rounded-md bg-black/30 px-3 py-2">
-      <span dir="ltr" className="truncate font-mono text-[11px] text-white/55">
-        {user} / {password}
-      </span>
-      <button
-        type="button"
-        onClick={onFill}
-        className="tv-focusable shrink-0 rounded border border-white/12 px-2.5 py-1 text-[10px] font-bold text-white/60 transition hover:border-white/40 hover:text-white"
-      >
-        {fillLabel}
-      </button>
-    </div>
   );
 }
 

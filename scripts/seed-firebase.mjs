@@ -73,7 +73,6 @@ async function main() {
   console.log("Creating users...");
   const users = [
     { id: "usr_admin", email: "admin@tvora.tv", name: "TVORA Admin", passwordHash: hashPassword("tvora-admin-2025"), role: "admin", preferredLanguage: "ar", plan: "premium" },
-    { id: "usr_demo", email: "demo@tvora.tv", name: "مستخدم تجريبي", passwordHash: hashPassword("demo1234"), role: "user", preferredLanguage: "ar", plan: "free" },
   ];
   for (const u of users) {
     await db.collection("users").doc(u.id).set({ ...u, createdAt: new Date(), updatedAt: new Date() });
