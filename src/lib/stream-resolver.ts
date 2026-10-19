@@ -201,27 +201,29 @@ async function resolve3iskPage(pageUrl: string): Promise<ResolvedStream> {
     const directCdnMatch = currentHtml.match(/<iframe[^>]+src=["'](https:\/\/[^"']*(?:miravd|ukrcdn|grzcdn|upstream)[^"']*)["']/i);
 
     if (embed3iskMatch) {
-      const embed3iskUrl = embed3iskMatch[1];
-      try {
-        const rEmbed = await fetch(embed3iskUrl, {
-          headers: { ...BROWSER_HEADERS, Referer: currentUrl },
-          signal: AbortSignal.timeout(10000),
-        });
-        const embedHtml = await rEmbed.text();
-        const hostMatch = embedHtml.match(/<iframe[^>]+src=["'](https:\/\/[^"']+)["']/i);
-        if (hostMatch) {
-          const hostUrl = hostMatch[1];
-          if (hostUrl.includes("miravd.")) {
-            const res = await resolveMiravd(hostUrl);
-            if (res.success && res.streamUrl) return { ...res, title };
+      const baseEmbedUrl = embed3iskMatch[1];
+      for (let s = 1; s <= 6; s++) {
+        const sUrl = baseEmbedUrl.replace(/\/embed\/\d+\//, `/embed/${s}/`);
+        try {
+          const rEmbed = await fetch(sUrl, {
+            headers: { ...BROWSER_HEADERS, Referer: currentUrl },
+            signal: AbortSignal.timeout(8000),
+          });
+          const embedHtml = await rEmbed.text();
+          const hostMatch = embedHtml.match(/<iframe[^>]+src=["'](https:\/\/[^"']+)["']/i);
+          if (hostMatch) {
+            const hostUrl = hostMatch[1];
+            if (hostUrl.includes("miravd.") || hostUrl.includes("grzcdn.")) {
+              const res = await resolveMiravd(hostUrl);
+              if (res.success && res.streamUrl) return { ...res, title };
+            }
+            if (hostUrl.includes("ukrcdn.")) {
+              const res = await resolveUkrcdn(hostUrl);
+              if (res.success && res.streamUrl) return { ...res, title };
+            }
           }
-          if (hostUrl.includes("ukrcdn.")) {
-            const res = await resolveUkrcdn(hostUrl);
-            if (res.success && res.streamUrl) return { ...res, title };
-          }
-          return { success: true, type: "embed", embedUrl: hostUrl, title };
-        }
-      } catch {}
+        } catch {}
+      }
     }
 
     if (directCdnMatch) {
