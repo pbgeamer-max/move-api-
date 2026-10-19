@@ -23,7 +23,7 @@ import { cn } from "@/lib/utils";
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const GOOGLE_CLIENT_ID =
   process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ||
-  "514013837952-ikduagf5013ve2c9lqgiv840ah136u9k.apps.googleusercontent.com";
+  "752747425768-iguam8aoal7vn377aj39o7n0509es3k2.apps.googleusercontent.com";
 
 type Step = "email" | "password" | "register";
 
