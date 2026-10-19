@@ -2007,6 +2007,37 @@ export function getLocalCatalog(): Dict[] {
             if (!arr.includes("مسلسلات عربية")) arr.push("مسلسلات عربية");
           }
         }
+
+        // Auto-detect and populate rich genres (Action, Crime, Comedy, Romance, Horror, etc.)
+        const lowerText = titleText.toLowerCase();
+        const GENRE_RULES: Array<{ genre: string; ar: string; keywords: string[] }> = [
+          { genre: "Action", ar: "أكشن", keywords: ["اكشن", "أكشن", "قتال", "مواجهة", "عصابات", "صراع", "معارك", "انتقام", "سلاح", "مطاردة", "action"] },
+          { genre: "Crime", ar: "جريمة", keywords: ["جريمة", "عصابة", "عصابات", "مافيا", "مخدرات", "شرطة", "تحقيق", "سجن", "قتل", "crime", "gang"] },
+          { genre: "Comedy", ar: "كوميديا", keywords: ["كوميد", "مضحك", "فكاه", "مرح", "سخرية", "طريف", "ضحك", "comedy"] },
+          { genre: "Romance", ar: "رومانسي", keywords: ["رومانس", "حب", "عاطف", "عشق", "غرام", "حبيب", "زواج", "romance", "love"] },
+          { genre: "Horror", ar: "رعب", keywords: ["رعب", "جن", "سحر", "شيطان", "لعنة", "مخيف", "ارواح", "أرواح", "siccin", "horror"] },
+          { genre: "Mystery", ar: "غموض", keywords: ["غموض", "سر", "اسرار", "أسرار", "لغز", "مجهول", "اختفاء", "مريب", "تحري", "mystery", "thriller"] },
+          { genre: "History", ar: "تاريخي", keywords: ["تاريخ", "عثمان", "ارطغرل", "أرطغرل", "سلطان", "دولة", "قرن", "قديم", "تاريخي", "history", "historical"] },
+          { genre: "Family", ar: "عائلي", keywords: ["عائل", "اسر", "أسري", "اطفال", "أطفال", "ابناء", "أبناء", "ام", "أم", "اب", "أب", "اخوة", "أخوة", "family"] },
+          { genre: "Adventure", ar: "مغامرة", keywords: ["مغامر", "رحلة", "استكشاف", "خطر", "سفر", "adventure"] },
+          { genre: "Animation", ar: "رسوم متحركة", keywords: ["رسوم", "كرتون", "انيميشن", "انمي", "تحريك", "animation"] },
+          { genre: "Fantasy", ar: "فانتازيا", keywords: ["فانتازيا", "خيال", "اسطورة", "أسطورة", "قوى", "سحر", "fantasy"] },
+          { genre: "War", ar: "حرب", keywords: ["حرب", "معركة", "جيش", "جنود", "قتال", "دفاع", "وطن", "شهيد", "war"] },
+          { genre: "Drama", ar: "دراما", keywords: ["دراما", "صدمة", "حزن", "معاناة", "مأساة", "حياة", "قصة", "drama"] },
+        ];
+
+        let matchedAny = false;
+        for (const rule of GENRE_RULES) {
+          if (rule.keywords.some((kw) => lowerText.includes(kw))) {
+            arr.push(rule.genre);
+            arr.push(rule.ar);
+            matchedAny = true;
+          }
+        }
+        if (!matchedAny) {
+          arr.push("Drama", "دراما");
+        }
+
         return JSON.stringify(Array.from(new Set(arr)));
       };
 

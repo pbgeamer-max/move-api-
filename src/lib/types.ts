@@ -118,6 +118,7 @@ export interface HomePayload {
   hero: HeroSlide[];
   trending: TitleDTO[];
   featured: TitleDTO[];
+  topSeries?: TitleDTO[];
   newReleases: TitleDTO[];
   arabicPicks: TitleDTO[];
   topRated: TitleDTO[];

@@ -113,6 +113,16 @@ export function HomeView() {
         </Row>
       </Reveal>
 
+      {data.topSeries && data.topSeries.length > 0 && (
+        <Reveal delay={0.09}>
+          <Row title={lang === "ar" ? "أشهر المسلسلات" : "Popular Series"} action={<ViewAll onClick={() => navigate("series")} />}>
+            {data.topSeries.map((title, i) => (
+              <TitleCard key={title.id} title={title} index={i} priority={i < 4} />
+            ))}
+          </Row>
+        </Reveal>
+      )}
+
       <ContinueWatchingRow />
 
       <ForYouRow />

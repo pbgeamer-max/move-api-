@@ -318,13 +318,13 @@ export function DiscoveryBase({ type }: { type: "movie" | "series" }) {
             <p className="mb-4 text-xs font-semibold text-white/45" role="status" aria-live="polite">
               {loaded.total} {t("discover.results")}
             </p>
-            <Stagger className="grid grid-cols-2 gap-x-3 gap-y-8 sm:grid-cols-3 sm:gap-x-4 md:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+            <div className="grid grid-cols-2 gap-x-3 gap-y-8 sm:grid-cols-3 sm:gap-x-4 md:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
               {loaded.items.map((title, i) => (
-                <motion.div key={title.id} layout variants={staggerItem}>
+                <div key={title.id} className="animate-in fade-in duration-300">
                   <GridCard title={title} priority={i < 6} />
-                </motion.div>
+                </div>
               ))}
-            </Stagger>
+            </div>
             {loaded.page < loaded.pages && (
               <div className="mt-10 flex justify-center">
                 <button

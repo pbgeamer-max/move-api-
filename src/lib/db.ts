@@ -253,7 +253,9 @@ function filterCatalog(catalog: any[], where?: any, orderBy?: any, skip?: number
       const targetGenre = where.genres.contains.toLowerCase();
       list = list.filter((item) => {
         const gStr = typeof item.genres === "string" ? item.genres.toLowerCase() : JSON.stringify(item.genres || []).toLowerCase();
-        return gStr.includes(targetGenre);
+        if (gStr.includes(targetGenre)) return true;
+        const text = `${item.titleAr || ""} ${item.titleEn || ""} ${item.synopsisAr || ""}`.toLowerCase();
+        return text.includes(targetGenre);
       });
     }
     if (where.country) {

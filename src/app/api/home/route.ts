@@ -10,40 +10,70 @@ export async function GET() {
   const cached = cacheGet<HomePayload>("home");
   if (cached) return NextResponse.json(cached);
   const payload = await buildHome();
-  cacheSet("home", payload, 60_000);
+  cacheSet("home", payload, 10_000);
   return NextResponse.json(payload);
 }
 
 async function buildHome(): Promise<HomePayload> {
-  const [moviesFeatured, seriesFeatured, trending, featuredAll, newReleases, arabicPicks, topRated, settings] =
-    await Promise.all([
-      db.title.findMany({ where: { visible: true, type: "movie", featured: true }, orderBy: { rating: "desc" }, take: 4 }),
-      db.title.findMany({ where: { visible: true, type: "series", featured: true }, orderBy: { rating: "desc" }, take: 4 }),
-      db.title.findMany({ where: { visible: true, trending: true }, orderBy: { rating: "desc" }, take: 14 }),
-      db.title.findMany({ where: { visible: true, featured: true }, orderBy: { rating: "desc" }, take: 12 }),
-      db.title.findMany({ where: { visible: true, isNew: true }, orderBy: { releaseYear: "desc" }, take: 14 }),
-      db.title.findMany({
-        where: {
-          visible: true,
-          OR: [
-            { genres: { contains: "Arabic" } },
-            { titleAr: { contains: "مدبلج" } },
-            { originalTitle: { contains: "مدبلج" } },
-            { country: { in: ["Iraq", "Arab Region", "تركيا"] } },
-          ],
-        },
-        orderBy: { rating: "desc" },
-        take: 14,
-      }),
-      db.title.findMany({ where: { visible: true, rating: { not: null } }, orderBy: { rating: "desc" }, skip: 4, take: 14 }),
-      db.siteSetting.findUnique({ where: { key: "demoMode" } }),
-    ]);
+  const [
+    moviesFeatured,
+    seriesFeatured,
+    trendingMovies,
+    trendingSeries,
+    topSeriesList,
+    featuredAll,
+    newMovies,
+    newSeries,
+    arabicPicks,
+    topRated,
+    settings,
+  ] = await Promise.all([
+    db.title.findMany({ where: { visible: true, type: "movie", featured: true }, orderBy: { rating: "desc" }, take: 4 }),
+    db.title.findMany({ where: { visible: true, type: "series", featured: true }, orderBy: { rating: "desc" }, take: 4 }),
+    db.title.findMany({ where: { visible: true, type: "movie", trending: true }, orderBy: { rating: "desc" }, take: 8 }),
+    db.title.findMany({ where: { visible: true, type: "series", trending: true }, orderBy: { rating: "desc" }, take: 8 }),
+    db.title.findMany({ where: { visible: true, type: "series" }, orderBy: { rating: "desc" }, take: 14 }),
+    db.title.findMany({ where: { visible: true, featured: true }, orderBy: { rating: "desc" }, take: 12 }),
+    db.title.findMany({ where: { visible: true, type: "movie", isNew: true }, orderBy: { releaseYear: "desc" }, take: 8 }),
+    db.title.findMany({ where: { visible: true, type: "series", isNew: true }, orderBy: { releaseYear: "desc" }, take: 8 }),
+    db.title.findMany({
+      where: {
+        visible: true,
+        OR: [
+          { genres: { contains: "Arabic" } },
+          { genres: { contains: "مدبلج" } },
+          { titleAr: { contains: "مدبلج" } },
+          { originalTitle: { contains: "مدبلج" } },
+          { country: { in: ["Iraq", "Arab Region", "تركيا"] } },
+        ],
+      },
+      orderBy: { rating: "desc" },
+      take: 14,
+    }),
+    db.title.findMany({ where: { visible: true, rating: { not: null } }, orderBy: { rating: "desc" }, skip: 4, take: 14 }),
+    db.siteSetting.findUnique({ where: { key: "demoMode" } }),
+  ]);
 
   const demoMode = settings
     ? (JSON.parse(settings.value) as { enabled: boolean; reason: string })
     : { enabled: true, reason: "Demo mode" };
 
-  const ser = (rows: typeof trending) => rows.map((t) => serializeTitle(t as unknown as Record<string, unknown> & { id: string }));
+  const ser = (rows: any[]) => rows.map((t) => serializeTitle(t as unknown as Record<string, unknown> & { id: string }));
+
+  // Interleave helper to guarantee movies and series both appear prominently
+  const interleave = (arr1: any[], arr2: any[], max = 14) => {
+    const res: any[] = [];
+    const len = Math.max(arr1.length, arr2.length);
+    for (let i = 0; i < len; i++) {
+      if (arr1[i]) res.push(arr1[i]);
+      if (arr2[i]) res.push(arr2[i]);
+      if (res.length >= max) break;
+    }
+    return res;
+  };
+
+  const trendingMixed = interleave(trendingSeries, trendingMovies, 14);
+  const newReleasesMixed = interleave(newSeries, newMovies, 14);
 
   // Hero slides: alternate movie / series for a dynamic cinematic carousel
   const hero: HomePayload["hero"] = [];
@@ -69,9 +99,10 @@ async function buildHome(): Promise<HomePayload> {
 
   return {
     hero,
-    trending: ser(trending),
+    trending: ser(trendingMixed),
+    topSeries: ser(topSeriesList),
     featured: ser(featuredAll),
-    newReleases: ser(newReleases),
+    newReleases: ser(newReleasesMixed),
     arabicPicks: ser(arabicPicks),
     topRated: ser(topRated),
     demoMode,
