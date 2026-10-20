@@ -23,7 +23,6 @@ import {
   Radio,
 } from "lucide-react";
 import { SeriesModal } from "./series-modal";
-import { PlayerModal } from "./player-modal";
 import type { SeriesItem, MovieItem } from "@/lib/move-catalog";
 
 interface DashboardViewProps {
@@ -38,11 +37,7 @@ export function DashboardView({ username, onLogout }: DashboardViewProps) {
 
   // Modals state
   const [selectedSeries, setSelectedSeries] = useState<SeriesItem | null>(null);
-  const [playerModal, setPlayerModal] = useState<{ open: boolean; title: string; streamUrl: string }>({
-    open: false,
-    title: "",
-    streamUrl: "",
-  });
+  const [loadingMovieId, setLoadingMovieId] = useState<string | null>(null);
 
   // Series catalog state
   const [seriesList, setSeriesList] = useState<SeriesItem[]>([]);
@@ -153,6 +148,26 @@ export function DashboardView({ username, onLogout }: DashboardViewProps) {
     }
   };
 
+  // Decode & copy movie .m3u8 stream directly to clipboard
+  const handleCopyDecodedMovieM3u8 = async (movie: MovieItem) => {
+    setLoadingMovieId(movie.id);
+    try {
+      const res = await fetch(`/api/v1/stream?id=${encodeURIComponent(movie.id)}`);
+      const data = await res.json();
+      if (data.success && data.streamUrl) {
+        await navigator.clipboard.writeText(data.streamUrl);
+        setCopiedKey(`m3u8-${movie.id}`);
+        setTimeout(() => setCopiedKey(null), 3000);
+      } else {
+        alert(data.error || "تعذر فك تشفير رابط البث لهذا الفيلم");
+      }
+    } catch {
+      alert("حدث خطأ أثناء الاتصال بالخادم لفك التشفير");
+    } finally {
+      setLoadingMovieId(null);
+    }
+  };
+
   // Test Stream Resolver Tool
   const handleResolveStream = async () => {
     const q = resolverInput.trim();
@@ -244,7 +259,7 @@ export function DashboardView({ username, onLogout }: DashboardViewProps) {
             { id: "api", label: "⚡ روابط الـ API والنسخ", icon: Zap },
             { id: "series", label: "📺 المسلسلات والمواسم (1,222)", icon: Tv },
             { id: "movies", label: "🎬 الأفلام (423)", icon: Film },
-            { id: "resolver", label: "⚡ مستخرج الروابط والمشغل", icon: Play },
+            { id: "resolver", label: "⚡ فك تشفير واستخراج m3u8", icon: Zap },
             { id: "guide", label: "📖 كود الربط لموقعك", icon: Code2 },
           ].map((tab) => {
             const Icon = tab.icon;
@@ -697,43 +712,54 @@ export function DashboardView({ username, onLogout }: DashboardViewProps) {
                         </div>
                       </div>
 
-                      {/* Card Footer Actions */}
-                      <div className="p-3 bg-[#171a24] border-t border-white/5 flex items-center justify-between gap-1.5">
+                      {/* Card Footer Actions - NO PLAY BUTTON, 1-CLICK M3U8 DECODED COPY */}
+                      <div className="p-3 bg-[#171a24] border-t border-white/5 flex flex-col gap-2">
+                        {/* Primary: Decode & Copy .m3u8 */}
                         <button
-                          onClick={() => handleCopy(moviePlayUrl, `mp-${movie.id}`)}
-                          className="px-2 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-[11px] font-medium flex items-center gap-1 transition-colors cursor-pointer"
+                          onClick={() => handleCopyDecodedMovieM3u8(movie)}
+                          disabled={loadingMovieId === movie.id}
+                          className={`w-full py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer disabled:opacity-50 ${
+                            copiedKey === `m3u8-${movie.id}`
+                              ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/20"
+                              : "bg-emerald-600/20 text-emerald-300 hover:bg-emerald-600/30 border border-emerald-500/30"
+                          }`}
                         >
-                          {isCopiedPlay ? <Check className="w-3 h-3 text-green-400" /> : <Copy className="w-3 h-3" />}
-                          <span>رابط المشغل</span>
+                          {loadingMovieId === movie.id ? (
+                            <>
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                              <span>جاري فك التشفير...</span>
+                            </>
+                          ) : copiedKey === `m3u8-${movie.id}` ? (
+                            <>
+                              <Check className="w-3.5 h-3.5 text-white" />
+                              <span>تم نسخ رابط .m3u8!</span>
+                            </>
+                          ) : (
+                            <>
+                              <Zap className="w-3.5 h-3.5 text-emerald-400 fill-current" />
+                              <span>نسخ رابط m3u8 مفكوك</span>
+                            </>
+                          )}
                         </button>
 
-                        <button
-                          onClick={() => handleCopy(movieApi, `m-${movie.slug}`)}
-                          className="px-2 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-neutral-300 hover:text-white text-[11px] font-medium flex items-center gap-1 transition-colors cursor-pointer"
-                        >
-                          {isCopiedApi ? <Check className="w-3 h-3 text-green-400" /> : <Copy className="w-3 h-3" />}
-                          <span>API الفيلم</span>
-                        </button>
+                        {/* Secondary: API and Play Redirect links */}
+                        <div className="grid grid-cols-2 gap-2">
+                          <button
+                            onClick={() => handleCopy(movieApi, `m-${movie.slug}`)}
+                            className="py-1.5 px-2 rounded-lg bg-white/5 hover:bg-white/10 text-neutral-300 hover:text-white text-[11px] font-medium flex items-center justify-center gap-1 transition-colors cursor-pointer border border-white/5"
+                          >
+                            {isCopiedApi ? <Check className="w-3 h-3 text-green-400" /> : <Copy className="w-3 h-3 text-cyan-400" />}
+                            <span>API الفيلم</span>
+                          </button>
 
-                        <button
-                          onClick={async () => {
-                            const res = await fetch(`/api/v1/stream?id=${encodeURIComponent(movie.id)}`);
-                            const data = await res.json();
-                            if (data.success && data.streamUrl) {
-                              setPlayerModal({
-                                open: true,
-                                title: movie.titleAr,
-                                streamUrl: data.streamUrl,
-                              });
-                            } else {
-                              alert(data.error || "تعذر استخراج البث المباشر لهذا الفيلم");
-                            }
-                          }}
-                          className="px-2.5 py-1.5 rounded-lg bg-cyan-500/20 text-cyan-300 hover:bg-cyan-500/30 text-[11px] font-medium flex items-center gap-1 transition-colors cursor-pointer"
-                        >
-                          <Play className="w-3 h-3 fill-current" />
-                          <span>تشغيل</span>
-                        </button>
+                          <button
+                            onClick={() => handleCopy(moviePlayUrl, `mp-${movie.id}`)}
+                            className="py-1.5 px-2 rounded-lg bg-white/5 hover:bg-white/10 text-neutral-300 hover:text-white text-[11px] font-medium flex items-center justify-center gap-1 transition-colors cursor-pointer border border-white/5"
+                          >
+                            {isCopiedPlay ? <Check className="w-3 h-3 text-green-400" /> : <Copy className="w-3 h-3 text-emerald-400" />}
+                            <span>رابط المشغل</span>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   );
@@ -751,12 +777,12 @@ export function DashboardView({ username, onLogout }: DashboardViewProps) {
             <div className="p-6 rounded-2xl bg-[#12141c] border border-white/10 space-y-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center text-cyan-400 font-bold">
-                  <Play className="w-5 h-5 fill-current" />
+                  <Zap className="w-5 h-5 fill-current" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-white">محلل واستخراج روابط البث المباشر (HLS Resolver)</h3>
+                  <h3 className="text-base font-bold text-white">فك تشفير واستخراج رابط m3u8 المباشر</h3>
                   <p className="text-xs text-neutral-400">
-                    ضع معرف الحلقة أو الفيلم (أو رابطه)، ليقوم المحرك باستخراج رابط .m3u8 المباشر فوراً لمشغلك.
+                    ضع معرف الحلقة أو الفيلم (أو رابطه)، ليقوم المحرك بفك تشفيره فوراً واستخراج رابط .m3u8 المباشر لمشغلك.
                   </p>
                 </div>
               </div>
@@ -843,17 +869,20 @@ export function DashboardView({ username, onLogout }: DashboardViewProps) {
                       )}
 
                       <button
-                        onClick={() =>
-                          setPlayerModal({
-                            open: true,
-                            title: "تشغيل الرابط المستخرج",
-                            streamUrl: resolverResult.streamUrl,
-                          })
-                        }
-                        className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded-lg text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                        onClick={() => handleCopy(resolverResult.streamUrl, "res-url-big")}
+                        className="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg shadow-emerald-600/25"
                       >
-                        <Play className="w-4 h-4 fill-current" />
-                        <span>تشغيل وتجربة الفيديو في المشغل الآن</span>
+                        {copiedKey === "res-url-big" ? (
+                          <>
+                            <Check className="w-4 h-4 text-white" />
+                            <span>تم نسخ رابط .m3u8 بنجاح!</span>
+                          </>
+                        ) : (
+                          <>
+                            <Zap className="w-4 h-4 fill-current text-yellow-300" />
+                            <span>نسخ رابط .m3u8 المفكوك لمشغلك</span>
+                          </>
+                        )}
                       </button>
                     </div>
                   ) : (
@@ -1005,22 +1034,7 @@ export function DashboardView({ username, onLogout }: DashboardViewProps) {
       <SeriesModal
         series={selectedSeries}
         onClose={() => setSelectedSeries(null)}
-        onPlayStream={(title, streamUrl) =>
-          setPlayerModal({
-            open: true,
-            title,
-            streamUrl,
-          })
-        }
         origin={origin}
-      />
-
-      {/* Video Player Test Modal */}
-      <PlayerModal
-        open={playerModal.open}
-        onClose={() => setPlayerModal({ ...playerModal, open: false })}
-        title={playerModal.title}
-        streamUrl={playerModal.streamUrl}
       />
     </div>
   );
