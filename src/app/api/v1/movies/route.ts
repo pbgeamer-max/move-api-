@@ -23,12 +23,13 @@ export async function GET(req: NextRequest) {
   const q = searchParams.get("q") || "";
   const genre = searchParams.get("genre") || "";
   const year = searchParams.get("year") || "";
+  const onlyDecoded = searchParams.get("all") !== "1";
 
   const host = req.headers.get("x-forwarded-host") || req.headers.get("host") || "localhost:3000";
   const proto = req.headers.get("x-forwarded-proto") || (host.includes("localhost") ? "http" : "https");
   const origin = `${proto}://${host}`;
 
-  const result = queryMovies({ page, limit, q, genre, year });
+  const result = queryMovies({ page, limit, q, genre, year, onlyDecoded });
 
   const enrichedItems = result.items.map((m) => ({
     id: m.id,

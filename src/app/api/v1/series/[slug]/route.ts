@@ -21,7 +21,9 @@ export async function GET(
   { params }: { params: Promise<{ slug: string }> }
 ) {
   const { slug } = await params;
-  const series = getSeriesDetail(slug);
+  const { searchParams } = new URL(req.url);
+  const onlyDecoded = searchParams.get("all") !== "1";
+  const series = getSeriesDetail(slug, onlyDecoded);
 
   if (!series) {
     return NextResponse.json(

@@ -124,6 +124,40 @@ export function cleanImageUrl(url = ""): string {
   return url;
 }
 
+let _decodedCache: Record<string, string> | null = null;
+let _decodedCacheTime = 0;
+
+export function getDecodedStore(): Record<string, string> {
+  const now = Date.now();
+  if (_decodedCache && now - _decodedCacheTime < 5000) {
+    return _decodedCache;
+  }
+  try {
+    const p = path.join(process.cwd(), "data", "decoded_streams.json");
+    if (fs.existsSync(p)) {
+      _decodedCache = JSON.parse(fs.readFileSync(p, "utf-8"));
+      _decodedCacheTime = now;
+      return _decodedCache || {};
+    }
+  } catch {}
+  return {};
+}
+
+export function isItemDecoded(idOrSlug: string): boolean {
+  if (!idOrSlug) return false;
+  const store = getDecodedStore();
+  if (store[idOrSlug]) return true;
+  for (const k of Object.keys(store)) {
+    if (k.includes(idOrSlug) || idOrSlug.includes(k)) return true;
+  }
+  return false;
+}
+
+    } catch {}
+  }
+  return url;
+}
+
 export function loadCatalog(): CatalogData {
   if (_cache) return _cache;
 
@@ -355,6 +389,7 @@ export function querySeries({
   genre = "",
   year = "",
   dubbed = "",
+  onlyDecoded = true,
 }: {
   page?: number;
   limit?: number;
@@ -362,9 +397,18 @@ export function querySeries({
   genre?: string;
   year?: string;
   dubbed?: string;
+  onlyDecoded?: boolean;
 }) {
   const { series } = loadCatalog();
   let filtered = series;
+
+  if (onlyDecoded) {
+    const store = getDecodedStore();
+    filtered = filtered.filter((s) => {
+      const episodes = (s.seasons || []).flatMap((sn) => sn.episodes);
+      return episodes.some((ep) => Boolean(store[ep.id]));
+    });
+  }
 
   if (q) {
     const term = q.trim().toLowerCase();
@@ -425,9 +469,28 @@ export function querySeries({
   };
 }
 
-export function getSeriesDetail(slugOrId: string): SeriesItem | null {
+export function getSeriesDetail(slugOrId: string, onlyDecoded = true): SeriesItem | null {
   const { seriesBySlug } = loadCatalog();
-  return seriesBySlug.get(slugOrId) || null;
+  const raw = seriesBySlug.get(slugOrId);
+  if (!raw) return null;
+  if (!onlyDecoded) return raw;
+
+  const store = getDecodedStore();
+  const filteredSeasons = (raw.seasons || []).map((sn) => {
+    const validEps = sn.episodes.filter((ep) => Boolean(store[ep.id]));
+    return {
+      ...sn,
+      episodes: validEps,
+      episodesCount: validEps.length,
+    };
+  }).filter((sn) => sn.episodes.length > 0);
+
+  return {
+    ...raw,
+    seasons: filteredSeasons,
+    seasonsCount: filteredSeasons.length,
+    totalEpisodes: filteredSeasons.reduce((acc, sn) => acc + sn.episodes.length, 0),
+  };
 }
 
 export function queryMovies({
@@ -436,15 +499,22 @@ export function queryMovies({
   q = "",
   genre = "",
   year = "",
+  onlyDecoded = true,
 }: {
   page?: number;
   limit?: number;
   q?: string;
   genre?: string;
   year?: string;
+  onlyDecoded?: boolean;
 }) {
   const { movies } = loadCatalog();
   let filtered = movies;
+
+  if (onlyDecoded) {
+    const store = getDecodedStore();
+    filtered = filtered.filter((m) => Boolean(store[m.id] || store[m.slug]));
+  }
 
   if (q) {
     const term = q.trim().toLowerCase();
