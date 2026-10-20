@@ -9,8 +9,11 @@ export interface EpisodeItem {
   titleAr: string;
   titleEn?: string;
   synopsisAr?: string;
-  playbackUrl?: string;
+  thumbnailUrl?: string;
   runtime?: number;
+  streamUrl?: string;
+  streamApi?: string;
+  playbackUrl?: string; // Internal/compat fallback
 }
 
 export interface SeasonItem {
@@ -49,7 +52,9 @@ export interface MovieItem {
   rating?: number;
   genres: string[];
   runtime?: number;
-  playbackUrl?: string;
+  streamUrl?: string;
+  streamApi?: string;
+  playbackUrl?: string; // Internal/compat fallback
 }
 
 interface CatalogData {
@@ -57,10 +62,67 @@ interface CatalogData {
   seriesBySlug: Map<string, SeriesItem>;
   movies: MovieItem[];
   moviesBySlug: Map<string, MovieItem>;
+  watchUrlsById: Map<string, string>;
   totalEpisodes: number;
 }
 
 let _cache: CatalogData | null = null;
+
+/**
+ * Remove all "قصة عشق", "3isk", and SEO spam from story text
+ */
+export function cleanSynopsis(text = ""): string {
+  if (!text) return "";
+  let t = text
+    .replace(/<[^>]+>/g, " ")
+    .replace(/موقع\s*قصة\s*عشق(?:\s*الاصلي|\s*الأصلي)?/gi, "")
+    .replace(/قصة\s*عشق(?:\s*الاصلي|\s*الأصلي)?/gi, "")
+    .replace(/3isk(?:\.xyz|\.icu|\.net|\.vip|\.video)?/gi, "")
+    .replace(/مشاهدة\s*وتحميل\s*(?:حصري[ااً])?\s*(?:علي|على)?\s*/gi, "")
+    .replace(/مشاهدة\s*حصري[ااً]\s*(?:علي|على)?\s*/gi, "")
+    .replace(/بجودة\s*عالية\s*(?:HD|720p|1080p|4k)?/gi, "")
+    .replace(/كامل\s*مترجم\s*/gi, " ")
+    .replace(/كامل\s*مدبلج\s*/gi, " ")
+    .replace(/اون\s*لاين\s*/gi, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  // If initial sentence was SEO boilerplate
+  if (t.includes(".")) {
+    const parts = t.split(".");
+    if (
+      parts[0] &&
+      (parts[0].includes("مسلسل") || parts[0].includes("فيلم") || parts[0].includes("مترجم") || parts[0].includes("مدبلج")) &&
+      parts.slice(1).join(".").trim().length > 20
+    ) {
+      t = parts.slice(1).join(".").trim();
+    }
+  }
+
+  // Anchor to narrative onset
+  const storyMatch = t.match(/(يروي|تدور\s*أحداث|تدور\s*احداث|في\s*إطار|في\s*اطار|حول\s+|قصة\s+|تبدأ\s+|يحكي|تنقلب|تُطلق|تطلق|حين\s+|عندما\s+)/);
+  if (storyMatch && storyMatch.index !== undefined && storyMatch.index < 70) {
+    t = t.slice(storyMatch.index);
+  }
+
+  return t.replace(/\s+/g, " ").trim();
+}
+
+/**
+ * Unwrap proxy wrappers to direct clean CDN/host image URLs
+ */
+export function cleanImageUrl(url = ""): string {
+  if (!url) return "";
+  if (url.includes("image-proxy?url=")) {
+    try {
+      const param = url.split("image-proxy?url=")[1];
+      if (param) {
+        return decodeURIComponent(param);
+      }
+    } catch {}
+  }
+  return url;
+}
 
 export function loadCatalog(): CatalogData {
   if (_cache) return _cache;
@@ -84,15 +146,33 @@ export function loadCatalog(): CatalogData {
     }
   }
 
-  // Load enriched series overviews if available
-  const cleanOverviews: Map<string, string> = new Map();
+  // Load enriched series overviews
+  const cleanSeriesOverviews: Map<string, string> = new Map();
   if (fs.existsSync(vodSeriesPath)) {
     try {
       const list = JSON.parse(fs.readFileSync(vodSeriesPath, "utf-8"));
       if (Array.isArray(list)) {
         for (const item of list) {
           if (item.slug && item.overview) {
-            cleanOverviews.set(item.slug, item.overview);
+            cleanSeriesOverviews.set(item.slug, cleanSynopsis(item.overview));
+          }
+        }
+      }
+    } catch {}
+  }
+
+  // Load enriched movies overviews & posters
+  const cleanMovieData: Map<string, { overview?: string; posterUrl?: string }> = new Map();
+  if (fs.existsSync(vodMoviesPath)) {
+    try {
+      const list = JSON.parse(fs.readFileSync(vodMoviesPath, "utf-8"));
+      if (Array.isArray(list)) {
+        for (const item of list) {
+          if (item.slug) {
+            cleanMovieData.set(item.slug, {
+              overview: cleanSynopsis(item.overview || ""),
+              posterUrl: cleanImageUrl(item.posterUrl || ""),
+            });
           }
         }
       }
@@ -101,6 +181,7 @@ export function loadCatalog(): CatalogData {
 
   const seriesList: SeriesItem[] = [];
   const seriesBySlug = new Map<string, SeriesItem>();
+  const watchUrlsById = new Map<string, string>();
   let totalEpisodes = 0;
 
   for (const s of Object.values(rawSeries)) {
@@ -112,16 +193,25 @@ export function loadCatalog(): CatalogData {
 
     if (Array.isArray(s.seasons)) {
       seasons = s.seasons.map((sn: any) => {
-        const episodes: EpisodeItem[] = (sn.episodes || []).map((ep: any) => ({
-          id: ep.id || `${slug}-s${sn.number}-e${ep.number}`,
-          seasonNumber: sn.number || 1,
-          number: ep.number || 1,
-          titleAr: ep.titleAr || `الحلقة ${ep.number || 1}`,
-          titleEn: ep.titleEn || `Episode ${ep.number || 1}`,
-          synopsisAr: ep.synopsisAr || "",
-          playbackUrl: ep.playbackUrl || "",
-          runtime: ep.runtime || null,
-        }));
+        const episodes: EpisodeItem[] = (sn.episodes || []).map((ep: any) => {
+          const epId = ep.id || `${slug}-s${sn.number}-e${ep.number}`;
+          // Record internal watch url for direct stream resolution
+          const epWatchUrl = `https://3iskk.xyz/watch/episodes/${epId}/`;
+          watchUrlsById.set(epId, epWatchUrl);
+
+          return {
+            id: epId,
+            seasonNumber: sn.number || 1,
+            number: ep.number || 1,
+            titleAr: ep.titleAr || `الحلقة ${ep.number || 1}`,
+            titleEn: ep.titleEn || `Episode ${ep.number || 1}`,
+            synopsisAr: cleanSynopsis(ep.synopsisAr) || `الحلقة ${ep.number || 1} من مسلسل ${s.titleAr || slug}.`,
+            thumbnailUrl: cleanImageUrl(ep.thumbnailUrl || s.backdropUrl || s.posterUrl || ""),
+            runtime: ep.runtime || 45,
+            playbackUrl: epWatchUrl,
+          };
+        });
+
         countEps += episodes.length;
         return {
           number: sn.number || 1,
@@ -147,7 +237,9 @@ export function loadCatalog(): CatalogData {
       genresArr = s.genres;
     }
 
-    const cleanStory = cleanOverviews.get(slug) || s.synopsisAr || "";
+    const cleanStory = cleanSeriesOverviews.get(slug) || cleanSynopsis(s.synopsisAr) || "";
+    const cleanPoster = cleanImageUrl(s.posterUrl || "");
+    const cleanBackdrop = cleanImageUrl(s.backdropUrl || cleanPoster);
 
     const item: SeriesItem = {
       id: s.id || slug,
@@ -155,8 +247,8 @@ export function loadCatalog(): CatalogData {
       titleAr: s.titleAr || slug,
       titleEn: s.titleEn || "",
       synopsisAr: cleanStory,
-      posterUrl: s.posterUrl || "",
-      backdropUrl: s.backdropUrl || "",
+      posterUrl: cleanPoster,
+      backdropUrl: cleanBackdrop,
       releaseYear: s.releaseYear || 2024,
       rating: s.rating || 8.8,
       genres: genresArr,
@@ -168,6 +260,8 @@ export function loadCatalog(): CatalogData {
     seriesList.push(item);
     seriesBySlug.set(slug, item);
     seriesBySlug.set(item.id, item);
+    watchUrlsById.set(slug, `https://3iskk.xyz/watch/tvshows/${slug}/`);
+    watchUrlsById.set(item.id, `https://3iskk.xyz/watch/tvshows/${slug}/`);
   }
 
   // Movies
@@ -189,24 +283,32 @@ export function loadCatalog(): CatalogData {
       genresArr = m.genres;
     }
 
+    const enrichedMovie = cleanMovieData.get(slug);
+    const cleanStory = enrichedMovie?.overview || cleanSynopsis(m.synopsisAr) || "";
+    const cleanPoster = enrichedMovie?.posterUrl || cleanImageUrl(m.posterUrl || "");
+    const cleanBackdrop = cleanImageUrl(m.backdropUrl || cleanPoster);
+    const movieWatchUrl = `https://3iskk.xyz/watch/movies/${slug}/`;
+
     const item: MovieItem = {
       id: m.id || slug,
       slug,
       titleAr: m.titleAr || slug,
       titleEn: m.titleEn || "",
-      synopsisAr: m.synopsisAr || "",
-      posterUrl: m.posterUrl || "",
-      backdropUrl: m.backdropUrl || "",
+      synopsisAr: cleanStory,
+      posterUrl: cleanPoster,
+      backdropUrl: cleanBackdrop,
       releaseYear: m.releaseYear || 2024,
       rating: m.rating || 8.5,
       genres: genresArr,
       runtime: m.runtime || 110,
-      playbackUrl: m.playbackUrl || "",
+      playbackUrl: movieWatchUrl,
     };
 
     moviesList.push(item);
     moviesBySlug.set(slug, item);
     moviesBySlug.set(item.id, item);
+    watchUrlsById.set(slug, movieWatchUrl);
+    watchUrlsById.set(item.id, movieWatchUrl);
   }
 
   _cache = {
@@ -214,10 +316,36 @@ export function loadCatalog(): CatalogData {
     seriesBySlug,
     movies: moviesList,
     moviesBySlug,
+    watchUrlsById,
     totalEpisodes,
   };
 
   return _cache;
+}
+
+/**
+ * Returns the underlying 3isk watch URL for stream resolution
+ */
+export function getWatchUrlForId(idOrSlug: string): string | null {
+  if (!idOrSlug) return null;
+  const { watchUrlsById, moviesBySlug } = loadCatalog();
+
+  const direct = watchUrlsById.get(idOrSlug);
+  if (direct) return direct;
+
+  const movie = moviesBySlug.get(idOrSlug);
+  if (movie) return `https://3iskk.xyz/watch/movies/${movie.slug}/`;
+
+  // Assume episode slug if it contains season/episode or starts with serie/musalsal
+  if (idOrSlug.includes("-episode-") || idOrSlug.includes("-ep-") || idOrSlug.startsWith("serie-")) {
+    return `https://3iskk.xyz/watch/episodes/${idOrSlug}/`;
+  }
+
+  if (idOrSlug.startsWith("movie-") || idOrSlug.startsWith("film-")) {
+    return `https://3iskk.xyz/watch/movies/${idOrSlug}/`;
+  }
+
+  return `https://3iskk.xyz/watch/episodes/${idOrSlug}/`;
 }
 
 export function querySeries({
@@ -233,7 +361,7 @@ export function querySeries({
   q?: string;
   genre?: string;
   year?: string;
-  dubbed?: string; // "1" for dubbed, "0" for subbed
+  dubbed?: string;
 }) {
   const { series } = loadCatalog();
   let filtered = series;
@@ -272,7 +400,7 @@ export function querySeries({
   const start = (safePage - 1) * limit;
   const items = filtered.slice(start, start + limit);
 
-  // Return items without the heavy seasons array in the list view for speed
+  // Clean light list without heavy season hierarchies for speed
   const lightItems = items.map((s) => ({
     id: s.id,
     slug: s.slug,

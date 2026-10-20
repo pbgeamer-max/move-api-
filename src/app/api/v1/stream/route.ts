@@ -1,58 +1,41 @@
 import { NextRequest, NextResponse } from "next/server";
 import { resolveStream } from "@/lib/stream-resolver";
-import { getSeriesDetail, getMovieDetail } from "@/lib/move-catalog";
+import { getWatchUrlForId } from "@/lib/move-catalog";
 
 export const dynamic = "force-dynamic";
+
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
+  "Access-Control-Allow-Headers": "*",
+};
 
 export async function OPTIONS() {
   return new NextResponse(null, {
     status: 204,
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
-      "Access-Control-Allow-Headers": "*",
-    },
+    headers: CORS_HEADERS,
   });
 }
 
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id") || searchParams.get("episodeId") || searchParams.get("slug");
     let targetUrl = searchParams.get("url");
-    const episodeId = searchParams.get("episodeId");
-    const slug = searchParams.get("slug");
 
-    // Lookup from catalog if no URL provided
-    if (!targetUrl && slug) {
-      const movie = getMovieDetail(slug);
-      if (movie?.playbackUrl) {
-        targetUrl = movie.playbackUrl;
-      } else {
-        const series = getSeriesDetail(slug);
-        const firstEp = series?.seasons?.[0]?.episodes?.[0];
-        if (firstEp?.playbackUrl) {
-          targetUrl = firstEp.playbackUrl;
-        }
-      }
-    }
-
-    if (!targetUrl && episodeId) {
-      // Find episode across catalog
-      // Could be directly a 3isk episode URL if format is matched
-      targetUrl = `https://3iskk.xyz/watch/episodes/${episodeId}/`;
+    if (!targetUrl && id) {
+      targetUrl = getWatchUrlForId(id) || undefined;
     }
 
     if (!targetUrl) {
       return NextResponse.json(
         {
           success: false,
-          error: "يرجى تزويد الرابط في المعامل ?url= أو ?slug= أو ?episodeId=",
+          error: "يرجى تزويد معرف الحلقة أو الفيلم في ?id= أو ?episodeId= أو ?slug=",
         },
         {
           status: 400,
-          headers: {
-            "Access-Control-Allow-Origin": "*",
-          },
+          headers: CORS_HEADERS,
         }
       );
     }
@@ -65,32 +48,36 @@ export async function GET(req: NextRequest) {
     const origin = `${proto}://${host}`;
 
     // Convert relative proxy paths to absolute URLs
-    if (result.streamUrl && result.streamUrl.startsWith("/")) {
-      result.streamUrl = `${origin}${result.streamUrl}`;
+    let streamUrl = result.streamUrl;
+    if (streamUrl && streamUrl.startsWith("/")) {
+      streamUrl = `${origin}${streamUrl}`;
     }
-    if (result.embedUrl && result.embedUrl.startsWith("/")) {
-      result.embedUrl = `${origin}${result.embedUrl}`;
-    }
-    if (result.fallbackEmbed && result.fallbackEmbed.startsWith("/")) {
-      result.fallbackEmbed = `${origin}${result.fallbackEmbed}`;
-    }
+
+    const playUrl = id
+      ? `${origin}/api/v1/play?id=${encodeURIComponent(id)}`
+      : streamUrl
+      ? `${origin}/api/v1/play?url=${encodeURIComponent(streamUrl)}`
+      : null;
+
+    const proxiedStreamUrl = streamUrl
+      ? `${origin}/api/stream/vod?url=${encodeURIComponent(streamUrl)}`
+      : null;
 
     return NextResponse.json(
       {
-        success: result.success,
+        success: result.success && Boolean(streamUrl),
         type: result.type,
-        streamUrl: result.streamUrl || null,
-        embedUrl: result.embedUrl || null,
-        error: result.error || null,
-        cached: Boolean(result.cached),
+        id: id || null,
         title: result.title || null,
+        // DIRECT VIDEO STREAMS ONLY (For user's custom player - NO 3isk pages, NO 3isk iframe)
+        streamUrl: streamUrl || null,
+        playUrl: playUrl,
+        proxiedStreamUrl: proxiedStreamUrl,
+        cached: Boolean(result.cached),
+        error: !streamUrl ? result.error || "تعذر استخراج رابط البث المباشر للفيديو من المصدر" : null,
       },
       {
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
-          "Access-Control-Allow-Headers": "*",
-        },
+        headers: CORS_HEADERS,
       }
     );
   } catch (error: any) {
@@ -98,9 +85,7 @@ export async function GET(req: NextRequest) {
       { success: false, error: error?.message || "Internal resolver error" },
       {
         status: 500,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-        },
+        headers: CORS_HEADERS,
       }
     );
   }

@@ -3,14 +3,16 @@ import { queryMovies } from "@/lib/move-catalog";
 
 export const dynamic = "force-dynamic";
 
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
+  "Access-Control-Allow-Headers": "*",
+};
+
 export async function OPTIONS() {
   return new NextResponse(null, {
     status: 204,
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
-      "Access-Control-Allow-Headers": "*",
-    },
+    headers: CORS_HEADERS,
   });
 }
 
@@ -29,9 +31,20 @@ export async function GET(req: NextRequest) {
   const result = queryMovies({ page, limit, q, genre, year });
 
   const enrichedItems = result.items.map((m) => ({
-    ...m,
+    id: m.id,
+    slug: m.slug,
+    titleAr: m.titleAr,
+    titleEn: m.titleEn,
+    synopsisAr: m.synopsisAr,
+    posterUrl: m.posterUrl,
+    backdropUrl: m.backdropUrl,
+    releaseYear: m.releaseYear,
+    rating: m.rating,
+    genres: m.genres,
+    runtime: m.runtime,
+    streamUrl: `${origin}/api/v1/play?id=${encodeURIComponent(m.id)}`,
+    streamApi: `${origin}/api/v1/stream?id=${encodeURIComponent(m.id)}`,
     detailsApi: `${origin}/api/v1/movies/${m.slug}`,
-    streamApi: m.playbackUrl ? `${origin}/api/v1/stream?url=${encodeURIComponent(m.playbackUrl)}` : null,
   }));
 
   return NextResponse.json(
@@ -44,11 +57,7 @@ export async function GET(req: NextRequest) {
       data: enrichedItems,
     },
     {
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
-        "Access-Control-Allow-Headers": "*",
-      },
+      headers: CORS_HEADERS,
     }
   );
 }

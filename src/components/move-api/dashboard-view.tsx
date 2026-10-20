@@ -155,11 +155,15 @@ export function DashboardView({ username, onLogout }: DashboardViewProps) {
 
   // Test Stream Resolver Tool
   const handleResolveStream = async () => {
-    if (!resolverInput.trim()) return;
+    const q = resolverInput.trim();
+    if (!q) return;
     setResolverLoading(true);
     setResolverResult(null);
     try {
-      const res = await fetch(`/api/v1/stream?url=${encodeURIComponent(resolverInput.trim())}`);
+      const queryParam = q.startsWith("http")
+        ? `url=${encodeURIComponent(q)}`
+        : `id=${encodeURIComponent(q)}`;
+      const res = await fetch(`/api/v1/stream?${queryParam}`);
       const data = await res.json();
       setResolverResult(data);
     } catch {
@@ -205,7 +209,7 @@ export function DashboardView({ username, onLogout }: DashboardViewProps) {
                 </span>
               </div>
               <p className="text-[11px] text-neutral-400 hidden sm:block">
-                لوحة تحكم خادم البث وواجهات برمجة التطبيقات
+                لوحة تحكم خادم البث المباشر وواجهات برمجة التطبيقات
               </p>
             </div>
           </div>
@@ -275,13 +279,13 @@ export function DashboardView({ username, onLogout }: DashboardViewProps) {
               <div className="max-w-2xl">
                 <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-cyan-500/10 text-cyan-400 text-xs font-semibold mb-3 border border-cyan-500/20">
                   <Sparkles className="w-3.5 h-3.5" />
-                  <span>REST API جاهز للاستخدام الخارجي مع دعم CORS مفتوح</span>
+                  <span>REST API متكامل لموقعك الثاني مع دعم CORS مفتوح وبث مباشر نقي</span>
                 </div>
                 <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">
                   واجهات برمجة التطبيقات لموقعك الثاني (VOD API)
                 </h2>
                 <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed">
-                  هذا السيرفر مخصص ليعمل كـ <span className="text-cyan-300 font-semibold">Backend API</span>. انسخ أي رابط من الأسفل وضعه في موقعك الآخر لعرض المسلسلات والمواسم والحلقات والقصص، وتشغيل الفيديو مباشرة بدون أي مشاكل حظر أو تشفير.
+                  هذا السيرفر مخصص ليعمل كـ <span className="text-cyan-300 font-semibold">Headless VOD Backend</span>. يعطيك روابط تشغيل فيديو مباشرة <span className="text-emerald-400 font-mono">.m3u8</span> وبوسترات وقصص نظيفة تماماً بدون حقوق قصة عشق، وبدون أي صفحات ويب أو مشغلات خارجية.
                 </p>
               </div>
 
@@ -300,7 +304,7 @@ export function DashboardView({ username, onLogout }: DashboardViewProps) {
                   <span className="text-lg font-extrabold text-yellow-400 font-mono">423</span>
                 </div>
                 <div className="bg-[#12141c]/80 p-3 rounded-xl border border-white/5">
-                  <span className="text-[11px] text-neutral-400 block mb-0.5">حالة محلل البث</span>
+                  <span className="text-[11px] text-neutral-400 block mb-0.5">حالة محلل البث المباشر</span>
                   <span className="text-lg font-extrabold text-emerald-400 font-mono">🟢 نشط 100%</span>
                 </div>
               </div>
@@ -316,8 +320,24 @@ export function DashboardView({ username, onLogout }: DashboardViewProps) {
               <div className="grid grid-cols-1 gap-3.5">
                 {[
                   {
+                    key: "ep-play",
+                    title: "1. رابط التشغيل المباشر للمشغلات (Direct Video Stream for Players)",
+                    desc: "ضعه مباشرة كـ src في مشغل موقعك (<video src='...'> أو Hls.js أو Plyr أو Video.js). يعيد توجيه المشغل فوراً لملف .m3u8 المباشر مع CORS كامل وبدون إعلانات.",
+                    method: "GET",
+                    endpoint: "/api/v1/play?id=serie-teskilat-season-1-episode-189",
+                    params: "?id={episode_or_movie_id}&proxy=1 (اختياري للبروكسي)",
+                  },
+                  {
+                    key: "ep-stream",
+                    title: "2. استخراج كود البث المباشر JSON لأي حلقة أو فيلم (Stream Resolver API)",
+                    desc: "يعيد بيانات JSON نقية تحتوي على رابط .m3u8 المباشر ورابط المشغل مع صلاحية مفتوحة وبدون إعلانات.",
+                    method: "GET",
+                    endpoint: "/api/v1/stream?id=serie-teskilat-season-1-episode-189",
+                    params: "?id={episode_or_movie_id} أو ?url={watchUrl}",
+                  },
+                  {
                     key: "ep-series",
-                    title: "1. جلب قائمة المسلسلات (Series List)",
+                    title: "3. جلب قائمة المسلسلات (Series List)",
                     desc: "يجلب قائمة المسلسلات مع البوسترات، العناوين، القصص، وسنة الإنتاج مع دعم البحث والصفحات.",
                     method: "GET",
                     endpoint: "/api/v1/series?page=1&limit=24",
@@ -325,35 +345,27 @@ export function DashboardView({ username, onLogout }: DashboardViewProps) {
                   },
                   {
                     key: "ep-series-detail",
-                    title: "2. جلب تفاصيل المسلسل والمواسم والحلقات (Series Details & Seasons)",
-                    desc: "يجلب قصة المسلسل كاملة، وجميع المواسم والحلقات مرتبة بالتسلسل مع روابط تشغيل كل حلقة.",
+                    title: "4. جلب تفاصيل المسلسل والمواسم والحلقات (Series Details & Seasons)",
+                    desc: "يجلب قصة المسلسل بدون حقوق، وجميع المواسم والحلقات مرتبة مع روابط تشغيل كل حلقة جاهزة لمشغلك.",
                     method: "GET",
                     endpoint: "/api/v1/series/serie-sifir-bir",
                     params: "مرر slug أو id المسلسل في الرابط",
                   },
                   {
                     key: "ep-movies",
-                    title: "3. جلب قائمة الأفلام (Movies List)",
-                    desc: "يجلب جميع الأفلام مع البوسترات، التقييم، سنة الإنتاج، ورابط التشغيل المباشر لكل فيلم.",
+                    title: "5. جلب قائمة الأفلام (Movies List)",
+                    desc: "يجلب جميع الأفلام مع البوسترات والقصص النظيفة ورابط التشغيل المباشر لكل فيلم.",
                     method: "GET",
                     endpoint: "/api/v1/movies?page=1&limit=24",
                     params: "?page=1&limit=24&q=اسم_الفيلم&year=2024",
                   },
                   {
                     key: "ep-movies-detail",
-                    title: "4. جلب تفاصيل الفيلم ورابط تشغيله (Movie Details)",
-                    desc: "يجلب القصة الكاملة وتفاصيل الفيلم ورابط الـ API المباشر لتشغيله.",
+                    title: "6. جلب تفاصيل الفيلم ورابط تشغيله (Movie Details)",
+                    desc: "يجلب القصة الكاملة وتفاصيل الفيلم ورابط الـ API المباشر لتشغيله في موقعك.",
                     method: "GET",
-                    endpoint: "/api/v1/movies/movie-siccin-9-2026-mudblij",
+                    endpoint: "/api/v1/movies/movie-tam-bir-centilmen-2024",
                     params: "مرر slug الفيلم في الرابط",
-                  },
-                  {
-                    key: "ep-stream",
-                    title: "5. استخراج رابط البث المباشر لأي حلقة أو فيلم (Stream Resolver)",
-                    desc: "يفك تشفير أي رابط حلقة ويعيد لك رابط HLS (.m3u8) مباشر ونقي يعمل على أي مشغل.",
-                    method: "GET",
-                    endpoint: "/api/v1/stream?url=https://3iskk.xyz/watch/episodes/serie-sifir-bir-season-1-episode-1/",
-                    params: "?url={playbackUrl} أو ?slug={movieSlug}",
                   },
                 ].map((item) => {
                   const fullUrl = `${origin}${item.endpoint}`;
@@ -454,12 +466,12 @@ export function DashboardView({ username, onLogout }: DashboardViewProps) {
         )}
 
         {/* ========================================================================= */}
-        {/* TAB 2: Series Catalog Explorer */}
+        {/* TAB 2: Series & Seasons Explorer */}
         {/* ========================================================================= */}
         {activeTab === "series" && (
           <div className="space-y-5">
-            {/* Search & Filter Bar */}
-            <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between bg-[#12141c] p-4 rounded-xl border border-white/5">
+            {/* Search and Filters */}
+            <div className="flex flex-col sm:flex-row gap-3 bg-[#12141c] p-4 rounded-xl border border-white/5">
               <div className="relative flex-1">
                 <input
                   type="text"
@@ -468,18 +480,17 @@ export function DashboardView({ username, onLogout }: DashboardViewProps) {
                     setSeriesSearch(e.target.value);
                     fetchSeries(1, e.target.value, seriesFilter);
                   }}
-                  placeholder="ابحث عن أي مسلسل بالاسم العربي أو الإنجليزي..."
+                  placeholder="ابحث عن أي مسلسل تركي بالعربية أو الإنجليزية..."
                   className="w-full bg-[#171a24] border border-white/10 rounded-xl px-4 py-2.5 pr-10 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-cyan-500"
                 />
                 <Search className="w-4 h-4 text-neutral-400 absolute right-3.5 top-3 pointer-events-none" />
               </div>
 
-              {/* Filters */}
-              <div className="flex items-center gap-2">
+              <div className="flex gap-2">
                 {[
                   { id: "", label: "الكل" },
-                  { id: "1", label: "مدبلج" },
                   { id: "0", label: "مترجم" },
+                  { id: "1", label: "مدبلج" },
                 ].map((f) => (
                   <button
                     key={f.id}
@@ -487,10 +498,10 @@ export function DashboardView({ username, onLogout }: DashboardViewProps) {
                       setSeriesFilter(f.id);
                       fetchSeries(1, seriesSearch, f.id);
                     }}
-                    className={`px-3 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+                    className={`px-3 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer ${
                       seriesFilter === f.id
-                        ? "bg-cyan-500 text-white"
-                        : "bg-[#171a24] text-neutral-400 hover:text-white"
+                        ? "bg-cyan-500 text-white shadow-md shadow-cyan-500/20"
+                        : "bg-[#171a24] text-neutral-400 hover:text-white border border-white/5"
                     }`}
                   >
                     {f.label}
@@ -557,7 +568,7 @@ export function DashboardView({ username, onLogout }: DashboardViewProps) {
                           <div className="flex items-center gap-2 text-[10px] text-neutral-400 mb-2">
                             <span>{item.releaseYear || 2024}</span>
                             <span>•</span>
-                            <span className="text-cyan-400">{item.seasonsCount} مواسم</span>
+                            <span className="text-cyan-400 font-semibold">{item.seasonsCount} مواسم</span>
                             <span>•</span>
                             <span>{item.totalEpisodes} حلقة</span>
                           </div>
@@ -574,7 +585,7 @@ export function DashboardView({ username, onLogout }: DashboardViewProps) {
                           className="px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-neutral-300 hover:text-white text-xs font-medium flex items-center gap-1 transition-colors cursor-pointer"
                         >
                           {isCopied ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
-                          <span>{isCopied ? "تم النسخ!" : "نسخ الـ API"}</span>
+                          <span>{isCopied ? "تم النسخ!" : "نسخ API المسلسل"}</span>
                         </button>
 
                         <button
@@ -648,7 +659,9 @@ export function DashboardView({ username, onLogout }: DashboardViewProps) {
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 {moviesList.map((movie) => {
                   const movieApi = `${origin}/api/v1/movies/${movie.slug}`;
-                  const isCopied = copiedKey === `m-${movie.slug}`;
+                  const moviePlayUrl = `${origin}/api/v1/play?id=${encodeURIComponent(movie.id)}`;
+                  const isCopiedApi = copiedKey === `m-${movie.slug}`;
+                  const isCopiedPlay = copiedKey === `mp-${movie.id}`;
 
                   return (
                     <div
@@ -685,34 +698,42 @@ export function DashboardView({ username, onLogout }: DashboardViewProps) {
                       </div>
 
                       {/* Card Footer Actions */}
-                      <div className="p-3 bg-[#171a24] border-t border-white/5 flex items-center justify-between gap-2">
+                      <div className="p-3 bg-[#171a24] border-t border-white/5 flex items-center justify-between gap-1.5">
                         <button
-                          onClick={() => handleCopy(movieApi, `m-${movie.slug}`)}
-                          className="px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-neutral-300 hover:text-white text-xs font-medium flex items-center gap-1 transition-colors cursor-pointer"
+                          onClick={() => handleCopy(moviePlayUrl, `mp-${movie.id}`)}
+                          className="px-2 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-[11px] font-medium flex items-center gap-1 transition-colors cursor-pointer"
                         >
-                          {isCopied ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
-                          <span>{isCopied ? "تم النسخ!" : "نسخ API الفيلم"}</span>
+                          {isCopiedPlay ? <Check className="w-3 h-3 text-green-400" /> : <Copy className="w-3 h-3" />}
+                          <span>رابط المشغل</span>
                         </button>
 
-                        {movie.playbackUrl && (
-                          <button
-                            onClick={async () => {
-                              const res = await fetch(`/api/v1/stream?url=${encodeURIComponent(movie.playbackUrl || "")}`);
-                              const data = await res.json();
-                              if (data.success && data.streamUrl) {
-                                setPlayerModal({
-                                  open: true,
-                                  title: movie.titleAr,
-                                  streamUrl: data.streamUrl,
-                                });
-                              }
-                            }}
-                            className="px-3 py-1.5 rounded-lg bg-cyan-500/20 text-cyan-300 hover:bg-cyan-500/30 text-xs font-medium flex items-center gap-1 transition-colors cursor-pointer"
-                          >
-                            <Play className="w-3.5 h-3.5 fill-current" />
-                            <span>تشغيل تجريبي</span>
-                          </button>
-                        )}
+                        <button
+                          onClick={() => handleCopy(movieApi, `m-${movie.slug}`)}
+                          className="px-2 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-neutral-300 hover:text-white text-[11px] font-medium flex items-center gap-1 transition-colors cursor-pointer"
+                        >
+                          {isCopiedApi ? <Check className="w-3 h-3 text-green-400" /> : <Copy className="w-3 h-3" />}
+                          <span>API الفيلم</span>
+                        </button>
+
+                        <button
+                          onClick={async () => {
+                            const res = await fetch(`/api/v1/stream?id=${encodeURIComponent(movie.id)}`);
+                            const data = await res.json();
+                            if (data.success && data.streamUrl) {
+                              setPlayerModal({
+                                open: true,
+                                title: movie.titleAr,
+                                streamUrl: data.streamUrl,
+                              });
+                            } else {
+                              alert(data.error || "تعذر استخراج البث المباشر لهذا الفيلم");
+                            }
+                          }}
+                          className="px-2.5 py-1.5 rounded-lg bg-cyan-500/20 text-cyan-300 hover:bg-cyan-500/30 text-[11px] font-medium flex items-center gap-1 transition-colors cursor-pointer"
+                        >
+                          <Play className="w-3 h-3 fill-current" />
+                          <span>تشغيل</span>
+                        </button>
                       </div>
                     </div>
                   );
@@ -735,20 +756,20 @@ export function DashboardView({ username, onLogout }: DashboardViewProps) {
                 <div>
                   <h3 className="text-base font-bold text-white">محلل واستخراج روابط البث المباشر (HLS Resolver)</h3>
                   <p className="text-xs text-neutral-400">
-                    الصق رابط صفحة أي حلقة أو فيلم، ليقوم المحرك بفك تشفيره واستخراج رابط الـ .m3u8 المباشر فوراً.
+                    ضع معرف الحلقة أو الفيلم (أو رابطه)، ليقوم المحرك باستخراج رابط .m3u8 المباشر فوراً لمشغلك.
                   </p>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-semibold text-neutral-300 block">رابط الحلقة أو الفيلم:</label>
+                <label className="text-xs font-semibold text-neutral-300 block">معرف الحلقة أو رابط المشاهدة:</label>
                 <div className="flex gap-2">
                   <input
                     type="text"
                     value={resolverInput}
                     onChange={(e) => setResolverInput(e.target.value)}
                     dir="ltr"
-                    placeholder="https://3iskk.xyz/watch/episodes/serie-sifir-bir-season-1-episode-1/"
+                    placeholder="serie-teskilat-season-1-episode-189 أو رابط 3isk"
                     className="flex-1 bg-[#171a24] border border-white/10 rounded-xl px-4 py-3 text-xs font-mono text-cyan-300 focus:outline-none focus:border-cyan-500"
                   />
                   <button
@@ -764,10 +785,10 @@ export function DashboardView({ username, onLogout }: DashboardViewProps) {
 
               {/* Sample link filler button */}
               <button
-                onClick={() => setResolverInput("https://3iskk.xyz/watch/episodes/serie-sifir-bir-season-1-episode-1/")}
+                onClick={() => setResolverInput("serie-teskilat-season-1-episode-189")}
                 className="text-xs text-neutral-400 hover:text-cyan-300 transition-colors flex items-center gap-1"
               >
-                <span>💡 تجربة رابط عينة (مسلسل صفر واحد - الحلقة 1)</span>
+                <span>💡 تجربة معرف عينة (مسلسل المنظمة - الحلقة 189)</span>
               </button>
 
               {/* Resolver Result */}
@@ -785,18 +806,41 @@ export function DashboardView({ username, onLogout }: DashboardViewProps) {
                         </span>
                       </div>
 
-                      <div className="bg-black/50 p-2.5 rounded-lg border border-white/5 flex items-center justify-between gap-2">
-                        <code className="text-xs font-mono text-cyan-300 truncate dir-ltr select-all">
-                          {resolverResult.streamUrl}
-                        </code>
-                        <button
-                          onClick={() => handleCopy(resolverResult.streamUrl, "res-url")}
-                          className="px-3 py-1.5 rounded bg-cyan-500 text-white text-xs font-semibold flex items-center gap-1 shrink-0 transition-colors cursor-pointer"
-                        >
-                          {copiedKey === "res-url" ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                          <span>{copiedKey === "res-url" ? "تم النسخ!" : "نسخ رابط البث"}</span>
-                        </button>
+                      {/* Direct .m3u8 stream */}
+                      <div className="space-y-1">
+                        <span className="text-[10px] text-neutral-400 block">رابط البث المباشر المصدري (.m3u8):</span>
+                        <div className="bg-black/50 p-2.5 rounded-lg border border-white/5 flex items-center justify-between gap-2">
+                          <code className="text-xs font-mono text-cyan-300 truncate dir-ltr select-all">
+                            {resolverResult.streamUrl}
+                          </code>
+                          <button
+                            onClick={() => handleCopy(resolverResult.streamUrl, "res-url")}
+                            className="px-3 py-1.5 rounded bg-cyan-500 text-white text-xs font-semibold flex items-center gap-1 shrink-0 transition-colors cursor-pointer"
+                          >
+                            {copiedKey === "res-url" ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                            <span>نسخ .m3u8</span>
+                          </button>
+                        </div>
                       </div>
+
+                      {/* Direct Player URL */}
+                      {resolverResult.playUrl && (
+                        <div className="space-y-1">
+                          <span className="text-[10px] text-neutral-400 block">رابط مشغل موقعك السريع (/api/v1/play):</span>
+                          <div className="bg-black/50 p-2.5 rounded-lg border border-white/5 flex items-center justify-between gap-2">
+                            <code className="text-xs font-mono text-emerald-400 truncate dir-ltr select-all">
+                              {resolverResult.playUrl}
+                            </code>
+                            <button
+                              onClick={() => handleCopy(resolverResult.playUrl, "res-play-url")}
+                              className="px-3 py-1.5 rounded bg-emerald-600 text-white text-xs font-semibold flex items-center gap-1 shrink-0 transition-colors cursor-pointer"
+                            >
+                              {copiedKey === "res-play-url" ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                              <span>نسخ رابط المشغل</span>
+                            </button>
+                          </div>
+                        </div>
+                      )}
 
                       <button
                         onClick={() =>
@@ -834,13 +878,43 @@ export function DashboardView({ username, onLogout }: DashboardViewProps) {
                 <span>كيف تضع وتشغل هذا الـ API في موقعك الثاني؟</span>
               </h3>
               <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed">
-                موقعك الثاني يمكنه الاتصال بهذا السيرفر مباشرة عبر المتصفح (JavaScript Fetch) أو من الباك إند (Node.js, PHP, Python, Flutter...) بدون أي مشاكل CORS.
+                موقعك الثاني يمكنه تشغيل الفيديو بأبسط طريقة ممكنة: ضع رابط <code className="text-emerald-400 font-mono">/api/v1/play?id=...</code> مباشرة داخل أي مشغل (Video.js, Plyr, Hls.js, أو HTML5 Video) بدون أي حظر أو تعقيدات.
               </p>
 
-              {/* Code Example: HTML + Hls.js */}
+              {/* Code Example 1: Direct HTML Video Tag */}
               <div className="space-y-2 pt-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-neutral-400">1. كود مشغل فيديو كامل جاهز للنسخ (HTML + Hls.js):</span>
+                  <span className="text-xs font-semibold text-emerald-400">1. الطريقة الأسهل: تشغيل مباشر في كود HTML عبر رابط المشغل:</span>
+                  <button
+                    onClick={() =>
+                      handleCopy(
+                        `<video controls autoplay width="100%" style="max-width:800px; border-radius:12px;">
+  <source src="${origin}/api/v1/play?id=serie-teskilat-season-1-episode-189" type="application/x-mpegURL">
+</video>`,
+                        "guide-code-html"
+                      )
+                    }
+                    className="text-xs text-cyan-400 hover:underline flex items-center gap-1 cursor-pointer"
+                  >
+                    {copiedKey === "guide-code-html" ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
+                    <span>نسخ كود HTML</span>
+                  </button>
+                </div>
+
+                <div className="bg-[#090a0f] border border-white/10 rounded-xl p-4 overflow-x-auto">
+                  <pre className="text-[11px] font-mono text-neutral-300 dir-ltr whitespace-pre">
+{`<video controls autoplay width="100%" style="max-width: 800px; border-radius: 12px;">
+  <!-- يعمل على سفاري / آيفون / أندرويد وجميع المشغلات مباشرة -->
+  <source src="${origin}/api/v1/play?id=serie-teskilat-season-1-episode-189" type="application/x-mpegURL">
+</video>`}
+                  </pre>
+                </div>
+              </div>
+
+              {/* Code Example 2: HTML + Hls.js */}
+              <div className="space-y-2 pt-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-cyan-400">2. مشغل فيديو متطور في متصفح كروم / فايرفوكس (HLS.js):</span>
                   <button
                     onClick={() =>
                       handleCopy(
@@ -851,33 +925,23 @@ export function DashboardView({ username, onLogout }: DashboardViewProps) {
   <title>مشغل مسلسلات</title>
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 </head>
-<body style="background:#111; color:#fff; font-family:sans-serif; text-align:center; padding:20px;">
-  <h2>مشغل الفيديو المباشر</h2>
-  <video id="player" controls autoplay style="width:80%; max-width:900px; border-radius:10px;"></video>
+<body style="background:#0b0d14; color:#fff; font-family:sans-serif; text-align:center; padding:30px;">
+  <h2>مشغل الفيديو المباشر من MOVE API</h2>
+  <video id="player" controls autoplay style="width:100%; max-width:850px; border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,0.5);"></video>
 
   <script>
-    const API_HOST = "${origin}";
+    const streamSource = "${origin}/api/v1/play?id=serie-teskilat-season-1-episode-189";
+    const video = document.getElementById("player");
 
-    // دالة استخراج وتشغيل أي حلقة
-    async function playEpisode(playbackUrl) {
-      const res = await fetch(\`\${API_HOST}/api/v1/stream?url=\${encodeURIComponent(playbackUrl)}\`);
-      const data = await res.json();
-      if (data.success && data.streamUrl) {
-        const video = document.getElementById("player");
-        if (Hls.isSupported()) {
-          const hls = new Hls();
-          hls.loadSource(data.streamUrl);
-          hls.attachMedia(video);
-          hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
-        } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-          video.src = data.streamUrl;
-          video.play();
-        }
-      }
+    if (Hls.isSupported()) {
+      const hls = new Hls();
+      hls.loadSource(streamSource);
+      hls.attachMedia(video);
+      hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
+    } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+      video.src = streamSource;
+      video.play();
     }
-
-    // تجربة تشغيل حلقة فوراً:
-    playEpisode("https://3iskk.xyz/watch/episodes/serie-sifir-bir-season-1-episode-1/");
   </script>
 </body>
 </html>`,
@@ -887,46 +951,37 @@ export function DashboardView({ username, onLogout }: DashboardViewProps) {
                     className="text-xs text-cyan-400 hover:underline flex items-center gap-1 cursor-pointer"
                   >
                     {copiedKey === "guide-code-1" ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
-                    <span>نسخ الكود بالكامل</span>
+                    <span>نسخ صفحة كاملة</span>
                   </button>
                 </div>
 
                 <div className="bg-[#090a0f] border border-white/10 rounded-xl p-4 overflow-x-auto">
                   <pre className="text-[11px] font-mono text-neutral-300 dir-ltr whitespace-pre">
-{`<!-- 1. استدعاء مكتبة HLS.js -->
+{`<!-- 1. استدعاء Hls.js -->
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
-<video id="myPlayer" controls autoplay style="width: 100%; max-width: 900px;"></video>
+<video id="myPlayer" controls autoplay style="width: 100%; max-width: 850px;"></video>
 
 <script>
-  const API_HOST = "${origin}";
+  // رابط البث المباشر من سيرفرك
+  const playUrl = "${origin}/api/v1/play?id=serie-teskilat-season-1-episode-189";
+  const video = document.getElementById("myPlayer");
 
-  // دالة لجلب وتشغيل أي حلقة في موقعك
-  async function playEpisode(episodePlaybackUrl) {
-    const res = await fetch(\`\${API_HOST}/api/v1/stream?url=\${encodeURIComponent(episodePlaybackUrl)}\`);
-    const data = await res.json();
-
-    if (data.success && data.streamUrl) {
-      const video = document.getElementById("myPlayer");
-      if (Hls.isSupported()) {
-        const hls = new Hls();
-        hls.loadSource(data.streamUrl);
-        hls.attachMedia(video);
-        hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
-      } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-        video.src = data.streamUrl;
-        video.play();
-      }
-    }
+  if (Hls.isSupported()) {
+    const hls = new Hls();
+    hls.loadSource(playUrl);
+    hls.attachMedia(video);
+  } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+    video.src = playUrl;
   }
 </script>`}
                   </pre>
                 </div>
               </div>
 
-              {/* Code Example: Fetch series list */}
+              {/* Code Example 3: Fetch series list */}
               <div className="space-y-2 pt-4">
-                <span className="text-xs font-semibold text-neutral-400">2. كود جلب قائمة المسلسلات وعرضها (JavaScript Fetch):</span>
+                <span className="text-xs font-semibold text-neutral-400">3. كود جلب قائمة المسلسلات وعرضها (JavaScript Fetch):</span>
                 <div className="bg-[#090a0f] border border-white/10 rounded-xl p-4 overflow-x-auto">
                   <pre className="text-[11px] font-mono text-neutral-300 dir-ltr whitespace-pre">
 {`async function loadSeries(page = 1) {

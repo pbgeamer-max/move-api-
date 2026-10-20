@@ -3,14 +3,16 @@ import { getMovieDetail } from "@/lib/move-catalog";
 
 export const dynamic = "force-dynamic";
 
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
+  "Access-Control-Allow-Headers": "*",
+};
+
 export async function OPTIONS() {
   return new NextResponse(null, {
     status: 204,
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
-      "Access-Control-Allow-Headers": "*",
-    },
+    headers: CORS_HEADERS,
   });
 }
 
@@ -26,9 +28,7 @@ export async function GET(
       { status: "error", message: "الفيلم غير موجود" },
       {
         status: 404,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-        },
+        headers: CORS_HEADERS,
       }
     );
   }
@@ -41,16 +41,24 @@ export async function GET(
     {
       status: "success",
       data: {
-        ...movie,
-        streamApi: movie.playbackUrl ? `${origin}/api/v1/stream?url=${encodeURIComponent(movie.playbackUrl)}` : null,
+        id: movie.id,
+        slug: movie.slug,
+        titleAr: movie.titleAr,
+        titleEn: movie.titleEn,
+        synopsisAr: movie.synopsisAr,
+        posterUrl: movie.posterUrl,
+        backdropUrl: movie.backdropUrl,
+        releaseYear: movie.releaseYear,
+        rating: movie.rating,
+        genres: movie.genres,
+        runtime: movie.runtime,
+        // Direct stream URL ready for <video src="...">, Hls.js, or Plyr on another site
+        streamUrl: `${origin}/api/v1/play?id=${encodeURIComponent(movie.id)}`,
+        streamApi: `${origin}/api/v1/stream?id=${encodeURIComponent(movie.id)}`,
       },
     },
     {
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
-        "Access-Control-Allow-Headers": "*",
-      },
+      headers: CORS_HEADERS,
     }
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { X, Copy, Check, Play, Film, Calendar, Star, Sparkles, Loader2 } from "lucide-react";
+import { X, Copy, Check, Play, Film, Calendar, Star, Sparkles, Loader2, Radio } from "lucide-react";
 import type { SeriesItem, EpisodeItem } from "@/lib/move-catalog";
 
 interface SeriesModalProps {
@@ -28,10 +28,9 @@ export function SeriesModal({ series, onClose, onPlayStream, origin }: SeriesMod
   };
 
   const handleTestEpisode = async (ep: EpisodeItem) => {
-    if (!ep.playbackUrl) return;
     setResolvingEpId(ep.id);
     try {
-      const res = await fetch(`/api/v1/stream?url=${encodeURIComponent(ep.playbackUrl)}`);
+      const res = await fetch(`/api/v1/stream?id=${encodeURIComponent(ep.id)}`);
       const data = await res.json();
       if (data.success && data.streamUrl) {
         onPlayStream(`${series.titleAr} - ${ep.titleAr}`, data.streamUrl);
@@ -99,7 +98,7 @@ export function SeriesModal({ series, onClose, onPlayStream, origin }: SeriesMod
                   </span>
                 </div>
 
-                <h3 className="text-xs font-semibold text-neutral-300 mb-1">قصة المسلسل:</h3>
+                <h3 className="text-xs font-semibold text-neutral-300 mb-1">قصة المسلسل (بدون حقوق):</h3>
                 <p className="text-xs text-neutral-300/90 leading-relaxed line-clamp-4">
                   {series.synopsisAr || "لا يتوفر ملخص لهذا المسلسل حالياً."}
                 </p>
@@ -154,7 +153,8 @@ export function SeriesModal({ series, onClose, onPlayStream, origin }: SeriesMod
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               {currentSeason.episodes.map((ep) => {
-                const epStreamApi = `${origin}/api/v1/stream?url=${encodeURIComponent(ep.playbackUrl || "")}`;
+                const epPlayUrl = `${origin}/api/v1/play?id=${encodeURIComponent(ep.id)}`;
+                const epStreamApi = `${origin}/api/v1/stream?id=${encodeURIComponent(ep.id)}`;
                 const isResolving = resolvingEpId === ep.id;
 
                 return (
@@ -170,24 +170,25 @@ export function SeriesModal({ series, onClose, onPlayStream, origin }: SeriesMod
                         <span className="text-xs font-medium text-white block truncate">
                           {ep.titleAr || `الحلقة ${ep.number}`}
                         </span>
-                        <span className="text-[10px] text-neutral-500 block truncate font-mono dir-ltr">
-                          ep-{ep.number}
+                        <span className="text-[10px] text-cyan-400/80 block truncate font-mono dir-ltr">
+                          /api/v1/play?id={ep.id}
                         </span>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-1.5 shrink-0">
-                      {/* Copy Stream API button */}
+                      {/* Copy Direct Play URL button */}
                       <button
-                        onClick={() => handleCopy(epStreamApi, ep.id)}
-                        title="نسخ رابط API تشغيل الحلقة"
-                        className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-neutral-300 hover:text-white transition-colors cursor-pointer"
+                        onClick={() => handleCopy(epPlayUrl, `play-${ep.id}`)}
+                        title="نسخ رابط المشغل المباشر لموقعك"
+                        className="px-2 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-[11px] font-medium flex items-center gap-1 transition-colors cursor-pointer"
                       >
-                        {copiedId === ep.id ? (
+                        {copiedId === `play-${ep.id}` ? (
                           <Check className="w-3.5 h-3.5 text-green-400" />
                         ) : (
                           <Copy className="w-3.5 h-3.5" />
                         )}
+                        <span>رابط المشغل</span>
                       </button>
 
                       {/* Test Stream Button */}

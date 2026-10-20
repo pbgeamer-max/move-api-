@@ -3,14 +3,16 @@ import { getSeriesDetail } from "@/lib/move-catalog";
 
 export const dynamic = "force-dynamic";
 
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
+  "Access-Control-Allow-Headers": "*",
+};
+
 export async function OPTIONS() {
   return new NextResponse(null, {
     status: 204,
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
-      "Access-Control-Allow-Headers": "*",
-    },
+    headers: CORS_HEADERS,
   });
 }
 
@@ -26,9 +28,7 @@ export async function GET(
       { status: "error", message: "المسلسل غير موجود" },
       {
         status: 404,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-        },
+        headers: CORS_HEADERS,
       }
     );
   }
@@ -37,12 +37,24 @@ export async function GET(
   const proto = req.headers.get("x-forwarded-proto") || (host.includes("localhost") ? "http" : "https");
   const origin = `${proto}://${host}`;
 
-  // Enrich episodes with direct stream resolution API URLs
+  // Enrich episodes with direct stream URLs for external players (no 3isk pages or iframes)
   const enrichedSeasons = (series.seasons || []).map((season) => ({
-    ...season,
+    number: season.number,
+    titleAr: season.titleAr,
+    titleEn: season.titleEn,
+    episodesCount: season.episodesCount,
     episodes: season.episodes.map((ep) => ({
-      ...ep,
-      streamApi: `${origin}/api/v1/stream?url=${encodeURIComponent(ep.playbackUrl || "")}`,
+      id: ep.id,
+      seasonNumber: ep.seasonNumber,
+      number: ep.number,
+      titleAr: ep.titleAr,
+      titleEn: ep.titleEn,
+      synopsisAr: ep.synopsisAr,
+      thumbnailUrl: ep.thumbnailUrl,
+      runtime: ep.runtime,
+      // Direct stream URL ready for <video src="...">, Hls.js, or Plyr on another site
+      streamUrl: `${origin}/api/v1/play?id=${encodeURIComponent(ep.id)}`,
+      streamApi: `${origin}/api/v1/stream?id=${encodeURIComponent(ep.id)}`,
     })),
   }));
 
@@ -50,16 +62,23 @@ export async function GET(
     {
       status: "success",
       data: {
-        ...series,
+        id: series.id,
+        slug: series.slug,
+        titleAr: series.titleAr,
+        titleEn: series.titleEn,
+        synopsisAr: series.synopsisAr,
+        posterUrl: series.posterUrl,
+        backdropUrl: series.backdropUrl,
+        releaseYear: series.releaseYear,
+        rating: series.rating,
+        genres: series.genres,
+        seasonsCount: series.seasonsCount,
+        totalEpisodes: series.totalEpisodes,
         seasons: enrichedSeasons,
       },
     },
     {
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
-        "Access-Control-Allow-Headers": "*",
-      },
+      headers: CORS_HEADERS,
     }
   );
 }
