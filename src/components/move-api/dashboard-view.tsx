@@ -1,0 +1,972 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
+import {
+  Film,
+  Tv,
+  Play,
+  Copy,
+  Check,
+  Search,
+  ExternalLink,
+  Code2,
+  Terminal,
+  LogOut,
+  Sparkles,
+  Layers,
+  Zap,
+  Calendar,
+  Star,
+  Loader2,
+  RefreshCw,
+  Globe,
+  Radio,
+} from "lucide-react";
+import { SeriesModal } from "./series-modal";
+import { PlayerModal } from "./player-modal";
+import type { SeriesItem, MovieItem } from "@/lib/move-catalog";
+
+interface DashboardViewProps {
+  username: string;
+  onLogout: () => void;
+}
+
+export function DashboardView({ username, onLogout }: DashboardViewProps) {
+  const [activeTab, setActiveTab] = useState<"api" | "series" | "movies" | "resolver" | "guide">("api");
+  const [origin, setOrigin] = useState("");
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
+
+  // Modals state
+  const [selectedSeries, setSelectedSeries] = useState<SeriesItem | null>(null);
+  const [playerModal, setPlayerModal] = useState<{ open: boolean; title: string; streamUrl: string }>({
+    open: false,
+    title: "",
+    streamUrl: "",
+  });
+
+  // Series catalog state
+  const [seriesList, setSeriesList] = useState<SeriesItem[]>([]);
+  const [seriesLoading, setSeriesLoading] = useState(false);
+  const [seriesSearch, setSeriesSearch] = useState("");
+  const [seriesFilter, setSeriesFilter] = useState(""); // "" | "1" (dubbed) | "0" (subbed)
+  const [seriesPage, setSeriesPage] = useState(1);
+  const [seriesTotal, setSeriesTotal] = useState(0);
+  const [seriesPages, setSeriesPages] = useState(1);
+
+  // Movies catalog state
+  const [moviesList, setMoviesList] = useState<MovieItem[]>([]);
+  const [moviesLoading, setMoviesLoading] = useState(false);
+  const [moviesSearch, setMoviesSearch] = useState("");
+  const [moviesPage, setMoviesPage] = useState(1);
+  const [moviesTotal, setMoviesTotal] = useState(0);
+  const [moviesPages, setMoviesPages] = useState(1);
+
+  // Stream Resolver tool state
+  const [resolverInput, setResolverInput] = useState("");
+  const [resolverLoading, setResolverLoading] = useState(false);
+  const [resolverResult, setResolverResult] = useState<any>(null);
+
+  // Live Tester in API tab
+  const [testEndpoint, setTestEndpoint] = useState("/api/v1/series?limit=2");
+  const [testLoading, setTestLoading] = useState(false);
+  const [testOutput, setTestOutput] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setOrigin(window.location.origin);
+    }
+  }, []);
+
+  const handleCopy = (text: string, key: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedKey(key);
+    setTimeout(() => setCopiedKey(null), 2000);
+  };
+
+  // Fetch Series
+  const fetchSeries = async (page = 1, q = seriesSearch, dubbed = seriesFilter) => {
+    setSeriesLoading(true);
+    try {
+      const params = new URLSearchParams({
+        page: String(page),
+        limit: "18",
+        q,
+        dubbed,
+      });
+      const res = await fetch(`/api/v1/series?${params.toString()}`);
+      const json = await res.json();
+      if (json.status === "success") {
+        setSeriesList(json.data);
+        setSeriesTotal(json.total);
+        setSeriesPages(json.pages);
+        setSeriesPage(json.page);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setSeriesLoading(false);
+    }
+  };
+
+  // Fetch Movies
+  const fetchMovies = async (page = 1, q = moviesSearch) => {
+    setMoviesLoading(true);
+    try {
+      const params = new URLSearchParams({
+        page: String(page),
+        limit: "18",
+        q,
+      });
+      const res = await fetch(`/api/v1/movies?${params.toString()}`);
+      const json = await res.json();
+      if (json.status === "success") {
+        setMoviesList(json.data);
+        setMoviesTotal(json.total);
+        setMoviesPages(json.pages);
+        setMoviesPage(json.page);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setMoviesLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === "series" && seriesList.length === 0) {
+      fetchSeries(1);
+    } else if (activeTab === "movies" && moviesList.length === 0) {
+      fetchMovies(1);
+    }
+  }, [activeTab]);
+
+  // Open series details
+  const handleOpenSeriesDetails = async (slug: string) => {
+    try {
+      const res = await fetch(`/api/v1/series/${slug}`);
+      const data = await res.json();
+      if (data.status === "success" && data.data) {
+        setSelectedSeries(data.data);
+      }
+    } catch {
+      alert("تعذر جلب تفاصيل المسلسل");
+    }
+  };
+
+  // Test Stream Resolver Tool
+  const handleResolveStream = async () => {
+    if (!resolverInput.trim()) return;
+    setResolverLoading(true);
+    setResolverResult(null);
+    try {
+      const res = await fetch(`/api/v1/stream?url=${encodeURIComponent(resolverInput.trim())}`);
+      const data = await res.json();
+      setResolverResult(data);
+    } catch {
+      setResolverResult({ success: false, error: "تعذر الاتصال بخادم الاستخراج" });
+    } finally {
+      setResolverLoading(false);
+    }
+  };
+
+  // Live API Tester
+  const handleRunApiTest = async () => {
+    setTestLoading(true);
+    setTestOutput(null);
+    try {
+      const res = await fetch(testEndpoint);
+      const data = await res.json();
+      setTestOutput(JSON.stringify(data, null, 2));
+    } catch (err: any) {
+      setTestOutput(JSON.stringify({ error: err?.message }, null, 2));
+    } finally {
+      setTestLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-[#090a0f] text-white flex flex-col selection:bg-cyan-500 selection:text-black">
+      {/* Top Navbar */}
+      <header className="sticky top-0 z-30 bg-[#12141c]/90 border-b border-white/10 backdrop-blur-xl">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+          {/* Logo & Brand */}
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center font-bold text-white shadow-md shadow-cyan-500/20">
+              <Zap className="w-5 h-5 fill-current" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-extrabold text-base tracking-wider bg-gradient-to-r from-white via-cyan-200 to-cyan-400 bg-clip-text text-transparent">
+                  MOVE API
+                </span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  Live v1.0
+                </span>
+              </div>
+              <p className="text-[11px] text-neutral-400 hidden sm:block">
+                لوحة تحكم خادم البث وواجهات برمجة التطبيقات
+              </p>
+            </div>
+          </div>
+
+          {/* Quick Domain Copy & User */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="hidden md:flex items-center gap-2 bg-[#1a1d28] border border-white/5 px-3 py-1.5 rounded-lg text-xs">
+              <Globe className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+              <span className="text-neutral-400 truncate font-mono dir-ltr max-w-[220px]">{origin}</span>
+              <button
+                onClick={() => handleCopy(origin, "origin")}
+                className="text-cyan-400 hover:text-cyan-300 transition-colors p-1"
+                title="نسخ عنوان السيرفر"
+              >
+                {copiedKey === "origin" ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
+              </button>
+            </div>
+
+            <button
+              onClick={onLogout}
+              className="px-3 py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-medium flex items-center gap-1.5 border border-red-500/20 transition-all cursor-pointer"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span>خروج</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Navigation Tabs Bar */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center gap-1 overflow-x-auto scrollbar-none py-1.5 border-t border-white/5">
+          {[
+            { id: "api", label: "⚡ روابط الـ API والنسخ", icon: Zap },
+            { id: "series", label: "📺 المسلسلات والمواسم (1,222)", icon: Tv },
+            { id: "movies", label: "🎬 الأفلام (423)", icon: Film },
+            { id: "resolver", label: "⚡ مستخرج الروابط والمشغل", icon: Play },
+            { id: "guide", label: "📖 كود الربط لموقعك", icon: Code2 },
+          ].map((tab) => {
+            const Icon = tab.icon;
+            const active = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as any)}
+                className={`px-3.5 py-2 rounded-xl text-xs font-semibold shrink-0 flex items-center gap-2 transition-all cursor-pointer ${
+                  active
+                    ? "bg-cyan-500 text-white shadow-lg shadow-cyan-500/20"
+                    : "text-neutral-400 hover:text-white hover:bg-white/5"
+                }`}
+              >
+                <Icon className={`w-3.5 h-3.5 ${active ? "text-white" : "text-neutral-400"}`} />
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6">
+        {/* ========================================================================= */}
+        {/* TAB 1: API Endpoints & Quick Copy */}
+        {/* ========================================================================= */}
+        {activeTab === "api" && (
+          <div className="space-y-6">
+            {/* Hero Card */}
+            <div className="p-6 rounded-2xl bg-gradient-to-r from-blue-900/30 via-cyan-900/20 to-purple-900/20 border border-cyan-500/20 relative overflow-hidden">
+              <div className="max-w-2xl">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-cyan-500/10 text-cyan-400 text-xs font-semibold mb-3 border border-cyan-500/20">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>REST API جاهز للاستخدام الخارجي مع دعم CORS مفتوح</span>
+                </div>
+                <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">
+                  واجهات برمجة التطبيقات لموقعك الثاني (VOD API)
+                </h2>
+                <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed">
+                  هذا السيرفر مخصص ليعمل كـ <span className="text-cyan-300 font-semibold">Backend API</span>. انسخ أي رابط من الأسفل وضعه في موقعك الآخر لعرض المسلسلات والمواسم والحلقات والقصص، وتشغيل الفيديو مباشرة بدون أي مشاكل حظر أو تشفير.
+                </p>
+              </div>
+
+              {/* Stat Counters */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-5 border-t border-white/10">
+                <div className="bg-[#12141c]/80 p-3 rounded-xl border border-white/5">
+                  <span className="text-[11px] text-neutral-400 block mb-0.5">المسلسلات المتاحة</span>
+                  <span className="text-lg font-extrabold text-cyan-400 font-mono">1,222</span>
+                </div>
+                <div className="bg-[#12141c]/80 p-3 rounded-xl border border-white/5">
+                  <span className="text-[11px] text-neutral-400 block mb-0.5">الحلقات والمواسم</span>
+                  <span className="text-lg font-extrabold text-purple-400 font-mono">65,206</span>
+                </div>
+                <div className="bg-[#12141c]/80 p-3 rounded-xl border border-white/5">
+                  <span className="text-[11px] text-neutral-400 block mb-0.5">الأفلام الكاملة</span>
+                  <span className="text-lg font-extrabold text-yellow-400 font-mono">423</span>
+                </div>
+                <div className="bg-[#12141c]/80 p-3 rounded-xl border border-white/5">
+                  <span className="text-[11px] text-neutral-400 block mb-0.5">حالة محلل البث</span>
+                  <span className="text-lg font-extrabold text-emerald-400 font-mono">🟢 نشط 100%</span>
+                </div>
+              </div>
+            </div>
+
+            {/* List of Copyable API Endpoints */}
+            <div>
+              <h3 className="text-sm font-bold text-neutral-300 mb-3 flex items-center gap-2">
+                <Terminal className="w-4 h-4 text-cyan-400" />
+                <span>نقاط الاتصال الجاهزة للنسخ (Endpoints):</span>
+              </h3>
+
+              <div className="grid grid-cols-1 gap-3.5">
+                {[
+                  {
+                    key: "ep-series",
+                    title: "1. جلب قائمة المسلسلات (Series List)",
+                    desc: "يجلب قائمة المسلسلات مع البوسترات، العناوين، القصص، وسنة الإنتاج مع دعم البحث والصفحات.",
+                    method: "GET",
+                    endpoint: "/api/v1/series?page=1&limit=24",
+                    params: "?page=1&limit=24&q=اسم_المسلسل&genre=دراما&dubbed=1",
+                  },
+                  {
+                    key: "ep-series-detail",
+                    title: "2. جلب تفاصيل المسلسل والمواسم والحلقات (Series Details & Seasons)",
+                    desc: "يجلب قصة المسلسل كاملة، وجميع المواسم والحلقات مرتبة بالتسلسل مع روابط تشغيل كل حلقة.",
+                    method: "GET",
+                    endpoint: "/api/v1/series/serie-sifir-bir",
+                    params: "مرر slug أو id المسلسل في الرابط",
+                  },
+                  {
+                    key: "ep-movies",
+                    title: "3. جلب قائمة الأفلام (Movies List)",
+                    desc: "يجلب جميع الأفلام مع البوسترات، التقييم، سنة الإنتاج، ورابط التشغيل المباشر لكل فيلم.",
+                    method: "GET",
+                    endpoint: "/api/v1/movies?page=1&limit=24",
+                    params: "?page=1&limit=24&q=اسم_الفيلم&year=2024",
+                  },
+                  {
+                    key: "ep-movies-detail",
+                    title: "4. جلب تفاصيل الفيلم ورابط تشغيله (Movie Details)",
+                    desc: "يجلب القصة الكاملة وتفاصيل الفيلم ورابط الـ API المباشر لتشغيله.",
+                    method: "GET",
+                    endpoint: "/api/v1/movies/movie-siccin-9-2026-mudblij",
+                    params: "مرر slug الفيلم في الرابط",
+                  },
+                  {
+                    key: "ep-stream",
+                    title: "5. استخراج رابط البث المباشر لأي حلقة أو فيلم (Stream Resolver)",
+                    desc: "يفك تشفير أي رابط حلقة ويعيد لك رابط HLS (.m3u8) مباشر ونقي يعمل على أي مشغل.",
+                    method: "GET",
+                    endpoint: "/api/v1/stream?url=https://3iskk.xyz/watch/episodes/serie-sifir-bir-season-1-episode-1/",
+                    params: "?url={playbackUrl} أو ?slug={movieSlug}",
+                  },
+                ].map((item) => {
+                  const fullUrl = `${origin}${item.endpoint}`;
+                  const isCopied = copiedKey === item.key;
+
+                  return (
+                    <div
+                      key={item.key}
+                      className="p-4 rounded-xl bg-[#12141c] border border-white/5 hover:border-cyan-500/30 transition-all space-y-2.5"
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-cyan-500/10 text-cyan-400 font-mono">
+                            {item.method}
+                          </span>
+                          <h4 className="text-xs sm:text-sm font-bold text-white">{item.title}</h4>
+                        </div>
+                        <span className="text-[11px] text-neutral-400 font-mono dir-ltr">{item.params}</span>
+                      </div>
+
+                      <p className="text-xs text-neutral-400 leading-relaxed">{item.desc}</p>
+
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 bg-[#171a24] p-2 rounded-lg border border-white/5">
+                        <code className="text-xs text-cyan-300 font-mono truncate dir-ltr select-all">
+                          {fullUrl}
+                        </code>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <button
+                            onClick={() => {
+                              setTestEndpoint(item.endpoint);
+                              handleRunApiTest();
+                            }}
+                            className="px-2.5 py-1 rounded bg-white/5 hover:bg-white/10 text-neutral-300 hover:text-white text-xs font-medium transition-colors cursor-pointer"
+                          >
+                            فحص الاستجابة
+                          </button>
+                          <button
+                            onClick={() => handleCopy(fullUrl, item.key)}
+                            className="px-3 py-1 rounded bg-cyan-500/20 text-cyan-300 hover:bg-cyan-500/30 text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+                          >
+                            {isCopied ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
+                            <span>{isCopied ? "تم النسخ!" : "نسخ الرابط لموقعك"}</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Interactive Live API Tester */}
+            <div className="p-5 rounded-2xl bg-[#12141c] border border-white/10 space-y-3">
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-bold text-neutral-300 uppercase tracking-wider flex items-center gap-2">
+                  <Play className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>مختبر الاستجابة الفوري (Live API Tester):</span>
+                </h4>
+                {testOutput && (
+                  <button
+                    onClick={() => handleCopy(testOutput, "json-test")}
+                    className="text-xs text-cyan-400 hover:underline flex items-center gap-1 cursor-pointer"
+                  >
+                    {copiedKey === "json-test" ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
+                    <span>نسخ كود الـ JSON</span>
+                  </button>
+                )}
+              </div>
+
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={testEndpoint}
+                  onChange={(e) => setTestEndpoint(e.target.value)}
+                  dir="ltr"
+                  placeholder="/api/v1/series?limit=2"
+                  className="flex-1 bg-[#171a24] border border-white/10 rounded-xl px-3 py-2 text-xs font-mono text-cyan-300 focus:outline-none focus:border-cyan-500"
+                />
+                <button
+                  onClick={handleRunApiTest}
+                  disabled={testLoading}
+                  className="px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
+                >
+                  {testLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5 fill-current" />}
+                  <span>طلب الـ API</span>
+                </button>
+              </div>
+
+              {testOutput && (
+                <div className="mt-2 bg-[#090a0f] border border-white/10 rounded-xl p-3 max-h-72 overflow-y-auto">
+                  <pre className="text-[11px] font-mono text-cyan-200/90 dir-ltr select-all whitespace-pre-wrap">
+                    {testOutput}
+                  </pre>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ========================================================================= */}
+        {/* TAB 2: Series Catalog Explorer */}
+        {/* ========================================================================= */}
+        {activeTab === "series" && (
+          <div className="space-y-5">
+            {/* Search & Filter Bar */}
+            <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between bg-[#12141c] p-4 rounded-xl border border-white/5">
+              <div className="relative flex-1">
+                <input
+                  type="text"
+                  value={seriesSearch}
+                  onChange={(e) => {
+                    setSeriesSearch(e.target.value);
+                    fetchSeries(1, e.target.value, seriesFilter);
+                  }}
+                  placeholder="ابحث عن أي مسلسل بالاسم العربي أو الإنجليزي..."
+                  className="w-full bg-[#171a24] border border-white/10 rounded-xl px-4 py-2.5 pr-10 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-cyan-500"
+                />
+                <Search className="w-4 h-4 text-neutral-400 absolute right-3.5 top-3 pointer-events-none" />
+              </div>
+
+              {/* Filters */}
+              <div className="flex items-center gap-2">
+                {[
+                  { id: "", label: "الكل" },
+                  { id: "1", label: "مدبلج" },
+                  { id: "0", label: "مترجم" },
+                ].map((f) => (
+                  <button
+                    key={f.id}
+                    onClick={() => {
+                      setSeriesFilter(f.id);
+                      fetchSeries(1, seriesSearch, f.id);
+                    }}
+                    className={`px-3 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+                      seriesFilter === f.id
+                        ? "bg-cyan-500 text-white"
+                        : "bg-[#171a24] text-neutral-400 hover:text-white"
+                    }`}
+                  >
+                    {f.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Results count & Pagination */}
+            <div className="flex items-center justify-between text-xs text-neutral-400 px-1">
+              <span>
+                إجمالي النتائج: <strong className="text-white font-mono">{seriesTotal}</strong> مسلسل (صفحة {seriesPage} من {seriesPages})
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => fetchSeries(seriesPage - 1)}
+                  disabled={seriesPage <= 1 || seriesLoading}
+                  className="px-2.5 py-1 rounded bg-[#171a24] text-neutral-300 hover:text-white disabled:opacity-30 cursor-pointer"
+                >
+                  السابق
+                </button>
+                <button
+                  onClick={() => fetchSeries(seriesPage + 1)}
+                  disabled={seriesPage >= seriesPages || seriesLoading}
+                  className="px-2.5 py-1 rounded bg-[#171a24] text-neutral-300 hover:text-white disabled:opacity-30 cursor-pointer"
+                >
+                  التالي
+                </button>
+              </div>
+            </div>
+
+            {/* Series Grid */}
+            {seriesLoading ? (
+              <div className="py-20 flex flex-col items-center justify-center text-neutral-400 gap-2">
+                <Loader2 className="w-8 h-8 animate-spin text-cyan-400" />
+                <span className="text-xs">جاري تحميل المسلسلات...</span>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                {seriesList.map((item) => {
+                  const seriesApi = `${origin}/api/v1/series/${item.slug}`;
+                  const isCopied = copiedKey === `s-${item.slug}`;
+
+                  return (
+                    <div
+                      key={item.id}
+                      className="bg-[#12141c] border border-white/5 rounded-2xl overflow-hidden hover:border-cyan-500/30 transition-all flex flex-col justify-between"
+                    >
+                      <div className="p-4 flex gap-3.5">
+                        {item.posterUrl ? (
+                          <img
+                            src={item.posterUrl}
+                            alt={item.titleAr}
+                            className="w-16 h-24 object-cover rounded-lg shrink-0 border border-white/10"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="w-16 h-24 bg-white/5 rounded-lg flex items-center justify-center text-neutral-600 shrink-0">
+                            <Tv className="w-6 h-6" />
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-bold text-sm text-white line-clamp-1 mb-1">{item.titleAr}</h4>
+                          <div className="flex items-center gap-2 text-[10px] text-neutral-400 mb-2">
+                            <span>{item.releaseYear || 2024}</span>
+                            <span>•</span>
+                            <span className="text-cyan-400">{item.seasonsCount} مواسم</span>
+                            <span>•</span>
+                            <span>{item.totalEpisodes} حلقة</span>
+                          </div>
+                          <p className="text-[11px] text-neutral-400 line-clamp-2 leading-relaxed">
+                            {item.synopsisAr || "لا يتوفر ملخص."}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Card Footer Actions */}
+                      <div className="p-3 bg-[#171a24] border-t border-white/5 flex items-center justify-between gap-2">
+                        <button
+                          onClick={() => handleCopy(seriesApi, `s-${item.slug}`)}
+                          className="px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-neutral-300 hover:text-white text-xs font-medium flex items-center gap-1 transition-colors cursor-pointer"
+                        >
+                          {isCopied ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
+                          <span>{isCopied ? "تم النسخ!" : "نسخ الـ API"}</span>
+                        </button>
+
+                        <button
+                          onClick={() => handleOpenSeriesDetails(item.slug)}
+                          className="px-3 py-1.5 rounded-lg bg-cyan-500/20 text-cyan-300 hover:bg-cyan-500/30 text-xs font-medium flex items-center gap-1 transition-colors cursor-pointer"
+                        >
+                          <Layers className="w-3.5 h-3.5" />
+                          <span>عرض الحلقات</span>
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ========================================================================= */}
+        {/* TAB 3: Movies Catalog Explorer */}
+        {/* ========================================================================= */}
+        {activeTab === "movies" && (
+          <div className="space-y-5">
+            {/* Search Bar */}
+            <div className="flex items-center justify-between bg-[#12141c] p-4 rounded-xl border border-white/5">
+              <div className="relative flex-1">
+                <input
+                  type="text"
+                  value={moviesSearch}
+                  onChange={(e) => {
+                    setMoviesSearch(e.target.value);
+                    fetchMovies(1, e.target.value);
+                  }}
+                  placeholder="ابحث عن أي فيلم..."
+                  className="w-full bg-[#171a24] border border-white/10 rounded-xl px-4 py-2.5 pr-10 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-cyan-500"
+                />
+                <Search className="w-4 h-4 text-neutral-400 absolute right-3.5 top-3 pointer-events-none" />
+              </div>
+            </div>
+
+            {/* Results count & Pagination */}
+            <div className="flex items-center justify-between text-xs text-neutral-400 px-1">
+              <span>
+                إجمالي النتائج: <strong className="text-white font-mono">{moviesTotal}</strong> فيلم (صفحة {moviesPage} من {moviesPages})
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => fetchMovies(moviesPage - 1)}
+                  disabled={moviesPage <= 1 || moviesLoading}
+                  className="px-2.5 py-1 rounded bg-[#171a24] text-neutral-300 hover:text-white disabled:opacity-30 cursor-pointer"
+                >
+                  السابق
+                </button>
+                <button
+                  onClick={() => fetchMovies(moviesPage + 1)}
+                  disabled={moviesPage >= moviesPages || moviesLoading}
+                  className="px-2.5 py-1 rounded bg-[#171a24] text-neutral-300 hover:text-white disabled:opacity-30 cursor-pointer"
+                >
+                  التالي
+                </button>
+              </div>
+            </div>
+
+            {/* Movies Grid */}
+            {moviesLoading ? (
+              <div className="py-20 flex flex-col items-center justify-center text-neutral-400 gap-2">
+                <Loader2 className="w-8 h-8 animate-spin text-cyan-400" />
+                <span className="text-xs">جاري تحميل الأفلام...</span>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                {moviesList.map((movie) => {
+                  const movieApi = `${origin}/api/v1/movies/${movie.slug}`;
+                  const isCopied = copiedKey === `m-${movie.slug}`;
+
+                  return (
+                    <div
+                      key={movie.id}
+                      className="bg-[#12141c] border border-white/5 rounded-2xl overflow-hidden hover:border-cyan-500/30 transition-all flex flex-col justify-between"
+                    >
+                      <div className="p-4 flex gap-3.5">
+                        {movie.posterUrl ? (
+                          <img
+                            src={movie.posterUrl}
+                            alt={movie.titleAr}
+                            className="w-16 h-24 object-cover rounded-lg shrink-0 border border-white/10"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="w-16 h-24 bg-white/5 rounded-lg flex items-center justify-center text-neutral-600 shrink-0">
+                            <Film className="w-6 h-6" />
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-bold text-sm text-white line-clamp-1 mb-1">{movie.titleAr}</h4>
+                          <div className="flex items-center gap-2 text-[10px] text-neutral-400 mb-2">
+                            <span>{movie.releaseYear || 2024}</span>
+                            <span>•</span>
+                            <span className="text-yellow-400 flex items-center gap-0.5">
+                              <Star className="w-3 h-3 fill-current" />
+                              {movie.rating || 8.5}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-neutral-400 line-clamp-2 leading-relaxed">
+                            {movie.synopsisAr || "لا يتوفر ملخص."}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Card Footer Actions */}
+                      <div className="p-3 bg-[#171a24] border-t border-white/5 flex items-center justify-between gap-2">
+                        <button
+                          onClick={() => handleCopy(movieApi, `m-${movie.slug}`)}
+                          className="px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-neutral-300 hover:text-white text-xs font-medium flex items-center gap-1 transition-colors cursor-pointer"
+                        >
+                          {isCopied ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
+                          <span>{isCopied ? "تم النسخ!" : "نسخ API الفيلم"}</span>
+                        </button>
+
+                        {movie.playbackUrl && (
+                          <button
+                            onClick={async () => {
+                              const res = await fetch(`/api/v1/stream?url=${encodeURIComponent(movie.playbackUrl || "")}`);
+                              const data = await res.json();
+                              if (data.success && data.streamUrl) {
+                                setPlayerModal({
+                                  open: true,
+                                  title: movie.titleAr,
+                                  streamUrl: data.streamUrl,
+                                });
+                              }
+                            }}
+                            className="px-3 py-1.5 rounded-lg bg-cyan-500/20 text-cyan-300 hover:bg-cyan-500/30 text-xs font-medium flex items-center gap-1 transition-colors cursor-pointer"
+                          >
+                            <Play className="w-3.5 h-3.5 fill-current" />
+                            <span>تشغيل تجريبي</span>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ========================================================================= */}
+        {/* TAB 4: Instant Stream Resolver Tool */}
+        {/* ========================================================================= */}
+        {activeTab === "resolver" && (
+          <div className="space-y-6 max-w-3xl mx-auto">
+            <div className="p-6 rounded-2xl bg-[#12141c] border border-white/10 space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center text-cyan-400 font-bold">
+                  <Play className="w-5 h-5 fill-current" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-white">محلل واستخراج روابط البث المباشر (HLS Resolver)</h3>
+                  <p className="text-xs text-neutral-400">
+                    الصق رابط صفحة أي حلقة أو فيلم، ليقوم المحرك بفك تشفيره واستخراج رابط الـ .m3u8 المباشر فوراً.
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-neutral-300 block">رابط الحلقة أو الفيلم:</label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={resolverInput}
+                    onChange={(e) => setResolverInput(e.target.value)}
+                    dir="ltr"
+                    placeholder="https://3iskk.xyz/watch/episodes/serie-sifir-bir-season-1-episode-1/"
+                    className="flex-1 bg-[#171a24] border border-white/10 rounded-xl px-4 py-3 text-xs font-mono text-cyan-300 focus:outline-none focus:border-cyan-500"
+                  />
+                  <button
+                    onClick={handleResolveStream}
+                    disabled={resolverLoading}
+                    className="px-5 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-semibold rounded-xl text-xs flex items-center gap-2 cursor-pointer transition-all disabled:opacity-50"
+                  >
+                    {resolverLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4 fill-current" />}
+                    <span>استخراج الرابط</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Sample link filler button */}
+              <button
+                onClick={() => setResolverInput("https://3iskk.xyz/watch/episodes/serie-sifir-bir-season-1-episode-1/")}
+                className="text-xs text-neutral-400 hover:text-cyan-300 transition-colors flex items-center gap-1"
+              >
+                <span>💡 تجربة رابط عينة (مسلسل صفر واحد - الحلقة 1)</span>
+              </button>
+
+              {/* Resolver Result */}
+              {resolverResult && (
+                <div className="mt-5 pt-5 border-t border-white/10 space-y-4 animate-in fade-in">
+                  {resolverResult.success && resolverResult.streamUrl ? (
+                    <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+                          <Check className="w-4 h-4" />
+                          <span>تم استخراج رابط البث المباشر بنجاح!</span>
+                        </span>
+                        <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-mono uppercase">
+                          {resolverResult.type || "HLS"}
+                        </span>
+                      </div>
+
+                      <div className="bg-black/50 p-2.5 rounded-lg border border-white/5 flex items-center justify-between gap-2">
+                        <code className="text-xs font-mono text-cyan-300 truncate dir-ltr select-all">
+                          {resolverResult.streamUrl}
+                        </code>
+                        <button
+                          onClick={() => handleCopy(resolverResult.streamUrl, "res-url")}
+                          className="px-3 py-1.5 rounded bg-cyan-500 text-white text-xs font-semibold flex items-center gap-1 shrink-0 transition-colors cursor-pointer"
+                        >
+                          {copiedKey === "res-url" ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                          <span>{copiedKey === "res-url" ? "تم النسخ!" : "نسخ رابط البث"}</span>
+                        </button>
+                      </div>
+
+                      <button
+                        onClick={() =>
+                          setPlayerModal({
+                            open: true,
+                            title: "تشغيل الرابط المستخرج",
+                            streamUrl: resolverResult.streamUrl,
+                          })
+                        }
+                        className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded-lg text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                      >
+                        <Play className="w-4 h-4 fill-current" />
+                        <span>تشغيل وتجربة الفيديو في المشغل الآن</span>
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs">
+                      {resolverResult.error || "تعذر استخراج البث المباشر لهذا الرابط"}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ========================================================================= */}
+        {/* TAB 5: Integration Guide & Code for other site */}
+        {/* ========================================================================= */}
+        {activeTab === "guide" && (
+          <div className="space-y-6 max-w-4xl mx-auto">
+            <div className="p-6 rounded-2xl bg-[#12141c] border border-white/10 space-y-4">
+              <h3 className="text-base font-bold text-white flex items-center gap-2">
+                <Code2 className="w-5 h-5 text-cyan-400" />
+                <span>كيف تضع وتشغل هذا الـ API في موقعك الثاني؟</span>
+              </h3>
+              <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed">
+                موقعك الثاني يمكنه الاتصال بهذا السيرفر مباشرة عبر المتصفح (JavaScript Fetch) أو من الباك إند (Node.js, PHP, Python, Flutter...) بدون أي مشاكل CORS.
+              </p>
+
+              {/* Code Example: HTML + Hls.js */}
+              <div className="space-y-2 pt-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-neutral-400">1. كود مشغل فيديو كامل جاهز للنسخ (HTML + Hls.js):</span>
+                  <button
+                    onClick={() =>
+                      handleCopy(
+                        `<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>مشغل مسلسلات</title>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+</head>
+<body style="background:#111; color:#fff; font-family:sans-serif; text-align:center; padding:20px;">
+  <h2>مشغل الفيديو المباشر</h2>
+  <video id="player" controls autoplay style="width:80%; max-width:900px; border-radius:10px;"></video>
+
+  <script>
+    const API_HOST = "${origin}";
+
+    // دالة استخراج وتشغيل أي حلقة
+    async function playEpisode(playbackUrl) {
+      const res = await fetch(\`\${API_HOST}/api/v1/stream?url=\${encodeURIComponent(playbackUrl)}\`);
+      const data = await res.json();
+      if (data.success && data.streamUrl) {
+        const video = document.getElementById("player");
+        if (Hls.isSupported()) {
+          const hls = new Hls();
+          hls.loadSource(data.streamUrl);
+          hls.attachMedia(video);
+          hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
+        } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+          video.src = data.streamUrl;
+          video.play();
+        }
+      }
+    }
+
+    // تجربة تشغيل حلقة فوراً:
+    playEpisode("https://3iskk.xyz/watch/episodes/serie-sifir-bir-season-1-episode-1/");
+  </script>
+</body>
+</html>`,
+                        "guide-code-1"
+                      )
+                    }
+                    className="text-xs text-cyan-400 hover:underline flex items-center gap-1 cursor-pointer"
+                  >
+                    {copiedKey === "guide-code-1" ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
+                    <span>نسخ الكود بالكامل</span>
+                  </button>
+                </div>
+
+                <div className="bg-[#090a0f] border border-white/10 rounded-xl p-4 overflow-x-auto">
+                  <pre className="text-[11px] font-mono text-neutral-300 dir-ltr whitespace-pre">
+{`<!-- 1. استدعاء مكتبة HLS.js -->
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+<video id="myPlayer" controls autoplay style="width: 100%; max-width: 900px;"></video>
+
+<script>
+  const API_HOST = "${origin}";
+
+  // دالة لجلب وتشغيل أي حلقة في موقعك
+  async function playEpisode(episodePlaybackUrl) {
+    const res = await fetch(\`\${API_HOST}/api/v1/stream?url=\${encodeURIComponent(episodePlaybackUrl)}\`);
+    const data = await res.json();
+
+    if (data.success && data.streamUrl) {
+      const video = document.getElementById("myPlayer");
+      if (Hls.isSupported()) {
+        const hls = new Hls();
+        hls.loadSource(data.streamUrl);
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
+      } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+        video.src = data.streamUrl;
+        video.play();
+      }
+    }
+  }
+</script>`}
+                  </pre>
+                </div>
+              </div>
+
+              {/* Code Example: Fetch series list */}
+              <div className="space-y-2 pt-4">
+                <span className="text-xs font-semibold text-neutral-400">2. كود جلب قائمة المسلسلات وعرضها (JavaScript Fetch):</span>
+                <div className="bg-[#090a0f] border border-white/10 rounded-xl p-4 overflow-x-auto">
+                  <pre className="text-[11px] font-mono text-neutral-300 dir-ltr whitespace-pre">
+{`async function loadSeries(page = 1) {
+  const res = await fetch("${origin}/api/v1/series?page=" + page);
+  const json = await res.json();
+
+  console.log("إجمالي المسلسلات:", json.total);
+  json.data.forEach(series => {
+    console.log(series.titleAr, series.posterUrl, series.seasonsCount);
+  });
+}`}
+                  </pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
+
+      {/* Series Details Modal */}
+      <SeriesModal
+        series={selectedSeries}
+        onClose={() => setSelectedSeries(null)}
+        onPlayStream={(title, streamUrl) =>
+          setPlayerModal({
+            open: true,
+            title,
+            streamUrl,
+          })
+        }
+        origin={origin}
+      />
+
+      {/* Video Player Test Modal */}
+      <PlayerModal
+        open={playerModal.open}
+        onClose={() => setPlayerModal({ ...playerModal, open: false })}
+        title={playerModal.title}
+        streamUrl={playerModal.streamUrl}
+      />
+    </div>
+  );
+}

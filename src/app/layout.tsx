@@ -5,21 +5,15 @@ import "./globals.css";
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
   title: {
-    default: "TVORA — سينما. مسلسلات. قنوات TV مباشرة",
-    template: "%s | TVORA",
+    default: "MOVE API — لوحة تحكم وسيرفر واجهات برمجة التطبيقات",
+    template: "%s | MOVE API",
   },
   description:
-    "TVORA منصة ترفيه سينمائية غامرة: أفلام، مسلسلات، وقنوات TV مباشرة على مدار الساعة — بتجربة دار سينما فاخرة بالعربية والإنجليزية.",
-  keywords: ["TVORA", "أفلام", "مسلسلات", "قنوات TV", "بث مباشر", "streaming", "movies", "series", "live TV", "channels"],
-  openGraph: {
-    title: "TVORA — Cinema. Series. Live TV Channels.",
-    description: "An immersive cinematic streaming experience: movies, series and live TV channels in Arabic & English.",
-    type: "website",
-    siteName: "TVORA",
-    images: [{ url: "/images/hero-horizon.jpg", width: 1440, height: 720, alt: "TVORA" }],
-  },
-  robots: { index: true, follow: true },
+    "MOVE API خادم وواجهات برمجة التطبيقات للأفلام والمسلسلات والحلقات والمواسم واستخراج روابط البث المباشر لموقعك.",
+  keywords: ["MOVE API", "أفلام", "مسلسلات", "API", "مواسم", "حلقات", "بث مباشر"],
+  robots: { index: false, follow: false },
 };
+
 
 export const viewport: Viewport = {
   themeColor: "#070708",
@@ -41,7 +35,6 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap"
           rel="stylesheet"
         />
-        <script src="https://accounts.google.com/gsi/client" async defer />
       </head>
       <body className="antialiased">
         {children}
