@@ -66,6 +66,18 @@ function setCached(key: string, data: ResolvedStream, ttlMs = 2 * 60 * 60 * 1000
     data,
     expiresAt: Date.now() + ttlMs,
   });
+
+  // Permanently persist to decoded_streams.json so it is instantly available forever
+  try {
+    if (!_decodedMap) _decodedMap = {};
+    _decodedMap[key] = data.streamUrl;
+    const match = key.match(/(?:episodes|movies|tvshows)\/([^/]+)/);
+    if (match && match[1]) {
+      _decodedMap[match[1]] = data.streamUrl;
+    }
+    const p = path.join(process.cwd(), "data", "decoded_streams.json");
+    fs.writeFileSync(p, JSON.stringify(_decodedMap, null, 2), "utf-8");
+  } catch {}
 }
 
 const BROWSER_HEADERS = {
