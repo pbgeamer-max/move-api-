@@ -69,8 +69,9 @@ export async function GET(req: NextRequest) {
         type: result.type,
         id: id || null,
         title: result.title || null,
-        // DIRECT VIDEO STREAMS ONLY (For user's custom player - NO 3isk pages, NO 3isk iframe)
-        streamUrl: streamUrl || null,
+        // DIRECT VIDEO STREAMS ONLY (Bypasses all protections and CORS restrictions)
+        streamUrl: proxiedStreamUrl || streamUrl || null,
+        rawStreamUrl: streamUrl || null,
         playUrl: playUrl,
         proxiedStreamUrl: proxiedStreamUrl,
         cached: Boolean(result.cached),

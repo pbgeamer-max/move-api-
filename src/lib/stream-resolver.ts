@@ -51,7 +51,7 @@ const BROWSER_HEADERS = {
 };
 
 /**
- * Unpacks Dean Edwards packed JavaScript code (commonly used in miravd, grzcdn, upstream)
+ * Unpacks Dean Edwards packed JavaScript code (commonly used in mwdy, miravd, grzcdn, upstream)
  */
 function unpackDeanEdwards(packedCode: string): string | null {
   try {
@@ -102,11 +102,12 @@ export async function resolveStream(targetUrl: string, bypassCache = false): Pro
       }
     }
 
-    if ((trimmed.includes("miravd.") || trimmed.includes("grzcdn.")) && trimmed.includes("embed-")) {
-      const hls = await resolveMiravd(trimmed);
+    if ((trimmed.includes("miravd.") || trimmed.includes("grzcdn.") || trimmed.includes("mwdy.")) && trimmed.includes("embed-")) {
+      const hls = await resolveEmbedPlayer(trimmed);
       if (hls.success && hls.streamUrl) {
-        setCached(trimmed, hls);
-        return hls;
+        const res: ResolvedStream = { success: true, type: "hls", streamUrl: hls.streamUrl };
+        setCached(trimmed, res);
+        return res;
       }
     }
 
@@ -231,8 +232,6 @@ async function resolve3iskPage(pageUrl: string): Promise<ResolvedStream> {
       playerHtml.match(/<iframe[^>]+src=["'](https:\/\/3iskk\.xyz\/embed\/[^"']+)["']/i) ||
       playerHtml.match(/src=["'](https:\/\/3iskk\.xyz\/embed\/[^"']+)["']/i);
 
-    let hostUrl: string | null = null;
-
     const candidateHosts: string[] = [];
 
     if (embed3iskMatch) {
@@ -256,7 +255,7 @@ async function resolve3iskPage(pageUrl: string): Promise<ResolvedStream> {
       }
     } else {
       // Check if playerHtml directly embeds the video CDN
-      const directCdnMatch = playerHtml.match(/<iframe[^>]+src=["'](https:\/\/[^"']*(?:miravd|ukrcdn|grzcdn|upstream)[^"']*)["']/i);
+      const directCdnMatch = playerHtml.match(/<iframe[^>]+src=["'](https:\/\/[^"']*(?:miravd|mwdy|ukrcdn|grzcdn|upstream|vidmoly)[^"']*)["']/i);
       if (directCdnMatch && directCdnMatch[1]) {
         candidateHosts.push(directCdnMatch[1]);
       }
@@ -266,25 +265,41 @@ async function resolve3iskPage(pageUrl: string): Promise<ResolvedStream> {
       return { success: false, type: "embed", error: "تعذر العثور على مشغل الفيديو المصدري في 3isk", title };
     }
 
-    // Step 5: Extract direct .m3u8 stream from candidate hosts with priority
-    // Priority: Try UkrCDN first (never blocks datacenter IPs), then Miravd/GRZCDN
+    // Step 5: Prioritize servers that do NOT block datacenter IPs (mwdy > ukrcdn > vidmoly > miravd)
+    candidateHosts.sort((a, b) => {
+      const getPriority = (url: string) => {
+        if (url.includes("mwdy")) return 1;
+        if (url.includes("ukrcdn")) return 2;
+        if (url.includes("vidmoly")) return 3;
+        if (url.includes("miravd")) return 4;
+        return 5;
+      };
+      return getPriority(a) - getPriority(b);
+    });
+
     let lastError = "";
 
-    // 5a. Try UkrCDN candidates first
+    // Step 6: Loop through candidate hosts until one resolves successfully
     for (const host of candidateHosts) {
-      if (host.includes("ukrcdn.")) {
-        const res = await resolveUkrcdn(host);
-        if (res.success && res.streamUrl) return { ...res, title };
-        if (res.error) lastError = res.error;
-      }
-    }
-
-    // 5b. Try Miravd / GRZCDN candidates
-    for (const host of candidateHosts) {
-      if (host.includes("miravd.") || host.includes("grzcdn.")) {
-        const res = await resolveMiravd(host);
-        if (res.success && res.streamUrl) return { ...res, title };
-        if (res.error) lastError = res.error;
+      try {
+        if (host.includes("ukrcdn.")) {
+          const res = await resolveUkrcdn(host);
+          if (res.success && res.streamUrl) return { ...res, title };
+          if (res.error) lastError = res.error;
+        } else {
+          const res = await resolveEmbedPlayer(host);
+          if (res.success && res.streamUrl) {
+            return {
+              success: true,
+              type: "hls",
+              streamUrl: res.streamUrl,
+              title,
+            };
+          }
+          if (res.error) lastError = res.error;
+        }
+      } catch (err: any) {
+        lastError = err?.message || String(err);
       }
     }
 
@@ -360,35 +375,63 @@ async function resolveUkrcdn(cdnUrl: string): Promise<ResolvedStream> {
 }
 
 /**
- * Miravd / GRZCDN Dean Edwards Packer Resolver: extracts direct .m3u8 from unpacked jwplayer setup
+ * Universal Embed Player Resolver:
+ * Supports mwdy.cc, miravd.com, grzcdn.com, upstream.to, vidmoly.to.
+ * Unpacks Dean Edwards packing, extracts HLS (.m3u8) streams or MP4 video files.
  */
-async function resolveMiravd(miraUrl: string): Promise<ResolvedStream> {
+async function resolveEmbedPlayer(embedUrl: string): Promise<{ success: boolean; streamUrl?: string; error?: string }> {
   try {
-    const refererList = ["https://aa.3isk.icu/", "https://3iskk.xyz/", ""];
+    const referers = [
+      "https://aa.3isk.icu/",
+      "https://3iskk.xyz/",
+      embedUrl.includes("mwdy") ? "https://mwdy.cc/" : "https://miravd.com/",
+      ""
+    ];
+
     let html = "";
     let lastStatus = 0;
 
-    for (const ref of refererList) {
+    for (const ref of referers) {
       try {
         const headers: Record<string, string> = { ...BROWSER_HEADERS };
         if (ref) headers.Referer = ref;
-        const r = await fetch(miraUrl, {
-          headers,
-          signal: AbortSignal.timeout(6000),
-        });
-        if (r.ok) {
-          html = await r.text();
+        const res = await fetch(embedUrl, { headers, signal: AbortSignal.timeout(8000) });
+        if (res.ok) {
+          html = await res.text();
           break;
         }
-        lastStatus = r.status;
+        lastStatus = res.status;
       } catch {}
     }
 
     if (!html) {
-      return { success: false, type: "embed", error: `Miravd HTTP ${lastStatus || 403}` };
+      return { success: false, error: `Embed host returned ${lastStatus || 403}` };
     }
 
-    // 1. Direct regex keyword extraction from Miravd / GRZCDN (100% reliable, zero eval, zero failure)
+    // 1. Dean Edwards unpacker (handles mwdy, miravd, grzcdn, upstream)
+    const unpacked = unpackDeanEdwards(html);
+    if (unpacked) {
+      const m3u8Match =
+        unpacked.match(/https?:\/\/[^\s"'<>]+\.m3u8[^\s"'<>]*/i) ||
+        unpacked.match(/file\s*:\s*["'](https?:\/\/[^"']+)["']/i);
+      if (m3u8Match) {
+        const streamUrl = m3u8Match[1] || m3u8Match[0];
+        return { success: true, streamUrl };
+      }
+
+      const mp4Match = unpacked.match(/https?:\/\/[^\s"'<>]+\.mp4[^\s"'<>]*/i);
+      if (mp4Match) {
+        return { success: true, streamUrl: mp4Match[0] };
+      }
+    }
+
+    // 2. Direct regex in raw HTML
+    const rawM3u8Match = html.match(/https?:\/\/[^\s"'<>]+\.m3u8[^\s"'<>]*/i);
+    if (rawM3u8Match) {
+      return { success: true, streamUrl: rawM3u8Match[0] };
+    }
+
+    // 3. Keyword reconstruction fallback for miravd/grzcdn/mwdy
     const packerMatch = html.match(
       /}\s*\(\s*(['"][\s\S]*?['"])\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(['"][\s\S]*?['"])\.split\(['"]\|['"]\)/
     );
@@ -396,43 +439,16 @@ async function resolveMiravd(miraUrl: string): Promise<ResolvedStream> {
       const keywords = packerMatch[4].slice(1, -1).split("|");
       const server = keywords.find((w) => /^s\d+$/.test(w));
       const hash = keywords.find((w) => w.length > 40 && !w.includes("/") && !w.includes("."));
-      const cdn = keywords.find((w) => w.includes("grzcdn")) || "grzcdn.com";
-      const domain = cdn.endsWith(".com") ? cdn : `${cdn}.com`;
+      const cdn = keywords.find((w) => w.includes("mwdy") || w.includes("grzcdn")) || (embedUrl.includes("mwdy") ? "mwdy.club" : "grzcdn.com");
+      const domain = cdn.includes(".") ? cdn : `${cdn}.com`;
 
       if (server && hash) {
-        const streamUrl = `https://${server}.${domain}/hls/,${hash},.urlset/master.m3u8`;
-        return {
-          success: true,
-          type: "hls",
-          streamUrl,
-        };
+        return { success: true, streamUrl: `https://${server}.${domain}/hls/,${hash},.urlset/master.m3u8` };
       }
     }
 
-    // 2. Unpack fallback
-    const unpacked = unpackDeanEdwards(html);
-    if (unpacked) {
-      const m3u8Match = unpacked.match(/https?:\/\/[^\s"'<>]+\.m3u8[^\s"'<>]*/i);
-      if (m3u8Match) {
-        return {
-          success: true,
-          type: "hls",
-          streamUrl: m3u8Match[0],
-        };
-      }
-
-      const fileMatch = unpacked.match(/file\s*:\s*["'](https?:\/\/[^"']+)["']/i);
-      if (fileMatch) {
-        return {
-          success: true,
-          type: "hls",
-          streamUrl: fileMatch[1],
-        };
-      }
-    }
-
-    return { success: false, type: "embed" };
+    return { success: false, error: "تعذر استخراج ملف الفيديو من هذا المشغل" };
   } catch (err: any) {
-    return { success: false, type: "embed", error: err?.message };
+    return { success: false, error: err.message };
   }
 }

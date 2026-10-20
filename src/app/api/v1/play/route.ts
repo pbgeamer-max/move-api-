@@ -19,19 +19,20 @@ export async function OPTIONS() {
 
 /**
  * GET /api/v1/play?id=<episode_or_movie_id>
- * Direct video stream player endpoint for external websites & players.
+ * Universal video stream playback endpoint for external websites, VLC, and smart players.
  * Resolves 3isk dynamic token redirects to the direct master .m3u8 stream,
- * and redirects the player directly to the playable video stream with universal CORS.
+ * and routes it through our universal bypass proxy with correct Referer/Origin and CORS headers.
  *
  * Example:
- * <video src="https://domain.com/api/v1/play?id=serie-teskilat-season-1-episode-189" controls />
+ * <video src="https://domain.com/api/v1/play?id=serie-organize-isler-mudblij-season-1-episode-1" controls />
  */
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id") || searchParams.get("episodeId") || searchParams.get("slug");
     const rawUrl = searchParams.get("url");
-    const proxyMode = searchParams.get("proxy") === "1";
+    const rawMode = searchParams.get("raw") === "1";
+    const format = searchParams.get("format");
 
     let targetUrl = rawUrl;
     if (!targetUrl && id) {
@@ -60,9 +61,24 @@ export async function GET(req: NextRequest) {
         ? `${origin}${result.streamUrl}`
         : result.streamUrl;
 
-      if (proxyMode) {
-        const proxied = `${origin}/api/stream/vod?url=${encodeURIComponent(finalStream)}`;
-        return NextResponse.redirect(proxied, {
+      const proxied = `${origin}/api/stream/vod?url=${encodeURIComponent(finalStream)}`;
+
+      // Return JSON if requested
+      if (format === "json") {
+        return NextResponse.json(
+          {
+            status: "success",
+            id: id || null,
+            streamUrl: proxied,
+            rawStreamUrl: finalStream,
+          },
+          { headers: CORS_HEADERS }
+        );
+      }
+
+      // If user specifically requested raw unproxied CDN URL
+      if (rawMode) {
+        return NextResponse.redirect(finalStream, {
           status: 302,
           headers: {
             ...CORS_HEADERS,
@@ -71,11 +87,12 @@ export async function GET(req: NextRequest) {
         });
       }
 
-      return NextResponse.redirect(finalStream, {
+      // Default: Universal Proxy redirect (bypasses 403s, injects referer, universal CORS)
+      return NextResponse.redirect(proxied, {
         status: 302,
         headers: {
           ...CORS_HEADERS,
-          "Cache-Control": "public, max-age=3600",
+          "Cache-Control": "public, max-age=1800",
         },
       });
     }
