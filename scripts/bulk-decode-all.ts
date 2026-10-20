@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
 import { loadCatalog, getWatchUrlForId } from "../src/lib/move-catalog";
-import { resolveStream, getStoredDecodedStream } from "../src/lib/stream-resolver";
+import { resolveStream } from "../src/lib/stream-resolver";
 
 const decodedPath = path.join(process.cwd(), "data", "decoded_streams.json");
 
@@ -18,30 +18,47 @@ function saveStore(store: Record<string, string>) {
   fs.writeFileSync(decodedPath, JSON.stringify(store, null, 2), "utf-8");
 }
 
+/**
+ * Parallel task runner with max concurrency
+ */
+async function runConcurrent<T>(
+  items: T[],
+  concurrency: number,
+  task: (item: T, index: number) => Promise<void>
+) {
+  let index = 0;
+  const workers = Array.from({ length: concurrency }, async () => {
+    while (index < items.length) {
+      const currentIndex = index++;
+      await task(items[currentIndex], currentIndex);
+    }
+  });
+  await Promise.all(workers);
+}
+
 async function decodeMovies() {
   const cat = loadCatalog();
   const store = loadStore();
   const movies = cat.movies;
 
   console.log(`\n========================================`);
-  console.log(`🎬 STARTING MOVIES DECODER (${movies.length} movies total)`);
-  console.log(`Already decoded in store: ${Object.keys(store).length}`);
+  console.log(`🎬 FAST CONCURRENT MOVIES DECODER (${movies.length} movies)`);
+  console.log(`Currently decoded in store: ${Object.keys(store).length}`);
   console.log(`========================================\n`);
 
   let count = 0;
   let newDecoded = 0;
 
-  for (const m of movies) {
+  await runConcurrent(movies, 3, async (m, idx) => {
     count++;
     if (store[m.id] || store[m.slug]) {
-      console.log(`[${count}/${movies.length}] ⚡ ALREADY DECODED: ${m.titleAr}`);
-      continue;
+      console.log(`[${idx + 1}/${movies.length}] ⚡ ALREADY DECODED: ${m.titleAr}`);
+      return;
     }
 
     const watchUrl = getWatchUrlForId(m.slug);
-    if (!watchUrl) continue;
+    if (!watchUrl) return;
 
-    process.stdout.write(`[${count}/${movies.length}] ⏳ Decoding: ${m.titleAr}... `);
     try {
       const res = await resolveStream(watchUrl, true);
       if (res.success && res.streamUrl) {
@@ -49,17 +66,16 @@ async function decodeMovies() {
         store[m.slug] = res.streamUrl;
         newDecoded++;
         saveStore(store);
-        console.log(`✅ SUCCESS! (${res.streamUrl.slice(0, 40)}...)`);
+        console.log(`[${idx + 1}/${movies.length}] ✅ SUCCESS: ${m.titleAr} -> ${res.streamUrl.slice(0, 45)}...`);
       } else {
-        console.log(`❌ Skipped (${res.error || "No player"})`);
+        console.log(`[${idx + 1}/${movies.length}] ❌ Skipped: ${m.titleAr} (${res.error || "No player"})`);
       }
     } catch (e: any) {
-      console.log(`❌ Error: ${e.message}`);
+      console.log(`[${idx + 1}/${movies.length}] ❌ Error: ${m.titleAr} (${e.message})`);
     }
 
-    // Small delay between requests to be polite
-    await new Promise((r) => setTimeout(r, 600));
-  }
+    await new Promise((r) => setTimeout(r, 400));
+  });
 
   console.log(`\n🎉 FINISHED MOVIES! Total in store: ${Object.keys(store).length} (New: ${newDecoded})`);
 }
@@ -74,42 +90,39 @@ async function decodeSeriesBySlug(seriesSlug: string) {
     return;
   }
 
+  const allEpisodes = (series.seasons || []).flatMap((s) => s.episodes);
+
   console.log(`\n========================================`);
-  console.log(`📺 STARTING SERIES: ${series.titleAr} (${series.totalEpisodes} episodes)`);
+  console.log(`📺 FAST SERIES DECODER: ${series.titleAr} (${allEpisodes.length} episodes)`);
   console.log(`========================================\n`);
 
-  let count = 0;
   let newDecoded = 0;
 
-  for (const season of series.seasons || []) {
-    for (const ep of season.episodes) {
-      count++;
-      if (store[ep.id]) {
-        console.log(`[${count}/${series.totalEpisodes}] ⚡ ALREADY DECODED: ${ep.titleAr || ep.id}`);
-        continue;
-      }
-
-      const watchUrl = getWatchUrlForId(ep.id);
-      if (!watchUrl) continue;
-
-      process.stdout.write(`[${count}/${series.totalEpisodes}] ⏳ Decoding ${ep.titleAr || `حلقة ${ep.number}`}... `);
-      try {
-        const res = await resolveStream(watchUrl, true);
-        if (res.success && res.streamUrl) {
-          store[ep.id] = res.streamUrl;
-          newDecoded++;
-          saveStore(store);
-          console.log(`✅ SUCCESS!`);
-        } else {
-          console.log(`❌ Skipped (${res.error || "No player"})`);
-        }
-      } catch (e: any) {
-        console.log(`❌ Error: ${e.message}`);
-      }
-
-      await new Promise((r) => setTimeout(r, 600));
+  await runConcurrent(allEpisodes, 3, async (ep, idx) => {
+    if (store[ep.id]) {
+      console.log(`[${idx + 1}/${allEpisodes.length}] ⚡ ALREADY DECODED: ${ep.titleAr || ep.id}`);
+      return;
     }
-  }
+
+    const watchUrl = getWatchUrlForId(ep.id);
+    if (!watchUrl) return;
+
+    try {
+      const res = await resolveStream(watchUrl, true);
+      if (res.success && res.streamUrl) {
+        store[ep.id] = res.streamUrl;
+        newDecoded++;
+        saveStore(store);
+        console.log(`[${idx + 1}/${allEpisodes.length}] ✅ SUCCESS: ${ep.titleAr || ep.id}`);
+      } else {
+        console.log(`[${idx + 1}/${allEpisodes.length}] ❌ Skipped: ${ep.titleAr || ep.id}`);
+      }
+    } catch (e: any) {
+      console.log(`[${idx + 1}/${allEpisodes.length}] ❌ Error: ${ep.titleAr || ep.id} (${e.message})`);
+    }
+
+    await new Promise((r) => setTimeout(r, 400));
+  });
 
   console.log(`\n🎉 FINISHED SERIES ${series.titleAr}! Total in store: ${Object.keys(store).length}`);
 }
@@ -121,7 +134,6 @@ async function main() {
   if (targetSeries) {
     await decodeSeriesBySlug(targetSeries);
   } else {
-    // Default: decode movies first
     await decodeMovies();
   }
 }
