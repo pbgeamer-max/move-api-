@@ -153,11 +153,6 @@ export function isItemDecoded(idOrSlug: string): boolean {
   return false;
 }
 
-    } catch {}
-  }
-  return url;
-}
-
 export function loadCatalog(): CatalogData {
   if (_cache) return _cache;
 
