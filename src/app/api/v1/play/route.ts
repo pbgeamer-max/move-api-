@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { resolveStream } from "@/lib/stream-resolver";
+import { resolveStream, getStoredDecodedStream } from "@/lib/stream-resolver";
 import { getWatchUrlForId } from "@/lib/move-catalog";
 
 export const dynamic = "force-dynamic";
@@ -52,6 +52,25 @@ export async function GET(req: NextRequest) {
     const host = req.headers.get("x-forwarded-host") || req.headers.get("host") || "localhost:3000";
     const proto = req.headers.get("x-forwarded-proto") || (host.includes("localhost") ? "http" : "https");
     const origin = `${proto}://${host}`;
+
+    // Fast path: Check pre-decoded offline / database streams (0ms instant bypass)
+    const stored = (id && getStoredDecodedStream(id)) || (targetUrl && getStoredDecodedStream(targetUrl));
+    if (stored) {
+      const proxied = `${origin}/api/stream/vod?url=${encodeURIComponent(stored)}`;
+      if (format === "json") {
+        return NextResponse.json(
+          { status: "success", id: id || null, streamUrl: proxied, rawStreamUrl: stored },
+          { headers: CORS_HEADERS }
+        );
+      }
+      return NextResponse.redirect(rawMode ? stored : proxied, {
+        status: 302,
+        headers: {
+          ...CORS_HEADERS,
+          "Cache-Control": "public, max-age=1800",
+        },
+      });
+    }
 
     // Resolve direct stream (.m3u8 / .mp4)
     const result = await resolveStream(targetUrl);

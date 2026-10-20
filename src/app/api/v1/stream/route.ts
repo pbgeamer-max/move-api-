@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { resolveStream } from "@/lib/stream-resolver";
+import { resolveStream, getStoredDecodedStream } from "@/lib/stream-resolver";
 import { getWatchUrlForId } from "@/lib/move-catalog";
 
 export const dynamic = "force-dynamic";
@@ -41,7 +41,9 @@ export async function GET(req: NextRequest) {
     }
 
     const bypassCache = searchParams.get("nocache") === "1" || searchParams.get("force") === "1";
-    const result = await resolveStream(targetUrl, bypassCache);
+    let result = (id && getStoredDecodedStream(id))
+      ? { success: true, type: "hls" as const, streamUrl: getStoredDecodedStream(id)!, cached: true }
+      : await resolveStream(targetUrl, bypassCache);
 
     const host = req.headers.get("x-forwarded-host") || req.headers.get("host") || "localhost:3000";
     const proto = req.headers.get("x-forwarded-proto") || (host.includes("localhost") ? "http" : "https");

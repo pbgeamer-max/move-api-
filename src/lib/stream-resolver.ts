@@ -1,5 +1,5 @@
-// TVORA Universal Video Stream Resolver Engine
-// Resolves 3isk movies, series, and episodes to direct HLS (.m3u8) streams without third-party web pages or player iframes
+import * as fs from "fs";
+import * as path from "path";
 
 export interface ResolvedStream {
   success: boolean;
@@ -10,6 +10,32 @@ export interface ResolvedStream {
   title?: string;
   error?: string;
   cached?: boolean;
+}
+
+let _decodedMap: Record<string, string> | null = null;
+
+export function getStoredDecodedStream(idOrUrl: string): string | null {
+  if (!idOrUrl) return null;
+  if (!_decodedMap) {
+    try {
+      const p = path.join(process.cwd(), "data", "decoded_streams.json");
+      if (fs.existsSync(p)) {
+        _decodedMap = JSON.parse(fs.readFileSync(p, "utf-8"));
+      } else {
+        _decodedMap = {};
+      }
+    } catch {
+      _decodedMap = {};
+    }
+  }
+
+  const direct = _decodedMap[idOrUrl];
+  if (direct) return direct;
+
+  for (const [key, stream] of Object.entries(_decodedMap)) {
+    if (idOrUrl.includes(key) || key.includes(idOrUrl)) return stream;
+  }
+  return null;
 }
 
 // In-memory cache with 2-hour TTL to prevent repeated scraping and ensure instant retrieval
@@ -84,6 +110,12 @@ export async function resolveStream(targetUrl: string, bypassCache = false): Pro
   }
   if (trimmed.includes(".mp4")) {
     return { success: true, type: "mp4", streamUrl: trimmed };
+  }
+
+  // 2. Check pre-decoded offline / database streams (0ms instant bypass)
+  const stored = getStoredDecodedStream(trimmed);
+  if (stored) {
+    return { success: true, type: "hls", streamUrl: stored, cached: true };
   }
 
   // 2. Check cache
