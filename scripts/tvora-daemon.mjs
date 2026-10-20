@@ -1,13 +1,15 @@
-// TVORA 24/7 Background Sync & Decoder Daemon with Telegram Bot
+// TVORA Ultra High-Speed 24/7 Multi-Worker Engine & Telegram Bot
 import * as fs from "fs";
 import * as path from "path";
 import * as zlib from "zlib";
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || "8937658776:AAExk0dpO9vIC52-HeCezsHGbn5HI5GomE0";
 const TELEGRAM_API = `https://api.telegram.org/bot${BOT_TOKEN}`;
+const CONCURRENCY = parseInt(process.env.DECODE_CONCURRENCY || "6", 10); // 6 simultaneous workers
 
 const dataDir = path.join(process.cwd(), "data");
 const decodedPath = path.join(dataDir, "decoded_streams.json");
+const failedPath = path.join(dataDir, "failed_items.json");
 const subscribersPath = path.join(dataDir, "telegram_subscribers.json");
 const catalogGzPath = path.join(dataDir, "3isk_catalog.json.gz");
 
@@ -17,16 +19,18 @@ if (!fs.existsSync(dataDir)) {
 
 // Global in-memory state
 let decodedStore = {};
+let failedStore = {};
 let subscribers = [];
 let workerState = {
-  status: "بدء التشغيل",
-  currentlyProcessing: "لا يوجد",
+  status: "جاري العمل بكامل الطاقة",
+  activeWorkers: 0,
+  currentlyProcessing: [],
   lastDecoded: "لا يوجد",
   totalNewDiscovered: 0,
   startedAt: new Date().toISOString(),
+  sessionDecodedCount: 0,
 };
 
-// Load saved data
 function loadDecodedStore() {
   if (fs.existsSync(decodedPath)) {
     try {
@@ -40,12 +44,48 @@ function loadDecodedStore() {
   return decodedStore;
 }
 
-function saveDecodedStore() {
+let lastSaveTime = 0;
+function saveDecodedStore(force = false) {
+  const now = Date.now();
+  if (!force && now - lastSaveTime < 3000) return; // Batch write to save disk I/O
   try {
     fs.writeFileSync(decodedPath, JSON.stringify(decodedStore, null, 2), "utf-8");
+    lastSaveTime = now;
   } catch (e) {
-    console.error("[TVORA Daemon] Error saving decoded_streams.json:", e.message);
+    console.error("[TVORA Engine] Error saving decoded_streams.json:", e.message);
   }
+}
+
+function loadFailedStore() {
+  if (fs.existsSync(failedPath)) {
+    try {
+      failedStore = JSON.parse(fs.readFileSync(failedPath, "utf-8"));
+    } catch {
+      failedStore = {};
+    }
+  }
+  return failedStore;
+}
+
+function markItemFailed(key, reason) {
+  failedStore[key] = {
+    failedAt: Date.now(),
+    reason: reason || "No player",
+  };
+  try {
+    fs.writeFileSync(failedPath, JSON.stringify(failedStore, null, 2), "utf-8");
+  } catch {}
+}
+
+function isItemFailed(key) {
+  const item = failedStore[key];
+  if (!item) return false;
+  // Expire failure after 12 hours
+  if (Date.now() - item.failedAt > 12 * 60 * 60 * 1000) {
+    delete failedStore[key];
+    return false;
+  }
+  return true;
 }
 
 function loadSubscribers() {
@@ -69,7 +109,6 @@ function addSubscriber(chatId) {
   return false;
 }
 
-// Telegram helpers
 async function sendTelegram(chatId, text, replyMarkup = null) {
   try {
     const body = {
@@ -132,7 +171,7 @@ async function resolveUkrcdn(cdnUrl) {
   try {
     const r = await fetch(cdnUrl, {
       headers: { ...BROWSER_HEADERS, Referer: "https://3iskk.xyz/" },
-      signal: AbortSignal.timeout(8000),
+      signal: AbortSignal.timeout(6000),
     });
     if (!r.ok) return { success: false, error: `UkrCDN HTTP ${r.status}` };
     const html = await r.text();
@@ -153,7 +192,7 @@ async function resolveUkrcdn(cdnUrl) {
         Referer: cdnUrl,
         "User-Agent": BROWSER_HEADERS["User-Agent"],
       },
-      signal: AbortSignal.timeout(8000),
+      signal: AbortSignal.timeout(6000),
     });
     if (!rApi.ok) return { success: false, error: `Playback API HTTP ${rApi.status}` };
 
@@ -184,7 +223,7 @@ async function resolveEmbedPlayer(embedUrl) {
       try {
         const headers = { ...BROWSER_HEADERS };
         if (ref) headers.Referer = ref;
-        const res = await fetch(embedUrl, { headers, signal: AbortSignal.timeout(8000) });
+        const res = await fetch(embedUrl, { headers, signal: AbortSignal.timeout(6000) });
         if (res.ok) {
           html = await res.text();
           break;
@@ -234,13 +273,13 @@ async function resolveEmbedPlayer(embedUrl) {
 }
 
 /**
- * Multi-stage 3isk web page to direct HLS .m3u8
+ * High-Speed Multi-stage 3isk web page to direct HLS .m3u8 with Parallel Server Probing
  */
 async function resolve3iskWatchUrl(pageUrl) {
   try {
     const r1 = await fetch(pageUrl, {
       headers: { ...BROWSER_HEADERS, Referer: "https://3iskk.xyz/" },
-      signal: AbortSignal.timeout(10000),
+      signal: AbortSignal.timeout(8000),
     });
     if (!r1.ok) return { success: false, error: `HTTP ${r1.status} from 3isk` };
     const html1 = await r1.text();
@@ -272,7 +311,7 @@ async function resolve3iskWatchUrl(pageUrl) {
         Origin: "https://3iskk.xyz",
       },
       body: body1.toString(),
-      signal: AbortSignal.timeout(10000),
+      signal: AbortSignal.timeout(8000),
     });
 
     if (!r2.ok) return { success: false, error: `HTTP ${r2.status} from aa.3isk.icu step 1` };
@@ -307,7 +346,7 @@ async function resolve3iskWatchUrl(pageUrl) {
           Origin: "https://aa.3isk.icu",
         },
         body: body2.toString(),
-        signal: AbortSignal.timeout(10000),
+        signal: AbortSignal.timeout(8000),
       });
 
       if (r3.ok) {
@@ -323,21 +362,28 @@ async function resolve3iskWatchUrl(pageUrl) {
 
     if (embed3iskMatch) {
       const baseEmbedUrl = embed3iskMatch[1];
-      for (const s of [1, 2, 3, 4]) {
+      // Parallel server probes (Server 1, 2, 3, 4)
+      const probePromises = [1, 2, 3, 4].map(async (s) => {
         const sUrl = s === 1 ? baseEmbedUrl : baseEmbedUrl.replace(/\/embed\/\d+\//, `/embed/${s}/`);
         try {
           const rEmbed = await fetch(sUrl, {
             headers: { ...BROWSER_HEADERS, Referer: "https://aa.3isk.icu/" },
-            signal: AbortSignal.timeout(6000),
+            signal: AbortSignal.timeout(5000),
           });
           if (rEmbed.ok) {
             const embedHtml = await rEmbed.text();
             const hostMatch = embedHtml.match(/<iframe[^>]+src=["']([^"']+)["']/i);
-            if (hostMatch && hostMatch[1] && !candidateHosts.includes(hostMatch[1])) {
-              candidateHosts.push(hostMatch[1]);
+            if (hostMatch && hostMatch[1]) {
+              return hostMatch[1];
             }
           }
         } catch {}
+        return null;
+      });
+
+      const probed = await Promise.all(probePromises);
+      for (const h of probed) {
+        if (h && !candidateHosts.includes(h)) candidateHosts.push(h);
       }
     } else {
       const directCdnMatch = playerHtml.match(/<iframe[^>]+src=["'](https:\/\/[^"']*(?:miravd|mwdy|ukrcdn|grzcdn|upstream|vidmoly)[^"']*)["']/i);
@@ -350,6 +396,7 @@ async function resolve3iskWatchUrl(pageUrl) {
       return { success: false, error: "لم يتم العثور على سيرفرات المشغل المصدري", title };
     }
 
+    // Server priority
     candidateHosts.sort((a, b) => {
       const getPriority = (url) => {
         if (url.includes("mwdy")) return 1;
@@ -391,7 +438,7 @@ async function verifyM3u8Stream(streamUrl) {
         Referer: streamUrl.includes("mwdy") ? "https://mwdy.cc/" : "https://miravd.com/",
         Range: "bytes=0-1024",
       },
-      signal: AbortSignal.timeout(6000),
+      signal: AbortSignal.timeout(5000),
     });
     return res.status === 200 || res.status === 206;
   } catch {
@@ -400,10 +447,93 @@ async function verifyM3u8Stream(streamUrl) {
 }
 
 /**
- * Discover new episodes from 3isk homepage and latest pages
+ * Rapid Parallel Concurrent Item Processor
+ */
+async function processItem(item) {
+  const { id, slug, title, url, type } = item;
+  const key = slug || id;
+
+  if (decodedStore[key] || isItemFailed(key)) {
+    return { success: false, skipped: true };
+  }
+
+  workerState.currentlyProcessing.push(title || key);
+  if (workerState.currentlyProcessing.length > 8) {
+    workerState.currentlyProcessing.shift();
+  }
+
+  try {
+    const res = await resolve3iskWatchUrl(url);
+    if (res.success && res.streamUrl) {
+      const ok = await verifyM3u8Stream(res.streamUrl);
+      if (ok) {
+        decodedStore[key] = res.streamUrl;
+        if (id && id !== key) decodedStore[id] = res.streamUrl;
+        saveDecodedStore();
+        workerState.lastDecoded = title || key;
+        workerState.sessionDecodedCount++;
+
+        const isMovie = type === "movie" || url.includes("/movies/");
+        console.log(`✅ [WORKER] DECODED: ${title || key} -> ${res.streamUrl.slice(0, 45)}...`);
+
+        // Milestone notification every 25 decoded items
+        if (workerState.sessionDecodedCount % 25 === 0) {
+          const totalNow = Object.keys(decodedStore).length;
+          await broadcastAlert(`
+⚡ <b>إنجاز جديد: تم فك تشفير 25 حلقة وفيلم جديدة!</b>
+📊 <b>إجمالي المكتبة المفكوكة والجاهزة الآن:</b> ${totalNow}
+🎬 <b>آخر ما تم فكه:</b> ${title || key}
+          `.trim());
+        }
+
+        return { success: true, key, streamUrl: res.streamUrl };
+      }
+    }
+
+    markItemFailed(key, res.error || "Verification failed");
+  } catch (e) {
+    markItemFailed(key, e.message);
+  } finally {
+    workerState.currentlyProcessing = workerState.currentlyProcessing.filter((t) => t !== (title || key));
+  }
+
+  return { success: false };
+}
+
+/**
+ * Parallel Concurrency Pool Runner
+ */
+async function runConcurrentPool(items, concurrency, onProgress) {
+  let index = 0;
+  let completed = 0;
+  const total = items.length;
+
+  const workers = Array.from({ length: concurrency }, async (_, workerId) => {
+    while (index < items.length) {
+      const current = items[index++];
+      workerState.activeWorkers++;
+      await processItem(current);
+      workerState.activeWorkers = Math.max(0, workerState.activeWorkers - 1);
+      completed++;
+
+      if (onProgress && completed % 10 === 0) {
+        onProgress(completed, total);
+      }
+
+      // Small jitter between parallel worker requests to prevent network choke
+      await new Promise((r) => setTimeout(r, 150));
+    }
+  });
+
+  await Promise.all(workers);
+  saveDecodedStore(true);
+}
+
+/**
+ * Check and decode new releases from 3isk
  */
 async function checkNewReleases() {
-  console.log(`[${new Date().toLocaleTimeString()}] 🔍 Checking 3isk for new releases...`);
+  console.log(`[${new Date().toLocaleTimeString()}] 🔍 Scanning 3isk for new releases...`);
   workerState.status = "فحص الحلقات والأفلام الجديدة";
 
   const sources = [
@@ -414,15 +544,17 @@ async function checkNewReleases() {
   ];
 
   loadDecodedStore();
-  let newFound = 0;
+  loadFailedStore();
+
+  const newItems = [];
+  const seenUrls = new Set();
 
   for (const src of sources) {
     try {
-      const res = await fetch(src, { headers: BROWSER_HEADERS, signal: AbortSignal.timeout(10000) });
+      const res = await fetch(src, { headers: BROWSER_HEADERS, signal: AbortSignal.timeout(8000) });
       if (!res.ok) continue;
       const html = await res.text();
 
-      // Find episode links
       const epMatches = Array.from(
         html.matchAll(/<a[^>]+href=["'](https:\/\/3iskk\.xyz\/watch\/(?:episodes|movies)\/([^"'/]+)\/?)["'][^>]*>([\s\S]*?)<\/a>/gi)
       );
@@ -432,66 +564,32 @@ async function checkNewReleases() {
         const slug = m[2];
         const rawTitle = m[3].replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
 
-        if (decodedStore[slug] || decodedStore[fullUrl]) {
-          continue; // Already decoded!
+        if (decodedStore[slug] || isItemFailed(slug) || seenUrls.has(fullUrl)) {
+          continue;
         }
 
-        console.log(`✨ DISCOVERED NEW ITEM: ${slug} (${rawTitle})`);
-        workerState.currentlyProcessing = `فك تشفير: ${rawTitle || slug}`;
-
-        const resolved = await resolve3iskWatchUrl(fullUrl);
-        if (resolved.success && resolved.streamUrl) {
-          const isValid = await verifyM3u8Stream(resolved.streamUrl);
-          if (isValid) {
-            decodedStore[slug] = resolved.streamUrl;
-            decodedStore[fullUrl] = resolved.streamUrl;
-            saveDecodedStore();
-            newFound++;
-            workerState.totalNewDiscovered++;
-            workerState.lastDecoded = rawTitle || slug;
-
-            const isMovie = fullUrl.includes("/movies/");
-            const cleanTitle = (rawTitle || slug)
-              .replace(/موقع\s*قصة\s*عشق.*$/gi, "")
-              .replace(/قصة\s*عشق/gi, "")
-              .trim();
-
-            const playUrl = `https://move-api-production-a427.up.railway.app/api/v1/play?id=${encodeURIComponent(slug)}`;
-
-            const alertMsg = [
-              `🎬 <b>تم اكتشاف وفك تشفير ${isMovie ? "فيلم" : "حلقة"} جديد فوراً!</b>`,
-              ``,
-              `📌 <b>العنوان:</b> ${cleanTitle}`,
-              `🆔 <b>المعرّف:</b> <code>${slug}</code>`,
-              ``,
-              `⚡ <b>رابط التشغيل المباشر لجميع المشغلات:</b>`,
-              `<code>${playUrl}</code>`,
-              ``,
-              `✅ متاح الآن في الـ API ومفكوك التشفير 100%!`,
-            ].join("\n");
-
-            console.log(`✅ SUCCESSFULLY DECODED & VERIFIED: ${slug}`);
-            await broadcastAlert(alertMsg);
-          }
-        }
-
-        // Small pause between fetches
-        await new Promise((r) => setTimeout(r, 600));
+        seenUrls.add(fullUrl);
+        newItems.push({
+          id: slug,
+          slug,
+          title: rawTitle,
+          url: fullUrl,
+          type: fullUrl.includes("/movies/") ? "movie" : "episode",
+        });
       }
-    } catch (e) {
-      console.error(`[TVORA Daemon] Error scraping ${src}:`, e.message);
-    }
+    } catch {}
   }
 
-  console.log(`[${new Date().toLocaleTimeString()}] ✅ Finished new releases check. Found & decoded: ${newFound}`);
+  if (newItems.length > 0) {
+    console.log(`🚀 Found ${newItems.length} fresh items to decode in parallel!`);
+    await runConcurrentPool(newItems, Math.min(CONCURRENCY, 6));
+  }
 }
 
 /**
- * Background catalog-wide decoder loop
+ * High-Speed Catalog Decoder
  */
-async function catalogDecoderStep() {
-  workerState.status = "فك تشفير مكتبة المسلسلات والأفلام المتبقية";
-
+async function decodeEntireCatalog() {
   if (!fs.existsSync(catalogGzPath)) return;
 
   let catalog = null;
@@ -504,230 +602,220 @@ async function catalogDecoderStep() {
   }
 
   loadDecodedStore();
+  loadFailedStore();
 
-  // 1. Process movies first
-  const movies = Object.values(catalog.movies || {});
-  for (const m of movies) {
-    const slug = m.slug || m.id;
-    if (!slug) continue;
-    if (decodedStore[slug] || decodedStore[m.id]) continue;
+  // Build prioritized queue
+  const queue = [];
 
-    const watchUrl = `https://3iskk.xyz/watch/movies/${slug}/`;
-    workerState.currentlyProcessing = `فيلم: ${m.titleAr || slug}`;
-
-    try {
-      const res = await resolve3iskWatchUrl(watchUrl);
-      if (res.success && res.streamUrl) {
-        const ok = await verifyM3u8Stream(res.streamUrl);
-        if (ok) {
-          decodedStore[slug] = res.streamUrl;
-          if (m.id) decodedStore[m.id] = res.streamUrl;
-          saveDecodedStore();
-          workerState.lastDecoded = m.titleAr || slug;
-          console.log(`🎬 DECODED MOVIE: ${m.titleAr || slug}`);
-        }
-      }
-    } catch {}
-
-    await new Promise((r) => setTimeout(r, 800));
-    return; // Do one item per step so event loop and telegram polling are never blocked
-  }
-
-  // 2. Process series episodes
+  // 1. Trending Series Episodes (First priority!)
   const seriesList = Object.values(catalog.series || {});
   for (const s of seriesList) {
     const slug = s.slug || s.id;
     if (!slug) continue;
-
     const seasons = s.seasons || [];
     for (const sn of seasons) {
       for (const ep of sn.episodes || []) {
         const epId = ep.id || `${slug}-s${sn.number}-e${ep.number}`;
-        if (decodedStore[epId]) continue;
-
-        const epWatchUrl = `https://3iskk.xyz/watch/episodes/${epId}/`;
-        workerState.currentlyProcessing = `مسلسل: ${s.titleAr || slug} - حلقة ${ep.number}`;
-
-        try {
-          const res = await resolve3iskWatchUrl(epWatchUrl);
-          if (res.success && res.streamUrl) {
-            const ok = await verifyM3u8Stream(res.streamUrl);
-            if (ok) {
-              decodedStore[epId] = res.streamUrl;
-              saveDecodedStore();
-              workerState.lastDecoded = `${s.titleAr} - حلقة ${ep.number}`;
-              console.log(`📺 DECODED EPISODE: ${s.titleAr} - حلقة ${ep.number} (${epId})`);
-            }
-          }
-        } catch {}
-
-        await new Promise((r) => setTimeout(r, 800));
-        return; // Do one item per step
+        if (!decodedStore[epId] && !isItemFailed(epId)) {
+          queue.push({
+            id: epId,
+            slug: epId,
+            title: `${s.titleAr || slug} - حلقة ${ep.number}`,
+            url: `https://3iskk.xyz/watch/episodes/${epId}/`,
+            type: "episode",
+          });
+        }
       }
     }
   }
+
+  // 2. Movies
+  const movies = Object.values(catalog.movies || {});
+  for (const m of movies) {
+    const slug = m.slug || m.id;
+    if (!slug) continue;
+    if (!decodedStore[slug] && !isItemFailed(slug)) {
+      queue.push({
+        id: m.id || slug,
+        slug,
+        title: m.titleAr || slug,
+        url: `https://3iskk.xyz/watch/movies/${slug}/`,
+        type: "movie",
+      });
+    }
+  }
+
+  console.log(`\n======================================================`);
+  console.log(`⚡ TURBO CATALOG DECODER QUEUE: ${queue.length} items remaining.`);
+  console.log(`⚡ Concurrency Level: ${CONCURRENCY} parallel workers.`);
+  console.log(`======================================================\n`);
+
+  if (queue.length === 0) {
+    workerState.status = "المكتبة مكتملة بالكامل 100%";
+    return;
+  }
+
+  workerState.status = `فك تشفير المكتبة (${queue.length} متبقي) بـ ${CONCURRENCY} عمال متوازيين`;
+
+  await runConcurrentPool(queue, CONCURRENCY, (done, total) => {
+    console.log(`[PROGRESS] Processed ${done}/${total} items in catalog.`);
+  });
 }
 
 /**
- * Telegram Long-polling handler
+ * Independent Telegram Poller (Always instant and non-blocking)
  */
 let telegramUpdateOffset = 0;
 
-async function pollTelegramUpdates() {
-  try {
-    const url = `${TELEGRAM_API}/getUpdates?offset=${telegramUpdateOffset}&timeout=5`;
-    const res = await fetch(url, { signal: AbortSignal.timeout(15000) });
-    if (!res.ok) return;
+async function startTelegramPoller() {
+  console.log("[Telegram] Poller started (independent async thread).");
+  while (true) {
+    try {
+      const url = `${TELEGRAM_API}/getUpdates?offset=${telegramUpdateOffset}&timeout=5`;
+      const res = await fetch(url, { signal: AbortSignal.timeout(10000) });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.ok && Array.isArray(data.result)) {
+          for (const update of data.result) {
+            telegramUpdateOffset = update.update_id + 1;
+            const msg = update.message;
+            if (!msg || !msg.text) continue;
 
-    const data = await res.json();
-    if (!data.ok || !Array.isArray(data.result)) return;
+            const chatId = msg.chat.id;
+            const text = msg.text.trim();
+            addSubscriber(chatId);
 
-    for (const update of data.result) {
-      telegramUpdateOffset = update.update_id + 1;
-      const msg = update.message;
-      if (!msg || !msg.text) continue;
+            loadDecodedStore();
+            const decodedCount = Object.keys(decodedStore).length;
 
-      const chatId = msg.chat.id;
-      const text = msg.text.trim();
-      addSubscriber(chatId);
+            if (text.startsWith("/start") || text === "بدء") {
+              const welcome = [
+                `👋 <b>أهلاً بك في بوت إدارة منصة TVORA</b> (@f1iq_bot)`,
+                ``,
+                `🚀 <b>محرك فك التشفير فائق السرعة يعمل الآن بـ ${CONCURRENCY} مسارات متوازية!</b>`,
+                ``,
+                `📊 <b>الإحصائيات الحالية:</b>`,
+                `• الروابط المفكوكة والجاهزة: <b>${decodedCount}</b>`,
+                `• حالة المحرك: <b>${workerState.status}</b>`,
+                `• المسارات النشطة: <b>${workerState.activeWorkers} عمال متوازيين</b>`,
+                `• قيد الفك الآن: <i>${workerState.currentlyProcessing.slice(0, 3).join(", ") || "جاهز"}</i>`,
+                ``,
+                `📌 <b>الأوامر السريعة:</b>`,
+                `/status - الحالة اللحظية والإحصائيات`,
+                `/latest - آخر 5 روابط مفكوكة`,
+                `/check - فحص فوري للموقع لاكتشاف الجديد`,
+                `/decode [رابط] - فك تشفير رابط محدد فوراً`,
+              ].join("\n");
 
-      loadDecodedStore();
-      const decodedCount = Object.keys(decodedStore).length;
+              const keyboard = {
+                keyboard: [
+                  [{ text: "📊 الحالة والإحصائيات" }, { text: "🎬 آخر الإضافات" }],
+                  [{ text: "🔍 فحص الجديد الآن" }, { text: "⚡ تشغيل تجريبي" }],
+                ],
+                resize_keyboard: true,
+              };
 
-      if (text.startsWith("/start") || text === "بدء") {
-        const welcome = [
-          `👋 <b>أهلاً بك في بوت إدارة منصة TVORA</b> (@f1iq_bot)`,
-          ``,
-          `🤖 <b>نظام فك التشفير التلقائي يعمل الآن 24/7 على مدار الساعة بدون توقف.</b>`,
-          `يتم فحص مكتبة https://3iskk.xyz/ تلقائياً وفك تشفير جميع الأفلام والمسلسلات لتصبح جاهزة للتشغيل على أي مشغل بالعالم!`,
-          ``,
-          `📊 <b>الإحصائيات الحالية:</b>`,
-          `• الروابط المفكوكة والجاهزة: <b>${decodedCount}</b>`,
-          `• حالة السكربت: <b>${workerState.status}</b>`,
-          `• قيد المعالجة الآن: <i>${workerState.currentlyProcessing}</i>`,
-          ``,
-          `📌 <b>الأوامر المتاحة:</b>`,
-          `/status - حالة السكربت وعدد الأفلام والمسلسلات`,
-          `/latest - آخر الإضافات المفكوكة بروابط التشغيل`,
-          `/check - فحص فوري للموقع لاكتشاف الجديد الآن`,
-          `/decode [رابط] - فك تشفير رابط محدد فوراً`,
-        ].join("\n");
+              await sendTelegram(chatId, welcome, keyboard);
+            } else if (text.startsWith("/status") || text.includes("الحالة") || text.includes("الإحصائيات")) {
+              const statusMsg = [
+                `📊 <b>حالة محرك TVORA فائق السرعة (Turbo 24/7):</b>`,
+                ``,
+                `✅ <b>الروابط المفكوكة في قاعدة البيانات:</b> ${decodedCount}`,
+                `⚡ <b>قوة المعالجة:</b> ${CONCURRENCY} مسارات معالجة متوازية`,
+                `⚙️ <b>النشاط الحالي:</b> ${workerState.status}`,
+                `⏳ <b>قيد المعالجة الآن:</b> <code>${workerState.currentlyProcessing.slice(0, 3).join(" | ") || "لا يوجد"}</code>`,
+                `🎬 <b>آخر ما تم فكه:</b> ${workerState.lastDecoded}`,
+                `🔥 <b>تم فكه في هذه الجلسة:</b> ${workerState.sessionDecodedCount}`,
+                ``,
+                `🌐 <b>رابط الـ API الحي المفلتر:</b>`,
+                `<code>https://move-api-production-a427.up.railway.app/api/v1/movies</code>`,
+              ].join("\n");
 
-        const keyboard = {
-          keyboard: [
-            [{ text: "📊 الحالة والإحصائيات" }, { text: "🎬 آخر الإضافات" }],
-            [{ text: "🔍 فحص الجديد الآن" }, { text: "⚡ تشغيل تجريبي" }],
-          ],
-          resize_keyboard: true,
-        };
+              await sendTelegram(chatId, statusMsg);
+            } else if (text.startsWith("/latest") || text.includes("آخر الإضافات")) {
+              const keys = Object.keys(decodedStore).filter((k) => !k.startsWith("http")).slice(-5).reverse();
+              if (keys.length === 0) {
+                await sendTelegram(chatId, "لا توجد عناصر مفكوكة بعد.");
+              } else {
+                const list = keys.map((k, i) => {
+                  const playUrl = `https://move-api-production-a427.up.railway.app/api/v1/play?id=${encodeURIComponent(k)}`;
+                  return `${i + 1}. <b>${k}</b>\n🔗 <code>${playUrl}</code>`;
+                }).join("\n\n");
 
-        await sendTelegram(chatId, welcome, keyboard);
-      } else if (text.startsWith("/status") || text.includes("الحالة") || text.includes("الإحصائيات")) {
-        const statusMsg = [
-          `📊 <b>حالة نظام TVORA التلقائي (24/7):</b>`,
-          ``,
-          `✅ <b>الروابط المفكوكة في قاعدة البيانات:</b> ${decodedCount}`,
-          `⚙️ <b>النشاط الحالي:</b> ${workerState.status}`,
-          `⏳ <b>جاري فك:</b> <code>${workerState.currentlyProcessing}</code>`,
-          `⚡ <b>آخر ما تم فكه:</b> ${workerState.lastDecoded}`,
-          `🆕 <b>الجديد المكتشف تلقائياً:</b> ${workerState.totalNewDiscovered}`,
-          `🕒 <b>يعمل منذ:</b> ${new Date(workerState.startedAt).toLocaleString("ar")}`,
-          ``,
-          `🌐 <b>رابط الـ API الحي:</b>`,
-          `<code>https://move-api-production-a427.up.railway.app/api/v1/movies</code>`,
-        ].join("\n");
-
-        await sendTelegram(chatId, statusMsg);
-      } else if (text.startsWith("/latest") || text.includes("آخر الإضافات")) {
-        const keys = Object.keys(decodedStore).filter(k => !k.startsWith("http")).slice(-5).reverse();
-        if (keys.length === 0) {
-          await sendTelegram(chatId, "لا توجد عناصر مفكوكة بعد.");
-        } else {
-          const list = keys.map((k, i) => {
-            const playUrl = `https://move-api-production-a427.up.railway.app/api/v1/play?id=${encodeURIComponent(k)}`;
-            return `${i + 1}. <b>${k}</b>\n🔗 <code>${playUrl}</code>`;
-          }).join("\n\n");
-
-          await sendTelegram(chatId, `🎬 <b>آخر 5 عناصر تم فك تشفيرها وجاهزة للتشغيل:</b>\n\n${list}`);
-        }
-      } else if (text.startsWith("/check") || text.includes("فحص الجديد")) {
-        await sendTelegram(chatId, "🔍 جاري فحص https://3iskk.xyz/ بحثاً عن أي حلقات أو أفلام جديدة...");
-        await checkNewReleases();
-        await sendTelegram(chatId, `✅ تم الفحص! إجمالي الروابط المفكوكة الآن: ${Object.keys(decodedStore).length}`);
-      } else if (text.startsWith("/decode")) {
-        const parts = text.split(" ");
-        const target = parts[1];
-        if (!target) {
-          await sendTelegram(chatId, "⚠️ يرجى إرسال الرابط أو المعرف بعد الأمر:\nمثال:\n<code>/decode serie-organize-isler-mudblij-season-1-episode-1</code>");
-        } else {
-          await sendTelegram(chatId, `⏳ جاري فك تشفير: <code>${target}</code>...`);
-          const watchUrl = target.startsWith("http") ? target : `https://3iskk.xyz/watch/episodes/${target}/`;
-          const res = await resolve3iskWatchUrl(watchUrl);
-          if (res.success && res.streamUrl) {
-            decodedStore[target] = res.streamUrl;
-            saveDecodedStore();
-            const playUrl = `https://move-api-production-a427.up.railway.app/api/v1/play?id=${encodeURIComponent(target)}`;
-            await sendTelegram(chatId, `✅ <b>تم فك التشفير بنجاح!</b>\n\n⚡ <b>رابط التشغيل:</b>\n<code>${playUrl}</code>\n\n📹 <b>رابط البث الأصلي:</b>\n<code>${res.streamUrl}</code>`);
-          } else {
-            await sendTelegram(chatId, `❌ تعذر فك تشفير هذا الرابط: ${res.error || "سيرفر غير متاح"}`);
+                await sendTelegram(chatId, `🎬 <b>آخر 5 عناصر تم فك تشفيرها وجاهزة للتشغيل:</b>\n\n${list}`);
+              }
+            } else if (text.startsWith("/check") || text.includes("فحص الجديد")) {
+              await sendTelegram(chatId, "🔍 جاري فحص https://3iskk.xyz/ بحثاً عن أي حلقات أو أفلام جديدة بالمسارات المتوازية...");
+              await checkNewReleases();
+              await sendTelegram(chatId, `✅ تم الفحص! إجمالي الروابط المفكوكة الآن: ${Object.keys(decodedStore).length}`);
+            } else if (text.startsWith("/decode")) {
+              const parts = text.split(" ");
+              const target = parts[1];
+              if (!target) {
+                await sendTelegram(chatId, "⚠️ يرجى إرسال الرابط أو المعرف بعد الأمر:\nمثال:\n<code>/decode serie-organize-isler-mudblij-season-1-episode-1</code>");
+              } else {
+                await sendTelegram(chatId, `⏳ جاري فك تشفير: <code>${target}</code>...`);
+                const watchUrl = target.startsWith("http") ? target : `https://3iskk.xyz/watch/episodes/${target}/`;
+                const res = await resolve3iskWatchUrl(watchUrl);
+                if (res.success && res.streamUrl) {
+                  decodedStore[target] = res.streamUrl;
+                  saveDecodedStore(true);
+                  const playUrl = `https://move-api-production-a427.up.railway.app/api/v1/play?id=${encodeURIComponent(target)}`;
+                  await sendTelegram(chatId, `✅ <b>تم فك التشفير بنجاح!</b>\n\n⚡ <b>رابط التشغيل المباشر:</b>\n<code>${playUrl}</code>\n\n📹 <b>البث الأصلي:</b>\n<code>${res.streamUrl}</code>`);
+                } else {
+                  await sendTelegram(chatId, `❌ تعذر فك تشفير هذا الرابط: ${res.error || "سيرفر غير متاح"}`);
+                }
+              }
+            }
           }
         }
       }
-    }
-  } catch (err) {
-    // Silently ignore telegram network hiccups
+    } catch {}
+    await new Promise((r) => setTimeout(r, 200));
   }
 }
 
 /**
- * Main 24/7 Daemon Loop
+ * Main Turbo Daemon
  */
 async function main() {
   console.log(`
 ======================================================
-🚀 TVORA 24/7 BACKGROUND AUTOMATED ENGINE STARTED
-🤖 Telegram Bot: @f1iq_bot
+🚀 TVORA ULTRA HIGH-SPEED CONCURRENT ENGINE STARTED
+⚡ Workers: ${CONCURRENCY} parallel pipelines
+🤖 Telegram Bot: @f1iq_bot (Instant responder)
 📁 Storage: ${decodedPath}
 ======================================================
   `);
 
   loadDecodedStore();
+  loadFailedStore();
   loadSubscribers();
+
   console.log(`[Init] Loaded ${Object.keys(decodedStore).length} decoded streams.`);
+  console.log(`[Init] Loaded ${Object.keys(failedStore).length} failed items cache.`);
   console.log(`[Init] Loaded ${subscribers.length} registered Telegram subscribers.`);
 
-  // Notify subscribers system is online
-  await broadcastAlert(`
-🚀 <b>تم تشغيل سكربت TVORA التلقائي (24/7) بنجاح!</b>
+  // 1. Launch instant Telegram polling in background
+  startTelegramPoller();
 
-✅ السكربت يراقب موقع 3isk بدون توقف.
-✅ فك تشفير أي حلقة أو فيلم ينزل فوراً.
-✅ إرسال إشعار فوري هنا عند إضافة أي جديد.
-  `.trim());
-
-  let lastNewCheck = 0;
-  const NEW_CHECK_INTERVAL_MS = 3 * 60 * 1000; // Check 3isk for new items every 3 minutes
-
+  // 2. Infinite scanning and catalog decoding loop
   while (true) {
-    const now = Date.now();
-
-    // 1. Check for new releases on 3isk
-    if (now - lastNewCheck > NEW_CHECK_INTERVAL_MS) {
+    try {
+      // Step A: Instant check for new releases
       await checkNewReleases();
-      lastNewCheck = Date.now();
+
+      // Step B: Decode whole catalog with parallel workers
+      await decodeEntireCatalog();
+
+      // Sleep 5 minutes before next full cycle
+      console.log(`[Cycle Complete] Sleeping 5 minutes before next sweep...`);
+      await new Promise((r) => setTimeout(r, 5 * 60 * 1000));
+    } catch (e) {
+      console.error("[TVORA Loop Error]:", e.message);
+      await new Promise((r) => setTimeout(r, 10000));
     }
-
-    // 2. Decode next undecoded item from the catalog
-    await catalogDecoderStep();
-
-    // 3. Process telegram updates
-    await pollTelegramUpdates();
-
-    // Small delay to prevent tight loop
-    await new Promise((r) => setTimeout(r, 400));
   }
 }
 
-main().catch((err) => {
-  console.error("FATAL DAEMON CRASH:", err);
-});
+main().catch(console.error);
