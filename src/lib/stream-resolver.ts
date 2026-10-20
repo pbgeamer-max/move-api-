@@ -233,68 +233,65 @@ async function resolve3iskPage(pageUrl: string): Promise<ResolvedStream> {
 
     let hostUrl: string | null = null;
 
+    const candidateHosts: string[] = [];
+
     if (embed3iskMatch) {
       const baseEmbedUrl = embed3iskMatch[1];
-      // Try primary server 1 first
-      try {
-        const rEmbed = await fetch(baseEmbedUrl, {
-          headers: { ...BROWSER_HEADERS, Referer: "https://aa.3isk.icu/" },
-          signal: AbortSignal.timeout(8000),
-        });
-        const embedHtml = await rEmbed.text();
-        const hostMatch = embedHtml.match(/<iframe[^>]+src=["']([^"']+)["']/i);
-        if (hostMatch) {
-          hostUrl = hostMatch[1];
-        }
-      } catch {}
-
-      // Fallback: check alternate server if server 1 was empty
-      if (!hostUrl) {
-        for (const s of [2, 3]) {
-          const altUrl = baseEmbedUrl.replace(/\/embed\/\d+\//, `/embed/${s}/`);
-          try {
-            const rAlt = await fetch(altUrl, {
-              headers: { ...BROWSER_HEADERS, Referer: "https://aa.3isk.icu/" },
-              signal: AbortSignal.timeout(6000),
-            });
-            const altHtml = await rAlt.text();
-            const altMatch = altHtml.match(/<iframe[^>]+src=["']([^"']+)["']/i);
-            if (altMatch) {
-              hostUrl = altMatch[1];
-              break;
+      // Gather servers (Server 1, Server 2, Server 3, Server 4)
+      for (const s of [1, 2, 3, 4]) {
+        const sUrl = s === 1 ? baseEmbedUrl : baseEmbedUrl.replace(/\/embed\/\d+\//, `/embed/${s}/`);
+        try {
+          const rEmbed = await fetch(sUrl, {
+            headers: { ...BROWSER_HEADERS, Referer: "https://aa.3isk.icu/" },
+            signal: AbortSignal.timeout(6000),
+          });
+          if (rEmbed.ok) {
+            const embedHtml = await rEmbed.text();
+            const hostMatch = embedHtml.match(/<iframe[^>]+src=["']([^"']+)["']/i);
+            if (hostMatch && hostMatch[1] && !candidateHosts.includes(hostMatch[1])) {
+              candidateHosts.push(hostMatch[1]);
             }
-          } catch {}
-        }
+          }
+        } catch {}
       }
     } else {
       // Check if playerHtml directly embeds the video CDN
       const directCdnMatch = playerHtml.match(/<iframe[^>]+src=["'](https:\/\/[^"']*(?:miravd|ukrcdn|grzcdn|upstream)[^"']*)["']/i);
-      if (directCdnMatch) {
-        hostUrl = directCdnMatch[1];
+      if (directCdnMatch && directCdnMatch[1]) {
+        candidateHosts.push(directCdnMatch[1]);
       }
     }
 
-    if (!hostUrl) {
+    if (candidateHosts.length === 0) {
       return { success: false, type: "embed", error: "تعذر العثور على مشغل الفيديو المصدري في 3isk", title };
     }
 
-    // Step 5: Extract direct .m3u8 stream from host
-    if (hostUrl.includes("ukrcdn.")) {
-      const res = await resolveUkrcdn(hostUrl);
-      if (res.success && res.streamUrl) return { ...res, title };
-      if (res.error) return { ...res, title, error: `فشل فك تشفير UkrCDN: ${res.error}` };
+    // Step 5: Extract direct .m3u8 stream from candidate hosts with priority
+    // Priority: Try UkrCDN first (never blocks datacenter IPs), then Miravd/GRZCDN
+    let lastError = "";
+
+    // 5a. Try UkrCDN candidates first
+    for (const host of candidateHosts) {
+      if (host.includes("ukrcdn.")) {
+        const res = await resolveUkrcdn(host);
+        if (res.success && res.streamUrl) return { ...res, title };
+        if (res.error) lastError = res.error;
+      }
     }
 
-    if (hostUrl.includes("miravd.") || hostUrl.includes("grzcdn.")) {
-      const res = await resolveMiravd(hostUrl);
-      if (res.success && res.streamUrl) return { ...res, title };
-      if (res.error) return { ...res, title, error: `فشل فك تشفير Miravd: ${res.error}` };
+    // 5b. Try Miravd / GRZCDN candidates
+    for (const host of candidateHosts) {
+      if (host.includes("miravd.") || host.includes("grzcdn.")) {
+        const res = await resolveMiravd(host);
+        if (res.success && res.streamUrl) return { ...res, title };
+        if (res.error) lastError = res.error;
+      }
     }
 
     return {
       success: false,
       type: "embed",
-      error: `تعذر فك تشفير ملف m3u8 من المشغل المستضيف: ${hostUrl}`,
+      error: lastError || `تعذر فك تشفير ملف m3u8 من المشغلات المستضيفة (${candidateHosts.length} سيرفر)`,
       title,
     };
   } catch (err: any) {
@@ -367,14 +364,29 @@ async function resolveUkrcdn(cdnUrl: string): Promise<ResolvedStream> {
  */
 async function resolveMiravd(miraUrl: string): Promise<ResolvedStream> {
   try {
-    const r = await fetch(miraUrl, {
-      headers: { ...BROWSER_HEADERS, Referer: "https://3iskk.xyz/" },
-      signal: AbortSignal.timeout(8000),
-    });
-    if (!r.ok) {
-      return { success: false, type: "embed", error: `Miravd HTTP ${r.status}` };
+    const refererList = ["https://aa.3isk.icu/", "https://3iskk.xyz/", ""];
+    let html = "";
+    let lastStatus = 0;
+
+    for (const ref of refererList) {
+      try {
+        const headers: Record<string, string> = { ...BROWSER_HEADERS };
+        if (ref) headers.Referer = ref;
+        const r = await fetch(miraUrl, {
+          headers,
+          signal: AbortSignal.timeout(6000),
+        });
+        if (r.ok) {
+          html = await r.text();
+          break;
+        }
+        lastStatus = r.status;
+      } catch {}
     }
-    const html = await r.text();
+
+    if (!html) {
+      return { success: false, type: "embed", error: `Miravd HTTP ${lastStatus || 403}` };
+    }
 
     // 1. Direct regex keyword extraction from Miravd / GRZCDN (100% reliable, zero eval, zero failure)
     const packerMatch = html.match(
