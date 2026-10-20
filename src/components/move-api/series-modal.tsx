@@ -184,6 +184,16 @@ export function SeriesModal({ series, onClose, origin }: SeriesModalProps) {
                           </span>
                         </div>
                       </div>
+                      {ep.isDecoded ? (
+                        <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[10px] font-semibold text-emerald-400 shrink-0 flex items-center gap-1">
+                          <Zap className="w-2.5 h-2.5 fill-current" />
+                          <span>مفكوك بالكاش</span>
+                        </span>
+                      ) : (
+                        <span className="px-2 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-[10px] font-medium text-cyan-400 shrink-0">
+                          <span>بث فوري</span>
+                        </span>
+                      )}
                     </div>
 
                     {/* ONLY COPY BUTTONS - ZERO PLAY BUTTON */}

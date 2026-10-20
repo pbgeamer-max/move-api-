@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
   const q = searchParams.get("q") || "";
   const genre = searchParams.get("genre") || "";
   const year = searchParams.get("year") || "";
-  const onlyDecoded = searchParams.get("all") !== "1";
+  const onlyDecoded = searchParams.get("onlyDecoded") === "1";
 
   const host = req.headers.get("x-forwarded-host") || req.headers.get("host") || "localhost:3000";
   const proto = req.headers.get("x-forwarded-proto") || (host.includes("localhost") ? "http" : "https");
@@ -43,6 +43,7 @@ export async function GET(req: NextRequest) {
     rating: m.rating,
     genres: m.genres,
     runtime: m.runtime,
+    isDecoded: m.isDecoded ?? false,
     streamUrl: `${origin}/api/v1/play?id=${encodeURIComponent(m.id)}`,
     m3u8Url: `${origin}/api/v1/play?id=${encodeURIComponent(m.id)}`,
     streamApi: `${origin}/api/v1/stream?id=${encodeURIComponent(m.id)}`,

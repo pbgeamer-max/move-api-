@@ -708,6 +708,17 @@ export function DashboardView({ username, onLogout }: DashboardViewProps) {
                               <Star className="w-3 h-3 fill-current" />
                               {movie.rating || 8.5}
                             </span>
+                            <span>•</span>
+                            {movie.isDecoded ? (
+                              <span className="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[10px] font-semibold flex items-center gap-0.5">
+                                <Zap className="w-2.5 h-2.5 fill-current" />
+                                <span>مفكوك</span>
+                              </span>
+                            ) : (
+                              <span className="px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-400 text-[10px]">
+                                <span>بث فوري</span>
+                              </span>
+                            )}
                           </div>
                           <p className="text-[11px] text-neutral-400 line-clamp-2 leading-relaxed">
                             {movie.synopsisAr || "لا يتوفر ملخص."}

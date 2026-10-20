@@ -48,6 +48,8 @@ dev.log
 dev.out.log
 test
 server.log
+data/failed_items.json
+data/telegram_subscribers.json
 # Skills directory
 /skills/
 

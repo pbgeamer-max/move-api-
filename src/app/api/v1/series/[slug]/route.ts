@@ -22,7 +22,7 @@ export async function GET(
 ) {
   const { slug } = await params;
   const { searchParams } = new URL(req.url);
-  const onlyDecoded = searchParams.get("all") !== "1";
+  const onlyDecoded = searchParams.get("onlyDecoded") === "1";
   const series = getSeriesDetail(slug, onlyDecoded);
 
   if (!series) {
@@ -54,6 +54,7 @@ export async function GET(
       synopsisAr: ep.synopsisAr,
       thumbnailUrl: ep.thumbnailUrl,
       runtime: ep.runtime,
+      isDecoded: ep.isDecoded ?? false,
       // Direct decoded stream URL ready for <video src="...">, Hls.js, or Plyr on another site
       streamUrl: `${origin}/api/v1/play?id=${encodeURIComponent(ep.id)}`,
       m3u8Url: `${origin}/api/v1/play?id=${encodeURIComponent(ep.id)}`,

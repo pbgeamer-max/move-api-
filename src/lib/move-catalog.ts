@@ -14,6 +14,7 @@ export interface EpisodeItem {
   streamUrl?: string;
   streamApi?: string;
   playbackUrl?: string; // Internal/compat fallback
+  isDecoded?: boolean;
 }
 
 export interface SeasonItem {
@@ -55,6 +56,7 @@ export interface MovieItem {
   streamUrl?: string;
   streamApi?: string;
   playbackUrl?: string; // Internal/compat fallback
+  isDecoded?: boolean;
 }
 
 interface CatalogData {
@@ -384,7 +386,7 @@ export function querySeries({
   genre = "",
   year = "",
   dubbed = "",
-  onlyDecoded = true,
+  onlyDecoded = false,
 }: {
   page?: number;
   limit?: number;
@@ -464,27 +466,43 @@ export function querySeries({
   };
 }
 
-export function getSeriesDetail(slugOrId: string, onlyDecoded = true): SeriesItem | null {
+export function getSeriesDetail(slugOrId: string, onlyDecoded = false): SeriesItem | null {
   const { seriesBySlug } = loadCatalog();
   const raw = seriesBySlug.get(slugOrId);
   if (!raw) return null;
-  if (!onlyDecoded) return raw;
 
   const store = getDecodedStore();
-  const filteredSeasons = (raw.seasons || []).map((sn) => {
-    const validEps = sn.episodes.filter((ep) => Boolean(store[ep.id]));
+
+  if (onlyDecoded) {
+    const filteredSeasons = (raw.seasons || []).map((sn) => {
+      const validEps = sn.episodes.filter((ep) => Boolean(store[ep.id]));
+      return {
+        ...sn,
+        episodes: validEps,
+        episodesCount: validEps.length,
+      };
+    }).filter((sn) => sn.episodes.length > 0);
+
     return {
-      ...sn,
-      episodes: validEps,
-      episodesCount: validEps.length,
+      ...raw,
+      seasons: filteredSeasons,
+      seasonsCount: filteredSeasons.length,
+      totalEpisodes: filteredSeasons.reduce((acc, sn) => acc + sn.episodes.length, 0),
     };
-  }).filter((sn) => sn.episodes.length > 0);
+  }
+
+  // By default: Return ALL seasons and ALL episodes (never hide episodes from the library!)
+  const enrichedSeasons = (raw.seasons || []).map((sn) => ({
+    ...sn,
+    episodes: sn.episodes.map((ep) => ({
+      ...ep,
+      isDecoded: Boolean(store[ep.id]),
+    })),
+  }));
 
   return {
     ...raw,
-    seasons: filteredSeasons,
-    seasonsCount: filteredSeasons.length,
-    totalEpisodes: filteredSeasons.reduce((acc, sn) => acc + sn.episodes.length, 0),
+    seasons: enrichedSeasons,
   };
 }
 
@@ -494,7 +512,7 @@ export function queryMovies({
   q = "",
   genre = "",
   year = "",
-  onlyDecoded = true,
+  onlyDecoded = false,
 }: {
   page?: number;
   limit?: number;
@@ -504,10 +522,10 @@ export function queryMovies({
   onlyDecoded?: boolean;
 }) {
   const { movies } = loadCatalog();
+  const store = getDecodedStore();
   let filtered = movies;
 
   if (onlyDecoded) {
-    const store = getDecodedStore();
     filtered = filtered.filter((m) => Boolean(store[m.id] || store[m.slug]));
   }
 
@@ -537,7 +555,10 @@ export function queryMovies({
   const pages = Math.max(1, Math.ceil(total / limit));
   const safePage = Math.max(1, Math.min(page, pages));
   const start = (safePage - 1) * limit;
-  const items = filtered.slice(start, start + limit);
+  const items = filtered.slice(start, start + limit).map((m) => ({
+    ...m,
+    isDecoded: Boolean(store[m.id] || store[m.slug]),
+  }));
 
   return {
     total,
