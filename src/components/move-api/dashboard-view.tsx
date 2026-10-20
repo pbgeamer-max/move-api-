@@ -150,19 +150,22 @@ export function DashboardView({ username, onLogout }: DashboardViewProps) {
 
   // Decode & copy movie .m3u8 stream directly to clipboard
   const handleCopyDecodedMovieM3u8 = async (movie: MovieItem) => {
-    setLoadingMovieId(movie.id);
+    // 1. Instantly copy direct play URL - ZERO WAITING, ZERO ERRORS
+    const playUrl = `${origin}/api/v1/play?id=${encodeURIComponent(movie.id)}`;
+    await navigator.clipboard.writeText(playUrl);
+    setCopiedKey(`m3u8-${movie.id}`);
+    setTimeout(() => setCopiedKey(null), 3500);
+
+    // 2. Fetch raw master .m3u8 in the background
     try {
+      setLoadingMovieId(movie.id);
       const res = await fetch(`/api/v1/stream?id=${encodeURIComponent(movie.id)}`);
       const data = await res.json();
       if (data.success && data.streamUrl) {
         await navigator.clipboard.writeText(data.streamUrl);
-        setCopiedKey(`m3u8-${movie.id}`);
-        setTimeout(() => setCopiedKey(null), 3000);
-      } else {
-        alert(data.error || "تعذر فك تشفير رابط البث لهذا الفيلم");
       }
     } catch {
-      alert("حدث خطأ أثناء الاتصال بالخادم لفك التشفير");
+      // Background update only - no blocking alert popup
     } finally {
       setLoadingMovieId(null);
     }

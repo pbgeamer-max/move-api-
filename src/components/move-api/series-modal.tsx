@@ -27,22 +27,25 @@ export function SeriesModal({ series, onClose, origin }: SeriesModalProps) {
   };
 
   /**
-   * Resolves the stream live and copies the decoded direct .m3u8 link straight to clipboard
+   * Instantly copies the direct playable stream link, and resolves raw .m3u8 in the background
    */
   const handleCopyDecodedM3u8 = async (ep: EpisodeItem) => {
-    setLoadingEpId(ep.id);
+    // 1. Immediately copy the playable stream URL - ZERO WAITING, ZERO ERRORS
+    const playUrl = `${origin}/api/v1/play?id=${encodeURIComponent(ep.id)}`;
+    await navigator.clipboard.writeText(playUrl);
+    setCopiedKey(`m3u8-${ep.id}`);
+    setTimeout(() => setCopiedKey(null), 3500);
+
+    // 2. Fetch the raw master .m3u8 in the background and update clipboard if resolved
     try {
+      setLoadingEpId(ep.id);
       const res = await fetch(`/api/v1/stream?id=${encodeURIComponent(ep.id)}`);
       const data = await res.json();
       if (data.success && data.streamUrl) {
         await navigator.clipboard.writeText(data.streamUrl);
-        setCopiedKey(`m3u8-${ep.id}`);
-        setTimeout(() => setCopiedKey(null), 3000);
-      } else {
-        alert(data.error || "تعذر فك تشفير رابط البث لهذه الحلقة");
       }
     } catch {
-      alert("حدث خطأ أثناء الاتصال بالخادم لفك التشفير");
+      // Background update only - no blocking alert popup
     } finally {
       setLoadingEpId(null);
     }

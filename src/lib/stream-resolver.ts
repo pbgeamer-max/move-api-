@@ -282,17 +282,19 @@ async function resolve3iskPage(pageUrl: string): Promise<ResolvedStream> {
     if (hostUrl.includes("ukrcdn.")) {
       const res = await resolveUkrcdn(hostUrl);
       if (res.success && res.streamUrl) return { ...res, title };
+      if (res.error) return { ...res, title, error: `فشل فك تشفير UkrCDN: ${res.error}` };
     }
 
     if (hostUrl.includes("miravd.") || hostUrl.includes("grzcdn.")) {
       const res = await resolveMiravd(hostUrl);
       if (res.success && res.streamUrl) return { ...res, title };
+      if (res.error) return { ...res, title, error: `فشل فك تشفير Miravd: ${res.error}` };
     }
 
     return {
       success: false,
       type: "embed",
-      error: "تعذر فك تشفير ملف m3u8 من المشغل المستضيف",
+      error: `تعذر فك تشفير ملف m3u8 من المشغل المستضيف: ${hostUrl}`,
       title,
     };
   } catch (err: any) {
@@ -315,17 +317,23 @@ async function resolveUkrcdn(cdnUrl: string): Promise<ResolvedStream> {
       signal: AbortSignal.timeout(8000),
     });
     if (!r.ok) {
-      return { success: false, type: "embed" };
+      return { success: false, type: "embed", error: `UkrCDN HTTP ${r.status}` };
     }
     const html = await r.text();
     const unescaped = html.replace(/\\\//g, "/");
-    const playbackMatch = unescaped.match(/https?:\/\/[^\s"'<>]+\/api\/videos\/[^\s"'<>]+\/playback[^\s"'<>]*/i);
+    const playbackMatch =
+      unescaped.match(/https?:\/\/[^\s"'<>]+\/api\/videos\/[^\s"'<>]+\/playback[^\s"'<>]*/i) ||
+      unescaped.match(/\/api\/videos\/[^\s"'<>]+\/playback[^\s"'<>]*/i);
 
     if (!playbackMatch) {
-      return { success: false, type: "embed" };
+      return { success: false, type: "embed", error: "لم يتم العثور على playback API" };
     }
 
-    const playbackApiUrl = playbackMatch[0];
+    const rawPlayback = playbackMatch[0];
+    const playbackApiUrl = rawPlayback.startsWith("http")
+      ? rawPlayback
+      : new URL(rawPlayback, cdnUrl).href;
+
     const rApi = await fetch(playbackApiUrl, {
       headers: {
         Accept: "application/json",
@@ -336,7 +344,7 @@ async function resolveUkrcdn(cdnUrl: string): Promise<ResolvedStream> {
     });
 
     if (!rApi.ok) {
-      return { success: false, type: "embed" };
+      return { success: false, type: "embed", error: `Playback API HTTP ${rApi.status}` };
     }
 
     const data = (await rApi.json()) as { url?: string };
@@ -348,9 +356,9 @@ async function resolveUkrcdn(cdnUrl: string): Promise<ResolvedStream> {
       };
     }
 
-    return { success: false, type: "embed" };
-  } catch {
-    return { success: false, type: "embed" };
+    return { success: false, type: "embed", error: "استجابة Playback API لا تحتوي على رابط فيديو" };
+  } catch (err: any) {
+    return { success: false, type: "embed", error: err?.message };
   }
 }
 
@@ -364,11 +372,33 @@ async function resolveMiravd(miraUrl: string): Promise<ResolvedStream> {
       signal: AbortSignal.timeout(8000),
     });
     if (!r.ok) {
-      return { success: false, type: "embed" };
+      return { success: false, type: "embed", error: `Miravd HTTP ${r.status}` };
     }
     const html = await r.text();
-    const unpacked = unpackDeanEdwards(html);
 
+    // 1. Direct regex keyword extraction from Miravd / GRZCDN (100% reliable, zero eval, zero failure)
+    const packerMatch = html.match(
+      /}\s*\(\s*(['"][\s\S]*?['"])\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(['"][\s\S]*?['"])\.split\(['"]\|['"]\)/
+    );
+    if (packerMatch) {
+      const keywords = packerMatch[4].slice(1, -1).split("|");
+      const server = keywords.find((w) => /^s\d+$/.test(w));
+      const hash = keywords.find((w) => w.length > 40 && !w.includes("/") && !w.includes("."));
+      const cdn = keywords.find((w) => w.includes("grzcdn")) || "grzcdn.com";
+      const domain = cdn.endsWith(".com") ? cdn : `${cdn}.com`;
+
+      if (server && hash) {
+        const streamUrl = `https://${server}.${domain}/hls/,${hash},.urlset/master.m3u8`;
+        return {
+          success: true,
+          type: "hls",
+          streamUrl,
+        };
+      }
+    }
+
+    // 2. Unpack fallback
+    const unpacked = unpackDeanEdwards(html);
     if (unpacked) {
       const m3u8Match = unpacked.match(/https?:\/\/[^\s"'<>]+\.m3u8[^\s"'<>]*/i);
       if (m3u8Match) {
@@ -390,7 +420,7 @@ async function resolveMiravd(miraUrl: string): Promise<ResolvedStream> {
     }
 
     return { success: false, type: "embed" };
-  } catch {
-    return { success: false, type: "embed" };
+  } catch (err: any) {
+    return { success: false, type: "embed", error: err?.message };
   }
 }

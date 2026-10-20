@@ -43,6 +43,7 @@ export async function GET(req: NextRequest) {
     genres: m.genres,
     runtime: m.runtime,
     streamUrl: `${origin}/api/v1/play?id=${encodeURIComponent(m.id)}`,
+    m3u8Url: `${origin}/api/v1/play?id=${encodeURIComponent(m.id)}`,
     streamApi: `${origin}/api/v1/stream?id=${encodeURIComponent(m.id)}`,
     detailsApi: `${origin}/api/v1/movies/${m.slug}`,
   }));

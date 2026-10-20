@@ -52,8 +52,9 @@ export async function GET(
       synopsisAr: ep.synopsisAr,
       thumbnailUrl: ep.thumbnailUrl,
       runtime: ep.runtime,
-      // Direct stream URL ready for <video src="...">, Hls.js, or Plyr on another site
+      // Direct decoded stream URL ready for <video src="...">, Hls.js, or Plyr on another site
       streamUrl: `${origin}/api/v1/play?id=${encodeURIComponent(ep.id)}`,
+      m3u8Url: `${origin}/api/v1/play?id=${encodeURIComponent(ep.id)}`,
       streamApi: `${origin}/api/v1/stream?id=${encodeURIComponent(ep.id)}`,
     })),
   }));
