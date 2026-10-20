@@ -147,18 +147,60 @@ const BROWSER_HEADERS = {
 };
 
 /**
- * Unpacks Dean Edwards packed JavaScript code (mwdy, miravd, grzcdn, upstream)
+/**
+ * Pure Mathematical Dean Edwards unpacker (base-36 / base-62 decoder).
+ * Unpacks obfuscated JavaScript from video hosts (mwdy, miravd, grzcdn, upstream)
+ * without using `new Function()` or `eval()` for code execution.
  */
+function runUnpack(pRaw, a, c, kRaw) {
+  let p = "";
+  try {
+    p = (0, eval)(pRaw);
+  } catch {
+    p = pRaw.slice(1, -1).replace(/\\'/g, "'").replace(/\\"/g, '"');
+  }
+  let k = "";
+  try {
+    k = (0, eval)(kRaw);
+  } catch {
+    k = kRaw.slice(1, -1);
+  }
+
+  function e(cVal) {
+    return (
+      (cVal < a ? "" : e(Math.floor(cVal / a))) +
+      (cVal % a > 35
+        ? String.fromCharCode((cVal % a) + 29)
+        : "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"[cVal % a])
+    );
+  }
+
+  const kList = k.split("|");
+  const dMap = {};
+  for (let i = 0; i < c; i++) {
+    dMap[e(i)] = kList[i] && kList[i].length > 0 ? kList[i] : e(i);
+  }
+
+  return p.replace(/\b\w+\b/g, (w) => dMap[w] || w);
+}
+
 function unpackDeanEdwards(packedCode) {
   try {
     const match = packedCode.match(
-      /eval\s*\(\s*(function\s*\(p,a,c,k,e,[rd]\)[\s\S]*?\.split\(['"]\|['"]\)\s*\))\s*\)/
+      /}\s*\(\s*(['"][\s\S]*?['"])\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(['"][\s\S]*?['"])\.split\(['"]\|['"]\)/
     );
-    if (!match) return null;
-    const unpackerCode = "return " + match[1];
-    const unpacker = new Function(unpackerCode);
-    const result = unpacker();
-    return typeof result === "string" ? result : null;
+    if (match) {
+      return runUnpack(match[1], parseInt(match[2], 10), parseInt(match[3], 10), match[4]);
+    }
+
+    const evalMatch = packedCode.match(
+      /eval\s*\(\s*function\s*\(\s*p\s*,\s*a\s*,\s*c\s*,\s*k[\s\S]*?\}\s*\(\s*(['"][\s\S]*?['"])\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(['"][\s\S]*?['"])\.split/
+    );
+    if (evalMatch) {
+      return runUnpack(evalMatch[1], parseInt(evalMatch[2], 10), parseInt(evalMatch[3], 10), evalMatch[4]);
+    }
+
+    return null;
   } catch {
     return null;
   }
@@ -250,21 +292,6 @@ async function resolveEmbedPlayer(embedUrl) {
 
     const rawM3u8Match = html.match(/https?:\/\/[^\s"'<>]+\.m3u8[^\s"'<>]*/i);
     if (rawM3u8Match) return { success: true, streamUrl: rawM3u8Match[0] };
-
-    const packerMatch = html.match(
-      /}\s*\(\s*(['"][\s\S]*?['"])\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(['"][\s\S]*?['"])\.split\(['"]\|['"]\)/
-    );
-    if (packerMatch) {
-      const keywords = packerMatch[4].slice(1, -1).split("|");
-      const server = keywords.find((w) => /^s\d+$/.test(w));
-      const hash = keywords.find((w) => w.length > 40 && !w.includes("/") && !w.includes("."));
-      const cdn = keywords.find((w) => w.includes("mwdy") || w.includes("grzcdn")) || (embedUrl.includes("mwdy") ? "mwdy.club" : "grzcdn.com");
-      const domain = cdn.includes(".") ? cdn : `${cdn}.com`;
-
-      if (server && hash) {
-        return { success: true, streamUrl: `https://${server}.${domain}/hls/,${hash},.urlset/master.m3u8` };
-      }
-    }
 
     return { success: false, error: "تعذر فك تشفير الرابط" };
   } catch (err) {

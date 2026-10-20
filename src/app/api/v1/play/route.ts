@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { resolveStream, getStoredDecodedStream } from "@/lib/stream-resolver";
+import { resolveStream, getStoredDecodedStream, invalidateStoredStream } from "@/lib/stream-resolver";
 import { getWatchUrlForId } from "@/lib/move-catalog";
 
 export const dynamic = "force-dynamic";
@@ -54,7 +54,37 @@ export async function GET(req: NextRequest) {
     const origin = `${proto}://${host}`;
 
     // Fast path: Check pre-decoded offline / database streams (0ms instant bypass)
-    const stored = (id && getStoredDecodedStream(id)) || (targetUrl && getStoredDecodedStream(targetUrl));
+    let stored = (id && getStoredDecodedStream(id)) || (targetUrl && getStoredDecodedStream(targetUrl));
+
+    if (stored && !searchParams.get("fresh")) {
+      // Fast probe to ensure the stored stream is active and not returning 403 Forbidden
+      try {
+        const probeHeaders: Record<string, string> = {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+        };
+        if (stored.includes("mwdy")) {
+          probeHeaders["Referer"] = "https://mwdy.cc/";
+        } else if (stored.includes("grzcdn") || stored.includes("miravd")) {
+          probeHeaders["Referer"] = "https://miravd.com/";
+        }
+
+        const probeRes = await fetch(stored, {
+          method: "HEAD",
+          headers: probeHeaders,
+          signal: AbortSignal.timeout(1000),
+        });
+
+        if (!probeRes.ok && probeRes.status !== 206) {
+          // If upstream returns 403, 404, or 5xx, invalidate immediately and re-resolve
+          if (id) invalidateStoredStream(id);
+          if (targetUrl) invalidateStoredStream(targetUrl);
+          stored = null;
+        }
+      } catch {
+        // If probe timed out, fall through
+      }
+    }
+
     if (stored) {
       const proxied = `${origin}/api/stream/vod?url=${encodeURIComponent(stored)}`;
       if (format === "json") {
@@ -73,7 +103,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Resolve direct stream (.m3u8 / .mp4)
-    const result = await resolveStream(targetUrl);
+    const result = await resolveStream(targetUrl, true);
 
     if (result.success && result.streamUrl) {
       const finalStream = result.streamUrl.startsWith("/")

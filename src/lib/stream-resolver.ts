@@ -88,19 +88,83 @@ const BROWSER_HEADERS = {
   "Accept-Language": "ar,en-US;q=0.9,en;q=0.8",
 };
 
+export function invalidateStoredStream(idOrUrl: string) {
+  if (!idOrUrl) return;
+  let changed = false;
+  if (_decodedMap) {
+    if (_decodedMap[idOrUrl]) {
+      delete _decodedMap[idOrUrl];
+      changed = true;
+    }
+    for (const key of Object.keys(_decodedMap)) {
+      if (idOrUrl.includes(key) || key.includes(idOrUrl)) {
+        delete _decodedMap[key];
+        changed = true;
+      }
+    }
+    if (changed) {
+      try {
+        const p = path.join(process.cwd(), "data", "decoded_streams.json");
+        fs.writeFileSync(p, JSON.stringify(_decodedMap, null, 2), "utf-8");
+      } catch {}
+    }
+  }
+}
+
 /**
- * Unpacks Dean Edwards packed JavaScript code (commonly used in mwdy, miravd, grzcdn, upstream)
+ * Pure Mathematical Dean Edwards unpacker (base-36 / base-62 decoder).
+ * Unpacks obfuscated JavaScript from video hosts (mwdy, miravd, grzcdn, upstream)
+ * without using `new Function()` or `eval()` for code execution, avoiding SyntaxError.
  */
+function runUnpack(pRaw: string, a: number, c: number, kRaw: string): string {
+  let p = "";
+  try {
+    p = (0, eval)(pRaw);
+  } catch {
+    p = pRaw.slice(1, -1).replace(/\\'/g, "'").replace(/\\"/g, '"');
+  }
+  let k = "";
+  try {
+    k = (0, eval)(kRaw);
+  } catch {
+    k = kRaw.slice(1, -1);
+  }
+
+  function e(cVal: number): string {
+    return (
+      (cVal < a ? "" : e(Math.floor(cVal / a))) +
+      (cVal % a > 35
+        ? String.fromCharCode((cVal % a) + 29)
+        : "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"[cVal % a])
+    );
+  }
+
+  const kList = k.split("|");
+  const dMap: Record<string, string> = {};
+  for (let i = 0; i < c; i++) {
+    dMap[e(i)] = kList[i] && kList[i].length > 0 ? kList[i] : e(i);
+  }
+
+  return p.replace(/\b\w+\b/g, (w) => dMap[w] || w);
+}
+
 function unpackDeanEdwards(packedCode: string): string | null {
   try {
     const match = packedCode.match(
-      /eval\s*\(\s*(function\s*\(p,a,c,k,e,[rd]\)[\s\S]*?\.split\(['"]\|['"]\)\s*\))\s*\)/
+      /}\s*\(\s*(['"][\s\S]*?['"])\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(['"][\s\S]*?['"])\.split\(['"]\|['"]\)/
     );
-    if (!match) return null;
-    const unpackerCode = "return " + match[1];
-    const unpacker = new Function(unpackerCode);
-    const result = unpacker();
-    return typeof result === "string" ? result : null;
+    if (match) {
+      return runUnpack(match[1], parseInt(match[2], 10), parseInt(match[3], 10), match[4]);
+    }
+
+    const evalMatch = packedCode.match(
+      /eval\s*\(\s*function\s*\(\s*p\s*,\s*a\s*,\s*c\s*,\s*k[\s\S]*?\}\s*\(\s*(['"][\s\S]*?['"])\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(['"][\s\S]*?['"])\.split/
+    );
+    if (evalMatch) {
+      return runUnpack(evalMatch[1], parseInt(evalMatch[2], 10), parseInt(evalMatch[3], 10), evalMatch[4]);
+    }
+
+    return null;
   } catch {
     return null;
   }
@@ -125,9 +189,11 @@ export async function resolveStream(targetUrl: string, bypassCache = false): Pro
   }
 
   // 2. Check pre-decoded offline / database streams (0ms instant bypass)
-  const stored = getStoredDecodedStream(trimmed);
-  if (stored) {
-    return { success: true, type: "hls", streamUrl: stored, cached: true };
+  if (!bypassCache) {
+    const stored = getStoredDecodedStream(trimmed);
+    if (stored) {
+      return { success: true, type: "hls", streamUrl: stored, cached: true };
+    }
   }
 
   // 2. Check cache
@@ -473,22 +539,6 @@ async function resolveEmbedPlayer(embedUrl: string): Promise<{ success: boolean;
     const rawM3u8Match = html.match(/https?:\/\/[^\s"'<>]+\.m3u8[^\s"'<>]*/i);
     if (rawM3u8Match) {
       return { success: true, streamUrl: rawM3u8Match[0] };
-    }
-
-    // 3. Keyword reconstruction fallback for miravd/grzcdn/mwdy
-    const packerMatch = html.match(
-      /}\s*\(\s*(['"][\s\S]*?['"])\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(['"][\s\S]*?['"])\.split\(['"]\|['"]\)/
-    );
-    if (packerMatch) {
-      const keywords = packerMatch[4].slice(1, -1).split("|");
-      const server = keywords.find((w) => /^s\d+$/.test(w));
-      const hash = keywords.find((w) => w.length > 40 && !w.includes("/") && !w.includes("."));
-      const cdn = keywords.find((w) => w.includes("mwdy") || w.includes("grzcdn")) || (embedUrl.includes("mwdy") ? "mwdy.club" : "grzcdn.com");
-      const domain = cdn.includes(".") ? cdn : `${cdn}.com`;
-
-      if (server && hash) {
-        return { success: true, streamUrl: `https://${server}.${domain}/hls/,${hash},.urlset/master.m3u8` };
-      }
     }
 
     return { success: false, error: "تعذر استخراج ملف الفيديو من هذا المشغل" };

@@ -41,8 +41,9 @@ export async function GET(req: NextRequest) {
     }
 
     const bypassCache = searchParams.get("nocache") === "1" || searchParams.get("force") === "1";
-    let result = (id && getStoredDecodedStream(id))
-      ? { success: true, type: "hls" as const, streamUrl: getStoredDecodedStream(id)!, cached: true }
+    let stored = !bypassCache && id ? getStoredDecodedStream(id) : null;
+    let result = stored
+      ? { success: true, type: "hls" as const, streamUrl: stored, cached: true }
       : await resolveStream(targetUrl, bypassCache);
 
     const host = req.headers.get("x-forwarded-host") || req.headers.get("host") || "localhost:3000";
